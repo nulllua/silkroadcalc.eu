@@ -1,4 +1,4 @@
-const { Pool } = require("pg");
+const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -121,6 +121,15 @@ async function initSchema() {
       created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS notices (
+      id         SERIAL       PRIMARY KEY,
+      active     BOOLEAN      NOT NULL DEFAULT false,
+      message    TEXT         NOT NULL,
+      level      VARCHAR(20)  NOT NULL DEFAULT 'info',
+      created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS admin_users (
       id            SERIAL PRIMARY KEY,
       username      VARCHAR(100) UNIQUE NOT NULL,
@@ -161,14 +170,12 @@ async function initSchema() {
     );
   `);
   // Add id column to event_levels if upgrading from old schema
-  await pool
-    .query(`ALTER TABLE event_levels ADD COLUMN IF NOT EXISTS id SERIAL`)
-    .catch(() => {});
+  await pool.query(`ALTER TABLE event_levels ADD COLUMN IF NOT EXISTS id SERIAL`).catch(() => {});
 
   await pool.query(
     `INSERT INTO admin_lock_state (id, is_locked, changed_at)
      VALUES (1, true, NOW())
-     ON CONFLICT (id) DO NOTHING`,
+     ON CONFLICT (id) DO NOTHING`
   );
 }
 

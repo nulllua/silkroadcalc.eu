@@ -6,8 +6,7 @@
 
     <!-- Primary SEO -->
     <title>
-      Silk Road Trading Calculator | Best Routes, Profits & Prices for Silk Road
-      Trading Simulator
+      Silk Road Trading Calculator | Best Routes, Profits & Prices for Silk Road Trading Simulator
     </title>
     <meta
       name="description"
@@ -18,10 +17,7 @@
       content="silk road, silk road calculator, silk road trading calculator, silk road trading simulator, silk road simulator, silk road profit calculator, silk road routes, silk road best routes, silk road prices, silk road trade calculator, srt calculator, srt simulator, srt trading, silk road game, silk road roblox, trading simulator calculator"
     />
     <meta name="author" content="domi (@nulllua)" />
-    <meta
-      name="robots"
-      content="index, follow, max-snippet:-1, max-image-preview:large"
-    />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
     <meta name="googlebot" content="index, follow" />
     <link rel="canonical" href="https://silkroadcalc.eu/" />
 
@@ -128,8 +124,7 @@
               </select>
             </div>
             <div class="frow">
-              <label
-                data-tip="Filter routes to only show goods you can sell in this city."
+              <label data-tip="Filter routes to only show goods you can sell in this city."
                 >Sell in</label
               >
               <select id="sellInCity" onchange="onSellCityChange()">
@@ -172,8 +167,7 @@
               </select>
             </div>
             <div class="frow">
-              <label
-                data-tip="Your skill in languages other than your native tongue"
+              <label data-tip="Your skill in languages other than your native tongue"
                 >Language at Sell City</label
               >
               <select id="langLevel">
@@ -194,9 +188,7 @@
             </div>
             <div class="check-row" style="margin-top: 8px">
               <input type="checkbox" id="extraStorage" />
-              <label
-                for="extraStorage"
-                data-tip="Gamepass: permanently adds 1 cargo slot"
+              <label for="extraStorage" data-tip="Gamepass: permanently adds 1 cargo slot"
                 >Extra Storage Gamepass (+1 Slot)</label
               >
             </div>
@@ -211,9 +203,7 @@
             <div class="s-title">Gamepasses</div>
             <div class="check-row">
               <input type="checkbox" id="autoWalk" />
-              <label
-                for="autoWalk"
-                data-tip="Auto-Walk Speed Boost: +4 to base walkspeed"
+              <label for="autoWalk" data-tip="Auto-Walk Speed Boost: +4 to base walkspeed"
                 >Auto-Walk Speed Boost (+4)</label
               >
             </div>
@@ -230,9 +220,7 @@
           <div class="s-section">
             <div class="s-title">Faction Ranks</div>
             <div class="frow">
-              <label data-tip="Rank 8 grants +1 animal slot"
-                >Byzantine Rank</label
-              >
+              <label data-tip="Rank 8 grants +1 animal slot">Byzantine Rank</label>
               <select id="byzantineRank">
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -245,9 +233,7 @@
               </select>
             </div>
             <div class="frow">
-              <label data-tip="Rank 8 grants +1 animal slot"
-                >Sassanid Rank</label
-              >
+              <label data-tip="Rank 8 grants +1 animal slot">Sassanid Rank</label>
               <select id="sassanidRank">
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -262,18 +248,10 @@
           </div>
 
           <div class="stats-block">
-            <div class="row">
-              <span>Base Speed:</span><b id="statBaseSpeed">16</b>
-            </div>
-            <div class="row">
-              <span>Auto-Walk Bonus:</span><b id="statAutoBonus">+0</b>
-            </div>
-            <div class="row">
-              <span>Animal Speed Bonus:</span><b id="statAnimalBonus">0</b>
-            </div>
-            <div class="row total">
-              <span>Total Walkspeed:</span><b id="statSpeed">16.0</b>
-            </div>
+            <div class="row"><span>Base Speed:</span><b id="statBaseSpeed">16</b></div>
+            <div class="row"><span>Auto-Walk Bonus:</span><b id="statAutoBonus">+0</b></div>
+            <div class="row"><span>Animal Speed Bonus:</span><b id="statAnimalBonus">0</b></div>
+            <div class="row total"><span>Total Walkspeed:</span><b id="statSpeed">16.0</b></div>
             <div class="row" style="margin-top: 6px">
               <span>Cargo Slots:</span><b id="statSlots">3</b>
             </div>
@@ -290,27 +268,14 @@
           </div>
 
           <div id="tabsRow">
-            <span
-              class="tab active"
-              id="tabRoutes"
-              onclick="switchTab('routes')"
+            <span class="tab active" id="tabRoutes" onclick="switchTab('routes')"
               >Trading Routes</span
             >
-            <span class="tab" id="tabPrices" onclick="switchTab('prices')"
-              >Prices</span
-            >
-            <span class="tab" id="tabTools" onclick="switchTab('tools')"
-              >Tools</span
-            >
-            <span class="tab" id="tabEvents" onclick="switchTab('events')"
-              >Events</span
-            >
-            <span class="tab" id="tabSettings" onclick="switchTab('settings')"
-              >Settings</span
-            >
-            <span class="tab" id="tabAbout" onclick="switchTab('about')"
-              >About</span
-            >
+            <span class="tab" id="tabPrices" onclick="switchTab('prices')">Prices</span>
+            <span class="tab" id="tabTools" onclick="switchTab('tools')">Tools</span>
+            <span class="tab" id="tabEvents" onclick="switchTab('events')">Events</span>
+            <span class="tab" id="tabSettings" onclick="switchTab('settings')">Settings</span>
+            <span class="tab" id="tabAbout" onclick="switchTab('about')">About</span>
           </div>
 
           <div id="toolbar">
@@ -337,16 +302,9 @@
               <option value="0">All routes</option>
             </select>
             <span class="spacer"></span>
-            <span class="toolbar-notice"
-              >⚠ Prices may differ slightly from in-game values ⚠</span
-            >
+            <span class="toolbar-notice">⚠ Prices may differ slightly from in-game values ⚠</span>
             <span class="spacer"></span>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search…"
-              oninput="onSearchInput()"
-            />
+            <input type="text" id="searchInput" placeholder="Search…" oninput="onSearchInput()" />
           </div>
 
           <div id="routesPanel">
@@ -365,11 +323,7 @@
                     >
                       Buy City
                     </th>
-                    <th
-                      id="h-good"
-                      onclick="sortBy('good')"
-                      data-tip="Tradeable commodity"
-                    >
+                    <th id="h-good" onclick="sortBy('good')" data-tip="Tradeable commodity">
                       Good
                     </th>
                     <th
@@ -379,11 +333,7 @@
                     >
                       Sell City
                     </th>
-                    <th
-                      id="h-buyPrice"
-                      onclick="sortBy('buyPrice')"
-                      data-tip="Base purchase price"
-                    >
+                    <th id="h-buyPrice" onclick="sortBy('buyPrice')" data-tip="Base purchase price">
                       Buy Price
                     </th>
                     <th
@@ -421,14 +371,8 @@
                     >
                       Profit / Min
                     </th>
-                    <th data-tip="Best good to haul on the return journey">
-                      Return Cargo (Best)
-                    </th>
-                    <th
-                      data-tip="Copy this route as a Discord-friendly message"
-                    >
-                      Share
-                    </th>
+                    <th data-tip="Best good to haul on the return journey">Return Cargo (Best)</th>
+                    <th data-tip="Copy this route as a Discord-friendly message">Share</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -440,18 +384,10 @@
           <div id="pricesPanel">
             <div class="prices-head-row">
               <div class="prices-mode-toggle">
-                <button
-                  class="pmt-btn active"
-                  id="pmtBuy"
-                  onclick="setPricesMode('buy')"
-                >
+                <button class="pmt-btn active" id="pmtBuy" onclick="setPricesMode('buy')">
                   Buy Prices
                 </button>
-                <button
-                  class="pmt-btn"
-                  id="pmtSell"
-                  onclick="setPricesMode('sell')"
-                >
+                <button class="pmt-btn" id="pmtSell" onclick="setPricesMode('sell')">
                   Sell Prices
                 </button>
               </div>
@@ -463,17 +399,15 @@
           <div id="toolsPanel">
             <div class="set-h">📦 Courier Route Planner</div>
             <p class="set-p">
-              Pick up courier quests, plan your journey with the most profitable
-              goods at every stop along the way.
+              Pick up courier quests, plan your journey with the most profitable goods at every stop
+              along the way.
             </p>
 
             <div class="frow" style="margin-top: 8px">
               <label>I'm currently in</label>
               <select
                 id="courierStart"
-                onchange="
-                  document.getElementById('courierResult').innerHTML = ''
-                "
+                onchange="document.getElementById('courierResult').innerHTML = ''"
               >
                 <option value="">— Pick your city —</option>
                 <option value="Antioch">Antioch</option>
@@ -486,16 +420,10 @@
             </div>
 
             <div class="courier-quest-block">
-              <div class="courier-quest-block-title">
-                Courier Quests (optional)
-              </div>
+              <div class="courier-quest-block-title">Courier Quests (optional)</div>
               <div class="courier-quest-row">
                 <label class="courier-quest-check">
-                  <input
-                    type="checkbox"
-                    id="shortQuestCheck"
-                    onchange="onCourierQuestChange()"
-                  />
+                  <input type="checkbox" id="shortQuestCheck" onchange="onCourierQuestChange()" />
                   <span class="courier-quest-badge short">Short</span>
                   <span class="courier-quest-label">Quest</span>
                 </label>
@@ -511,11 +439,7 @@
               </div>
               <div class="courier-quest-row">
                 <label class="courier-quest-check">
-                  <input
-                    type="checkbox"
-                    id="longQuestCheck"
-                    onchange="onCourierQuestChange()"
-                  />
+                  <input type="checkbox" id="longQuestCheck" onchange="onCourierQuestChange()" />
                   <span class="courier-quest-badge long">Long</span>
                   <span class="courier-quest-label">Quest</span>
                 </label>
@@ -540,20 +464,15 @@
               >
             </div>
             <div class="set-btns" style="margin-top: 14px">
-              <button class="btn btn-gold" onclick="runCourierPlanner()">
-                ⚜ Plan Route
-              </button>
+              <button class="btn btn-gold" onclick="runCourierPlanner()">⚜ Plan Route</button>
             </div>
             <div id="courierResult"></div>
 
-            <div class="set-h" style="margin-top: 34px">
-              ✦ Find Optimal Setup
-            </div>
+            <div class="set-h" style="margin-top: 34px">✦ Find Optimal Setup</div>
             <p class="set-p">
-              Brute-forces every combination of culture, religion, faith level
-              and language skill. Shows the setup that delivers the highest
-              profit-per-minute on a single round trip with your current animals
-              and storage.
+              Brute-forces every combination of culture, religion, faith level and language skill.
+              Shows the setup that delivers the highest profit-per-minute on a single round trip
+              with your current animals and storage.
             </p>
             <div class="set-btns">
               <button class="btn btn-gold" onclick="runOptimalFinder()">
@@ -567,9 +486,7 @@
 
           <div id="settingsPanel">
             <div class="set-h">Theme</div>
-            <p class="set-p">
-              Choose how the calculator looks. Your choice is remembered.
-            </p>
+            <p class="set-p">Choose how the calculator looks. Your choice is remembered.</p>
             <div class="theme-picker">
               <label class="theme-card" data-theme="parchment">
                 <input
@@ -581,36 +498,21 @@
                 />
                 <div class="theme-swatch theme-swatch-parchment">
                   <div class="ts-row" style="background: #382316"></div>
-                  <div
-                    class="ts-row"
-                    style="background: #d4a843; height: 6px"
-                  ></div>
+                  <div class="ts-row" style="background: #d4a843; height: 6px"></div>
                   <div class="ts-row" style="background: #1a0e07"></div>
                 </div>
                 <div class="theme-name">Parchment & Gold</div>
-                <div class="theme-desc">
-                  Tavern ledger style, warm wood tones
-                </div>
+                <div class="theme-desc">Tavern ledger style, warm wood tones</div>
               </label>
               <label class="theme-card" data-theme="slate">
-                <input
-                  type="radio"
-                  name="theme"
-                  value="slate"
-                  onchange="applyTheme(this.value)"
-                />
+                <input type="radio" name="theme" value="slate" onchange="applyTheme(this.value)" />
                 <div class="theme-swatch theme-swatch-slate">
                   <div class="ts-row" style="background: #0f1115"></div>
-                  <div
-                    class="ts-row"
-                    style="background: #3d8eff; height: 6px"
-                  ></div>
+                  <div class="ts-row" style="background: #3d8eff; height: 6px"></div>
                   <div class="ts-row" style="background: #1a1d24"></div>
                 </div>
                 <div class="theme-name">Modern Slate</div>
-                <div class="theme-desc">
-                  Minimalist dark UI, clean and quiet
-                </div>
+                <div class="theme-desc">Minimalist dark UI, clean and quiet</div>
               </label>
             </div>
 
@@ -622,15 +524,13 @@
                 checked
                 onchange="applyWalker(this.checked)"
               />
-              <label for="walkerToggle"
-                >Show walking animation at the bottom of the screen</label
-              >
+              <label for="walkerToggle">Show walking animation at the bottom of the screen</label>
             </div>
 
             <div class="set-h">Save / Load Settings</div>
             <p class="set-p">
-              Save named setups to this browser. Each setup stores your
-              character, animals, and gamepass selections.
+              Save named setups to this browser. Each setup stores your character, animals, and
+              gamepass selections.
             </p>
 
             <div class="setup-block">
@@ -641,17 +541,9 @@
                   id="setupNameInput"
                   placeholder="Setup name…"
                   maxlength="40"
-                  oninput="
-                    document.getElementById('btnSaveSetup').disabled =
-                      !this.value.trim()
-                  "
+                  oninput="document.getElementById('btnSaveSetup').disabled = !this.value.trim()"
                 />
-                <button
-                  class="btn"
-                  id="btnSaveSetup"
-                  onclick="saveNamedState()"
-                  disabled
-                >
+                <button class="btn" id="btnSaveSetup" onclick="saveNamedState()" disabled>
                   Save
                 </button>
               </div>
@@ -673,16 +565,14 @@
                 <select id="clearSetupSelect">
                   <option value="">— choose setup —</option>
                 </select>
-                <button class="btn btn-red" onclick="clearNamedState()">
-                  Delete
-                </button>
+                <button class="btn btn-red" onclick="clearNamedState()">Delete</button>
               </div>
             </div>
 
             <div class="set-h">Onboarding Tour</div>
             <p class="set-p">
-              The tour runs automatically when you first open the site. You can
-              replay it anytime or turn it off completely.
+              The tour runs automatically when you first open the site. You can replay it anytime or
+              turn it off completely.
             </p>
             <div class="setup-block">
               <div class="setup-row" style="gap: 12px; flex-wrap: wrap">
@@ -693,17 +583,13 @@
                     align-items: center;
                     gap: 8px;
                     cursor: pointer;
-                    font-family: &quot;Cinzel&quot;, serif;
+                    font-family: 'Cinzel', serif;
                     font-size: 11px;
                     letter-spacing: 0.8px;
                     color: var(--dim);
                   "
                 >
-                  <input
-                    type="checkbox"
-                    id="tourOffToggle"
-                    onchange="onTourToggle(this.checked)"
-                  />
+                  <input type="checkbox" id="tourOffToggle" onchange="onTourToggle(this.checked)" />
                   Disable tour on startup
                 </label>
               </div>
@@ -721,23 +607,15 @@
                 <hr class="credits-divider" />
                 <div class="credits-label">Lead Analyst</div>
                 <div class="credits-analyst">KuglerKnight</div>
-                <div class="credits-analyst-role">
-                  Price research &amp; in-game verification
-                </div>
+                <div class="credits-analyst-role">Price research &amp; in-game verification</div>
               </div>
               <div class="credits-special-thanks">Special Thanks</div>
               <div class="credits-label">Original Idea</div>
               <div class="credits-analyst">Ming</div>
-              <div class="credits-analyst-role">
-                Sparked the idea to build the calculator
-              </div>
-              <div class="credits-label" style="margin-top: 16px">
-                Design Vision
-              </div>
+              <div class="credits-analyst-role">Sparked the idea to build the calculator</div>
+              <div class="credits-label" style="margin-top: 16px">Design Vision</div>
               <div class="credits-analyst">Sensitive Young Man</div>
-              <div class="credits-analyst-role">
-                Shaped how the site looks and feels
-              </div>
+              <div class="credits-analyst-role">Shaped how the site looks and feels</div>
               <div class="credits-buttons">
                 <a
                   class="discord-btn"
@@ -820,12 +698,7 @@
     <div id="eventFloater" aria-live="polite"></div>
 
     <!-- Onboarding tour overlay -->
-    <div
-      id="onbScrim"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="onbCardTitle"
-    >
+    <div id="onbScrim" role="dialog" aria-modal="true" aria-labelledby="onbCardTitle">
       <div id="onbBackdrop">
         <div class="onb-frame frame-t"></div>
         <div class="onb-frame frame-r"></div>
@@ -847,19 +720,14 @@
         <div class="onb-actions">
           <div class="onb-dots" id="onbDots"></div>
           <div class="onb-btn-row">
-            <button class="onb-btn ghost" id="onbSkip" type="button">
-              Skip tour
-            </button>
+            <button class="onb-btn ghost" id="onbSkip" type="button">Skip tour</button>
             <button class="onb-btn" id="onbBack" type="button">Back</button>
-            <button class="onb-btn primary" id="onbNext" type="button">
-              Next
-            </button>
+            <button class="onb-btn primary" id="onbNext" type="button">Next</button>
           </div>
         </div>
         <div class="onb-skip-row" id="onbDontShow">
           <label
-            ><input type="checkbox" id="onbDontShowCheck" /> Don't show this
-            again on opening</label
+            ><input type="checkbox" id="onbDontShowCheck" /> Don't show this again on opening</label
           >
         </div>
       </div>
@@ -871,52 +739,20 @@
         <!-- Head -->
         <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060" />
         <!-- Hair -->
-        <path
-          d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z"
-          fill="#3b1c07"
-        />
+        <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07" />
         <!-- Eyes -->
         <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
         <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
         <!-- Mouth -->
-        <rect
-          id="tcMouth"
-          x="23"
-          y="31"
-          width="24"
-          height="4"
-          rx="2"
-          fill="#1a0a00"
-        />
+        <rect id="tcMouth" x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00" />
         <!-- Neck -->
         <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060" />
         <!-- Body -->
         <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c" />
         <!-- Jacket seam lines -->
-        <line
-          x1="10"
-          y1="61"
-          x2="60"
-          y2="61"
-          stroke="rgba(0,0,0,.25)"
-          stroke-width="1"
-        />
-        <line
-          x1="10"
-          y1="74"
-          x2="60"
-          y2="74"
-          stroke="rgba(0,0,0,.25)"
-          stroke-width="1"
-        />
-        <line
-          x1="35"
-          y1="46"
-          x2="35"
-          y2="82"
-          stroke="rgba(0,0,0,.25)"
-          stroke-width="1"
-        />
+        <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1" />
+        <line x1="10" y1="74" x2="60" y2="74" stroke="rgba(0,0,0,.25)" stroke-width="1" />
+        <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1" />
         <!-- Left arm (static) -->
         <rect x="2" y="46" width="10" height="30" rx="3" fill="#5e6c34" />
         <!-- Right arm (pointing — rotates around shoulder) -->
@@ -926,25 +762,33 @@
           <rect x="58" y="72" width="10" height="7" rx="2" fill="#c09060" />
         </g>
         <!-- Legs -->
-        <rect
-          id="tcLegL"
-          x="14"
-          y="80"
-          width="16"
-          height="30"
-          rx="2"
-          fill="#253012"
-        />
-        <rect
-          id="tcLegR"
-          x="40"
-          y="80"
-          width="16"
-          height="30"
-          rx="2"
-          fill="#253012"
-        />
+        <rect id="tcLegL" x="14" y="80" width="16" height="30" rx="2" fill="#253012" />
+        <rect id="tcLegR" x="40" y="80" width="16" height="30" rx="2" fill="#253012" />
       </svg>
+    </div>
+
+    <!-- Notice Bar -->
+    <div
+      id="noticeBar"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: rgba(58, 58, 46, 0.85);
+        border-bottom: 2px solid #5a5a4e;
+        padding: 14px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #ddd;
+        font-family: Georgia, serif;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <span id="noticeText"></span>
     </div>
 
     <!-- What's New popup -->
@@ -986,24 +830,12 @@
       >
         We'll be back shortly.
       </div>
-      <div
-        style="
-          font-size: 11px;
-          color: #555;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        "
-      >
+      <div style="font-size: 11px; color: #555; letter-spacing: 0.12em; text-transform: uppercase">
         Check back soon
       </div>
     </div>
 
-    <div
-      id="whatsNewModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="whatsNewTitle"
-    >
+    <div id="whatsNewModal" role="dialog" aria-modal="true" aria-labelledby="whatsNewTitle">
       <div id="whatsNewBox">
         <div class="wn-title" id="whatsNewTitle">
           What's New <span class="wn-ver-badge">v1.7</span>
@@ -1011,41 +843,33 @@
         <div class="wn-body">
           <div class="wn-notice">
             If something looks wrong, please use the
-            <strong>feedback button</strong> at the side of the screen. I am not
-            always in the Silk Road chat to catch every issue mentioned there,
-            but I see every single report sent through the feedback button.
+            <strong>feedback button</strong> at the side of the screen. I am not always in the Silk
+            Road chat to catch every issue mentioned there, but I see every single report sent
+            through the feedback button.
           </div>
           <ul>
             <li>
-              <strong>Travel times</strong> remeasured in-game. Still estimates
-              since auto-walk varies, but calibrated so route rankings stay
-              accurate
+              <strong>Travel times</strong> remeasured in-game. Still estimates since auto-walk
+              varies, but calibrated so route rankings stay accurate
             </li>
             <li>
-              The <strong>Prices tab</strong> is now a compact matrix: every
-              good across every city at a glance
+              The <strong>Prices tab</strong> is now a compact matrix: every good across every city
+              at a glance
             </li>
             <li>
               The old Trip Planner has been replaced with a dedicated
               <strong>Courier Route Planner</strong> built around courier quests
             </li>
             <li>
-              The <strong>Events tab</strong> has been given a visual refresh
-              with per-city cards
+              The <strong>Events tab</strong> has been given a visual refresh with per-city cards
             </li>
-            <li>
-              Routes table scrolling and search are now faster and smoother
-            </li>
-            <li>
-              New setting to turn off the walking animation at the bottom of the
-              screen
-            </li>
+            <li>Routes table scrolling and search are now faster and smoother</li>
+            <li>New setting to turn off the walking animation at the bottom of the screen</li>
           </ul>
         </div>
         <div class="wn-footer">
           <label class="wn-dont-label">
-            <input type="checkbox" id="whatsNewDontShow" /> Don't show again
-            until next update
+            <input type="checkbox" id="whatsNewDontShow" /> Don't show again until next update
           </label>
           <button class="btn btn-gold" onclick="closeWhatsNew()">OK</button>
         </div>
@@ -1055,11 +879,7 @@
     <!-- Finish splash screen -->
     <div id="tourSplash">
       <div class="ts-title">Silk Road Calculator</div>
-      <svg
-        id="ts-rblx"
-        viewBox="0 0 160 242"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg id="ts-rblx" viewBox="0 0 160 242" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="ts-jgrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#7c8d45" />
@@ -1074,135 +894,29 @@
             <stop offset="100%" stop-color="#1c2a0d" />
           </linearGradient>
         </defs>
-        <rect
-          class="ts-dp ts-pll"
-          x="36"
-          y="190"
-          width="36"
-          height="52"
-          rx="2"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-plr"
-          x="88"
-          y="190"
-          width="36"
-          height="52"
-          rx="2"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-pto"
-          x="25"
-          y="102"
-          width="110"
-          height="90"
-          rx="4"
-          pathLength="100"
-        />
-        <line
-          class="ts-jl"
-          x1="25"
-          y1="127"
-          x2="135"
-          y2="127"
-          pathLength="100"
-        />
-        <line
-          class="ts-jl"
-          x1="25"
-          y1="151"
-          x2="135"
-          y2="151"
-          pathLength="100"
-        />
-        <line
-          class="ts-jl"
-          x1="25"
-          y1="175"
-          x2="135"
-          y2="175"
-          pathLength="100"
-        />
-        <line
-          class="ts-jl"
-          x1="80"
-          y1="102"
-          x2="80"
-          y2="192"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-pal"
-          x="1"
-          y="102"
-          width="26"
-          height="90"
-          rx="4"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-par"
-          x="133"
-          y="102"
-          width="26"
-          height="90"
-          rx="4"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-pnk"
-          x="63"
-          y="88"
-          width="34"
-          height="17"
-          rx="2"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-ph"
-          x="35"
-          y="5"
-          width="90"
-          height="86"
-          rx="5"
-          pathLength="100"
-        />
+        <rect class="ts-dp ts-pll" x="36" y="190" width="36" height="52" rx="2" pathLength="100" />
+        <rect class="ts-dp ts-plr" x="88" y="190" width="36" height="52" rx="2" pathLength="100" />
+        <rect class="ts-dp ts-pto" x="25" y="102" width="110" height="90" rx="4" pathLength="100" />
+        <line class="ts-jl" x1="25" y1="127" x2="135" y2="127" pathLength="100" />
+        <line class="ts-jl" x1="25" y1="151" x2="135" y2="151" pathLength="100" />
+        <line class="ts-jl" x1="25" y1="175" x2="135" y2="175" pathLength="100" />
+        <line class="ts-jl" x1="80" y1="102" x2="80" y2="192" pathLength="100" />
+        <rect class="ts-dp ts-pal" x="1" y="102" width="26" height="90" rx="4" pathLength="100" />
+        <rect class="ts-dp ts-par" x="133" y="102" width="26" height="90" rx="4" pathLength="100" />
+        <rect class="ts-dp ts-pnk" x="63" y="88" width="34" height="17" rx="2" pathLength="100" />
+        <rect class="ts-dp ts-ph" x="35" y="5" width="90" height="86" rx="5" pathLength="100" />
         <path
           class="ts-dp ts-pr"
           d="M 35,39 L 35,12 Q 35,5 42,5 L 118,5 Q 125,5 125,12 L 125,39 Z"
           pathLength="100"
         />
-        <rect
-          class="ts-dp ts-pel"
-          x="52"
-          y="44"
-          width="13"
-          height="15"
-          rx="2"
-          pathLength="100"
-        />
-        <rect
-          class="ts-dp ts-per"
-          x="95"
-          y="44"
-          width="13"
-          height="15"
-          rx="2"
-          pathLength="100"
-        />
-        <path
-          class="ts-dp ts-psm"
-          d="M 52,66 Q 80,84 108,66"
-          pathLength="100"
-        />
+        <rect class="ts-dp ts-pel" x="52" y="44" width="13" height="15" rx="2" pathLength="100" />
+        <rect class="ts-dp ts-per" x="95" y="44" width="13" height="15" rx="2" pathLength="100" />
+        <path class="ts-dp ts-psm" d="M 52,66 Q 80,84 108,66" pathLength="100" />
       </svg>
       <div class="ts-bar-label">Loading</div>
       <div class="ts-bar-track"><div class="ts-bar-fill"></div></div>
-      <div class="ts-fb-hint">
-        Found a bug or have a suggestion? Hit ✉ Feedback after loading!
-      </div>
+      <div class="ts-fb-hint">Found a bug or have a suggestion? Hit ✉ Feedback after loading!</div>
     </div>
 
     <!-- Silk Road walker -->
@@ -1225,42 +939,10 @@
             <rect x="104" y="9" width="6" height="6" rx="1" fill="#1a0e00" />
             <rect x="120" y="19" width="5" height="4" rx="1" fill="#8b6020" />
             <rect x="10" y="40" width="8" height="14" rx="2" fill="#b89040" />
-            <rect
-              class="wk-cl-a"
-              x="78"
-              y="69"
-              width="13"
-              height="28"
-              rx="2"
-              fill="#b89040"
-            />
-            <rect
-              class="wk-cl-b"
-              x="62"
-              y="69"
-              width="13"
-              height="28"
-              rx="2"
-              fill="#b89040"
-            />
-            <rect
-              class="wk-cl-b"
-              x="32"
-              y="69"
-              width="13"
-              height="28"
-              rx="2"
-              fill="#b89040"
-            />
-            <rect
-              class="wk-cl-a"
-              x="16"
-              y="69"
-              width="13"
-              height="28"
-              rx="2"
-              fill="#b89040"
-            />
+            <rect class="wk-cl-a" x="78" y="69" width="13" height="28" rx="2" fill="#b89040" />
+            <rect class="wk-cl-b" x="62" y="69" width="13" height="28" rx="2" fill="#b89040" />
+            <rect class="wk-cl-b" x="32" y="69" width="13" height="28" rx="2" fill="#b89040" />
+            <rect class="wk-cl-a" x="16" y="69" width="13" height="28" rx="2" fill="#b89040" />
           </svg>
         </div>
         <div id="wkCharWrap">
@@ -1273,91 +955,32 @@
             height="66"
           >
             <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060" />
-            <path
-              d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z"
-              fill="#3b1c07"
-            />
+            <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07" />
             <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
             <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
             <rect x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00" />
             <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060" />
             <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c" />
-            <line
-              x1="10"
-              y1="61"
-              x2="60"
-              y2="61"
-              stroke="rgba(0,0,0,.25)"
-              stroke-width="1"
-            />
-            <line
-              x1="35"
-              y1="46"
-              x2="35"
-              y2="82"
-              stroke="rgba(0,0,0,.25)"
-              stroke-width="1"
-            />
+            <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1" />
+            <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1" />
             <g id="wkCharArmL">
               <rect x="2" y="46" width="10" height="26" rx="3" fill="#5e6c34" />
               <rect x="0" y="68" width="14" height="12" rx="3" fill="#c09060" />
             </g>
             <g id="wkCharArmR">
-              <rect
-                x="58"
-                y="46"
-                width="10"
-                height="18"
-                rx="3"
-                fill="#5e6c34"
-              />
+              <rect x="58" y="46" width="10" height="18" rx="3" fill="#5e6c34" />
               <g id="wkCharForeArmR">
-                <rect
-                  x="58"
-                  y="62"
-                  width="10"
-                  height="14"
-                  rx="3"
-                  fill="#5e6c34"
-                />
-                <rect
-                  x="56"
-                  y="73"
-                  width="14"
-                  height="11"
-                  rx="3"
-                  fill="#c09060"
-                />
+                <rect x="58" y="62" width="10" height="14" rx="3" fill="#5e6c34" />
+                <rect x="56" y="73" width="14" height="11" rx="3" fill="#c09060" />
               </g>
             </g>
-            <rect
-              id="wkCharLegL"
-              x="14"
-              y="80"
-              width="16"
-              height="30"
-              rx="2"
-              fill="#253012"
-            />
-            <rect
-              id="wkCharLegR"
-              x="40"
-              y="80"
-              width="16"
-              height="30"
-              rx="2"
-              fill="#253012"
-            />
+            <rect id="wkCharLegL" x="14" y="80" width="16" height="30" rx="2" fill="#253012" />
+            <rect id="wkCharLegR" x="40" y="80" width="16" height="30" rx="2" fill="#253012" />
           </svg>
         </div>
         <!-- Camel head peeking from left edge (variant 2) -->
         <div id="wkPeekHead">
-          <svg
-            viewBox="87 0 53 46"
-            xmlns="http://www.w3.org/2000/svg"
-            width="53"
-            height="46"
-          >
+          <svg viewBox="87 0 53 46" xmlns="http://www.w3.org/2000/svg" width="53" height="46">
             <rect x="87" y="20" width="15" height="26" rx="3" fill="#c8a050" />
             <rect x="92" y="6" width="32" height="20" rx="3" fill="#c8a050" />
             <rect x="95" y="2" width="8" height="8" rx="3" fill="#b89040" />
@@ -1386,83 +1009,31 @@
         >
           <g transform="translate(70,0) scale(-1,1)">
             <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060" />
-            <path
-              d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z"
-              fill="#3b1c07"
-            />
+            <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07" />
             <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
             <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
             <rect x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00" />
             <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060" />
             <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c" />
-            <line
-              x1="10"
-              y1="61"
-              x2="60"
-              y2="61"
-              stroke="rgba(0,0,0,.25)"
-              stroke-width="1"
-            />
-            <line
-              x1="35"
-              y1="46"
-              x2="35"
-              y2="82"
-              stroke="rgba(0,0,0,.25)"
-              stroke-width="1"
-            />
+            <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1" />
+            <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1" />
             <g id="fbArmL">
               <rect x="2" y="46" width="10" height="26" rx="3" fill="#5e6c34" />
               <rect x="0" y="68" width="14" height="12" rx="3" fill="#c09060" />
             </g>
             <g id="fbArmR">
-              <rect
-                x="58"
-                y="46"
-                width="10"
-                height="26"
-                rx="3"
-                fill="#5e6c34"
-              />
-              <rect
-                x="56"
-                y="68"
-                width="14"
-                height="12"
-                rx="3"
-                fill="#c09060"
-              />
+              <rect x="58" y="46" width="10" height="26" rx="3" fill="#5e6c34" />
+              <rect x="56" y="68" width="14" height="12" rx="3" fill="#c09060" />
             </g>
-            <rect
-              id="fbLegR"
-              x="14"
-              y="82"
-              width="16"
-              height="20"
-              rx="2"
-              fill="#253012"
-            />
-            <rect
-              id="fbLegL"
-              x="40"
-              y="82"
-              width="16"
-              height="20"
-              rx="2"
-              fill="#253012"
-            />
+            <rect id="fbLegR" x="14" y="82" width="16" height="20" rx="2" fill="#253012" />
+            <rect id="fbLegL" x="40" y="82" width="16" height="20" rx="2" fill="#253012" />
           </g>
         </svg>
       </button>
     </div>
 
     <!-- Feedback modal -->
-    <div
-      id="feedbackModal"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Send feedback"
-    >
+    <div id="feedbackModal" role="dialog" aria-modal="true" aria-label="Send feedback">
       <div id="feedbackModalBox">
         <!-- Merchant peeking over top of modal -->
         <div class="fb-char-topper" aria-hidden="true">
@@ -1481,10 +1052,7 @@
             <!-- Head -->
             <rect x="102" y="4" width="76" height="64" rx="8" fill="#c09060" />
             <!-- Hair -->
-            <path
-              d="M102,26 L102,9 Q102,4 110,4 L168,4 Q178,4 178,9 L178,26 Z"
-              fill="#3b1c07"
-            />
+            <path d="M102,26 L102,9 Q102,4 110,4 L168,4 Q178,4 178,9 L178,26 Z" fill="#3b1c07" />
             <!-- Eyes -->
             <rect x="116" y="32" width="13" height="12" rx="2" fill="#0c0401" />
             <rect x="151" y="32" width="13" height="12" rx="2" fill="#0c0401" />
@@ -1498,25 +1066,14 @@
 
         <!-- Form body -->
         <div class="fb-bubble-body">
-          <button
-            id="closeBtn"
-            class="fb-close"
-            type="button"
-            aria-label="Close"
-          >
-            ✕
-          </button>
+          <button id="closeBtn" class="fb-close" type="button" aria-label="Close">✕</button>
           <h3 class="fb-title">
             <span class="fb-title-glyph" aria-hidden="true">✦</span>
             Send Feedback
           </h3>
 
           <form id="feedbackForm">
-            <div
-              class="fb-type-row"
-              role="radiogroup"
-              aria-label="Feedback type"
-            >
+            <div class="fb-type-row" role="radiogroup" aria-label="Feedback type">
               <label class="fb-type">
                 <input type="radio" name="fbType" value="feedback" checked />
                 <span class="fb-type-glyph" aria-hidden="true">✦</span>
@@ -1552,9 +1109,7 @@
               required
             ></textarea>
 
-            <button type="submit" id="sendBtn" class="btn btn-gold fb-submit">
-              Send Feedback
-            </button>
+            <button type="submit" id="sendBtn" class="btn btn-gold fb-submit">Send Feedback</button>
           </form>
 
           <p id="status" class="fb-status"></p>

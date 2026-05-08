@@ -3,25 +3,20 @@
 
 function getPlayerState() {
   return {
-    culture: document.getElementById("culture").value,
-    religion: document.getElementById("religion").value,
-    religionLevel: parseInt(document.getElementById("religionLevel").value),
-    langLevel: parseInt(document.getElementById("langLevel").value),
-    backpack: document.getElementById("backpack").value,
-    extraStorage: document.getElementById("extraStorage").checked,
-    caravanGamepass: document.getElementById("caravanGamepass").checked,
-    autoWalk: document.getElementById("autoWalk").checked,
-    byzantineRank:
-      parseInt(document.getElementById("byzantineRank").value) || 1,
-    sassanidRank: parseInt(document.getElementById("sassanidRank").value) || 1,
-    currentCity: document.getElementById("currentCity")?.value || "",
-    sellInCity: document.getElementById("sellInCity")?.value || "",
-    animals: [0, 1, 2, 3, 4].map(
-      (i) => document.getElementById("animal" + i)?.value || "None",
-    ),
-    saddlebags: [0, 1, 2, 3, 4].map(
-      (i) => document.getElementById("saddle" + i)?.checked || false,
-    ),
+    culture: document.getElementById('culture').value,
+    religion: document.getElementById('religion').value,
+    religionLevel: parseInt(document.getElementById('religionLevel').value),
+    langLevel: parseInt(document.getElementById('langLevel').value),
+    backpack: document.getElementById('backpack').value,
+    extraStorage: document.getElementById('extraStorage').checked,
+    caravanGamepass: document.getElementById('caravanGamepass').checked,
+    autoWalk: document.getElementById('autoWalk').checked,
+    byzantineRank: parseInt(document.getElementById('byzantineRank').value) || 1,
+    sassanidRank: parseInt(document.getElementById('sassanidRank').value) || 1,
+    currentCity: document.getElementById('currentCity')?.value || '',
+    sellInCity: document.getElementById('sellInCity')?.value || '',
+    animals: [0, 1, 2, 3, 4].map((i) => document.getElementById('animal' + i)?.value || 'None'),
+    saddlebags: [0, 1, 2, 3, 4].map((i) => document.getElementById('saddle' + i)?.checked || false),
   };
 }
 
@@ -30,20 +25,18 @@ function updateStats() {
   const slots = calculateStorage(ps);
   const speed = calculateWalkspeed(ps);
   const auto = ps.autoWalk ? 4 : 0;
-  const active = ps.animals.filter((a) => a !== "None");
+  const active = ps.animals.filter((a) => a !== 'None');
   const animalBonus =
     active.length > 0
       ? Math.round(
-          (active.reduce((s, a) => s + (ANIMALS_DATA[a]?.speed || 0), 0) /
-            active.length) *
-            100,
+          (active.reduce((s, a) => s + (ANIMALS_DATA[a]?.speed || 0), 0) / active.length) * 100
         ) / 100
       : 0;
-  document.getElementById("statSlots").textContent = slots;
-  document.getElementById("statSpeed").textContent = speed.toFixed(2);
-  document.getElementById("statBaseSpeed").textContent = "16";
-  document.getElementById("statAutoBonus").textContent = "+" + auto;
-  document.getElementById("statAnimalBonus").textContent = animalBonus;
+  document.getElementById('statSlots').textContent = slots;
+  document.getElementById('statSpeed').textContent = speed.toFixed(2);
+  document.getElementById('statBaseSpeed').textContent = '16';
+  document.getElementById('statAutoBonus').textContent = '+' + auto;
+  document.getElementById('statAnimalBonus').textContent = animalBonus;
 }
 
 function updateAll() {
@@ -58,17 +51,16 @@ function updateAll() {
   updateStats();
   renderTable();
   renderBestLoop();
-  if (document.getElementById("pricesPanel")?.style.display !== "none")
-    renderPricesTab();
+  if (document.getElementById('pricesPanel')?.style.display !== 'none') renderPricesTab();
   autoSave();
 }
 
 function renderTable() {
-  const q = document.getElementById("searchInput").value.toLowerCase().trim();
-  const limitEl = document.getElementById("rowLimit");
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const limitEl = document.getElementById('rowLimit');
   const limit = limitEl ? parseInt(limitEl.value) : 0;
-  const currentCity = document.getElementById("currentCity")?.value || "";
-  const sellInCity = document.getElementById("sellInCity")?.value || "";
+  const currentCity = document.getElementById('currentCity')?.value || '';
+  const sellInCity = document.getElementById('sellInCity')?.value || '';
 
   let rows = allRoutes.slice();
   if (q) {
@@ -77,7 +69,7 @@ function renderTable() {
         r.good.toLowerCase().includes(q) ||
         r.buyCity.toLowerCase().includes(q) ||
         r.sellCity.toLowerCase().includes(q) ||
-        r.goodType.toLowerCase().includes(q),
+        r.goodType.toLowerCase().includes(q)
     );
   }
   if (sellInCity) {
@@ -93,22 +85,21 @@ function renderTable() {
     }
     const va = a[sortKey],
       vb = b[sortKey];
-    const cmp = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+    const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
     if (cmp !== 0) return cmp * sortDir;
     return b.profitPerTrip - a.profitPerTrip;
   });
 
   if (limit > 0) rows = rows.slice(0, limit);
 
-  document.querySelectorAll("th").forEach((th) => (th.className = ""));
-  const hEl = document.getElementById("h-" + sortKey);
-  if (hEl)
-    hEl.className = (sortDir < 0 ? "sort-desc" : "sort-asc") + " featured";
+  document.querySelectorAll('th').forEach((th) => (th.className = ''));
+  const hEl = document.getElementById('h-' + sortKey);
+  if (hEl) hEl.className = (sortDir < 0 ? 'sort-desc' : 'sort-asc') + ' featured';
 
-  const sb = document.getElementById("sortBy");
+  const sb = document.getElementById('sortBy');
   if (sb && sb.value !== sortKey) sb.value = sortKey;
 
-  const tbody = document.getElementById("tableBody");
+  const tbody = document.getElementById('tableBody');
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="11" class="no-rows">⚔ No routes match your search ⚔</td></tr>`;
     renderMobileCards([]);
@@ -127,30 +118,26 @@ function renderTable() {
     profitPerMin: 8,
   };
   const featCol = FEAT[sortKey];
-  const ALPHA_SORTS = new Set(["good", "buyCity", "sellCity"]);
+  const ALPHA_SORTS = new Set(['good', 'buyCity', 'sellCity']);
   const showTopRow = !ALPHA_SORTS.has(sortKey);
 
   const frag = document.createDocumentFragment();
   rows.forEach((r, idx) => {
     const pu = r.profitPerUnit;
-    const puc = pu > 0 ? "profit" : pu < 0 ? "loss" : "zero";
+    const puc = pu > 0 ? 'profit' : pu < 0 ? 'loss' : 'zero';
     const pm = r.profitPerMin;
-    const pmc = pm > 0 ? "profit" : pm < 0 ? "loss" : "zero";
-    const cls = (i, extra = "") => (i === featCol ? "featured " : "") + extra;
+    const pmc = pm > 0 ? 'profit' : pm < 0 ? 'loss' : 'zero';
+    const cls = (i, extra = '') => (i === featCol ? 'featured ' : '') + extra;
     const isTop = showTopRow && idx === 0;
     const isHere = currentCity && r.buyCity === currentCity;
-    const tr = document.createElement("tr");
+    const tr = document.createElement('tr');
     const trClasses = [];
-    if (isTop) trClasses.push("top-row");
-    if (isHere) trClasses.push("here-row");
-    if (trClasses.length) tr.className = trClasses.join(" ");
-    const topMark = isTop
-      ? '<span class="top-marker" title="Best by current sort">★</span>'
-      : "";
+    if (isTop) trClasses.push('top-row');
+    if (isHere) trClasses.push('here-row');
+    if (trClasses.length) tr.className = trClasses.join(' ');
+    const topMark = isTop ? '<span class="top-marker" title="Best by current sort">★</span>' : '';
     const hereMark =
-      isHere && !isTop
-        ? '<span class="here-marker" title="You are here">⌂</span>'
-        : "";
+      isHere && !isTop ? '<span class="here-marker" title="You are here">⌂</span>' : '';
     const routeIdx = r._idx;
     tr.dataset.routeIdx = routeIdx;
     tr.innerHTML =
@@ -159,20 +146,20 @@ function renderTable() {
       `<td class="${cls(2)}">${badge(r.sellCity)}</td>` +
       `<td class="${cls(3)}"><span class="price-cell" data-route-idx="${routeIdx}" data-price-kind="buy">$${r.buyPrice}</span></td>` +
       `<td class="${cls(4)}"><span class="price-cell" data-route-idx="${routeIdx}" data-price-kind="sell">$${r.sellPrice}</span></td>` +
-      `<td class="${cls(5, puc)}">${pu >= 0 ? "+$" : "-$"}${Math.abs(pu)}</td>` +
-      `<td class="${cls(6, puc)}">${pu >= 0 ? "+$" : "-$"}${Math.abs(r.profitPerTrip)}</td>` +
+      `<td class="${cls(5, puc)}">${pu >= 0 ? '+$' : '-$'}${Math.abs(pu)}</td>` +
+      `<td class="${cls(6, puc)}">${pu >= 0 ? '+$' : '-$'}${Math.abs(r.profitPerTrip)}</td>` +
       `<td class="${cls(7)}">${fmtTime(r.time)}</td>` +
-      `<td class="${cls(8, pmc)}">${pm >= 0 ? "+$" : "-$"}${Math.abs(pm)}</td>` +
+      `<td class="${cls(8, pmc)}">${pm >= 0 ? '+$' : '-$'}${Math.abs(pm)}</td>` +
       `<td class="retcell">${returnCard(r.returnObj)}</td>` +
       `<td class="share-cell"><button class="copy-btn" onclick="copyRouteForDiscord(${routeIdx})" title="Copy as Discord message">⎘</button></td>`;
-    const expTr = document.createElement("tr");
-    expTr.className = "expand-row";
+    const expTr = document.createElement('tr');
+    expTr.className = 'expand-row';
     frag.appendChild(tr);
     frag.appendChild(expTr);
   });
-  tbody.innerHTML = "";
+  tbody.innerHTML = '';
   tbody.appendChild(frag);
-  const cardsEl = document.getElementById("routeCards");
+  const cardsEl = document.getElementById('routeCards');
   if (cardsEl && cardsEl.offsetParent !== null) renderMobileCards(rows);
 }
 
@@ -183,72 +170,70 @@ function onSearchInput() {
 }
 
 function initTableEvents() {
-  const tbody = document.getElementById("tableBody");
+  const tbody = document.getElementById('tableBody');
   if (!tbody || tbody._evtBound) return;
   tbody._evtBound = true;
-  tbody.addEventListener("click", (e) => {
-    if (e.target.closest(".copy-btn,.price-cell")) return;
-    const tr = e.target.closest("tr:not(.expand-row)");
+  tbody.addEventListener('click', (e) => {
+    if (e.target.closest('.copy-btn,.price-cell')) return;
+    const tr = e.target.closest('tr:not(.expand-row)');
     if (!tr) return;
     const expRow = tr.nextElementSibling;
-    if (!expRow?.classList.contains("expand-row")) return;
+    if (!expRow?.classList.contains('expand-row')) return;
     if (!expRow._rendered) {
       const idx = parseInt(tr.dataset.routeIdx);
       expRow.innerHTML = renderExpandCells(allRoutes[idx]);
       expRow._rendered = true;
     }
-    const opening = !expRow.classList.contains("open");
-    tbody.querySelector(".expand-row.open")?.classList.remove("open");
-    tbody.querySelector(".row-expanded")?.classList.remove("row-expanded");
-    expRow.classList.toggle("open", opening);
-    tr.classList.toggle("row-expanded", opening);
+    const opening = !expRow.classList.contains('open');
+    tbody.querySelector('.expand-row.open')?.classList.remove('open');
+    tbody.querySelector('.row-expanded')?.classList.remove('row-expanded');
+    expRow.classList.toggle('open', opening);
+    tr.classList.toggle('row-expanded', opening);
   });
 }
 
 function renderMobileCards(rows) {
-  const container = document.getElementById("routeCards");
+  const container = document.getElementById('routeCards');
   if (!container) return;
   if (!rows.length) {
     container.innerHTML =
       '<div class="route-card" style="text-align:center;cursor:default;padding:16px"><span class="rc-empty-msg">⚔ No routes match your search ⚔</span></div>';
     return;
   }
-  const ALPHA_SORTS = new Set(["good", "buyCity", "sellCity"]);
+  const ALPHA_SORTS = new Set(['good', 'buyCity', 'sellCity']);
   const showTop = !ALPHA_SORTS.has(sortKey);
   const frag = document.createDocumentFragment();
   rows.forEach((r, idx) => {
     const isTop = showTop && idx === 0;
     const pm = r.profitPerMin;
     const pu = r.profitPerUnit;
-    const pmc = pm > 0 ? "profit" : pm < 0 ? "loss" : "zero";
-    const puc = pu > 0 ? "profit" : pu < 0 ? "loss" : "zero";
-    const topMark = isTop
-      ? '<span class="top-marker" title="Best by current sort">★</span>'
-      : "";
-    let retHtml = "";
+    const pmc = pm > 0 ? 'profit' : pm < 0 ? 'loss' : 'zero';
+    const puc = pu > 0 ? 'profit' : pu < 0 ? 'loss' : 'zero';
+    const topMark = isTop ? '<span class="top-marker" title="Best by current sort">★</span>' : '';
+    let retHtml = '';
     if (r.returnObj) {
       const ret = r.returnObj;
       const rpm = ret.profitPerMin,
         rpu = ret.profitPerUnit;
-      const rpmc = rpm > 0 ? "profit" : rpm < 0 ? "loss" : "zero";
-      const rpuc = rpu > 0 ? "profit" : rpu < 0 ? "loss" : "zero";
+      const rpmc = rpm > 0 ? 'profit' : rpm < 0 ? 'loss' : 'zero';
+      const rpuc = rpu > 0 ? 'profit' : rpu < 0 ? 'loss' : 'zero';
       const rpt = ret.profitPerTrip,
-        rptc = rpt > 0 ? "profit" : rpt < 0 ? "loss" : "zero";
+        rptc = rpt > 0 ? 'profit' : rpt < 0 ? 'loss' : 'zero';
       const totalTrip = r.profitPerTrip + ret.profitPerTrip;
       const totalTime = r.time + ret.time;
       const totalPerMin = totalTime > 0 ? Math.round(totalTrip / totalTime) : 0;
       const totalPerHour = totalPerMin * 60;
-      const tc = totalTrip >= 0 ? "profit" : "loss";
+      const tc = totalTrip >= 0 ? 'profit' : 'loss';
       retHtml = `<div class="rc-expand">
         <div class="rc-ret-route">
           <span class="rc-ret-label">↩ Return</span>
           ${badge(ret.buyCity)}<span class="rc-arrow">→</span>${badge(ret.sellCity)}
-          <span class="rc-ppm ${rpmc}" style="margin-left:auto">${rpm >= 0 ? "+$" : "-$"}${Math.abs(rpm)}/min</span>
+          <span class="rc-ppm ${rpmc}" style="margin-left:auto">${rpm >= 0 ? '+$' : '-$'}${Math.abs(rpm)}/min</span>
         </div>
         <div class="rc-body">
           <div style="flex:1">${goodCell(ret.good, ret.goodType)}</div>
           <div class="rc-stats">
-            <span class="rc-pu ${rpuc}">${rpu >= 0 ? "+$" : "-$"}${Math.abs(rpu)}/u</span>
+            <span class="rc-pu ${rpuc}">${rpu >= 0 ? '+$' : '-$'}${Math.abs(rpu)}/u</span>
             <span class="rc-time">${fmtTime(ret.time)}</span>
           </div>
         </div>
@@ -257,30 +242,30 @@ function renderMobileCards(rows) {
           <span class="rc-sep">·</span>
           <span class="rc-price">Sell $${ret.sellPrice}</span>
           <span class="rc-sep">·</span>
-          <span class="rc-pt ${rptc}">${rpt >= 0 ? "+$" : "-$"}${Math.abs(rpt)}/trip</span>
+          <span class="rc-pt ${rptc}">${rpt >= 0 ? '+$' : '-$'}${Math.abs(rpt)}/trip</span>
         </div>
         <div class="rc-roundtrip">
           <span class="rc-rt-label">Round trip</span>
-          <span class="rc-rt-val ${tc}">${totalTrip >= 0 ? "+$" : "-$"}${Math.abs(totalTrip)}</span>
-          <span class="rc-rt-rate ${tc}">${totalPerMin >= 0 ? "+$" : "-$"}${Math.abs(totalPerMin)}/min · ${totalPerHour >= 0 ? "+$" : "-$"}${Math.abs(totalPerHour)}/h</span>
+          <span class="rc-rt-val ${tc}">${totalTrip >= 0 ? '+$' : '-$'}${Math.abs(totalTrip)}</span>
+          <span class="rc-rt-rate ${tc}">${totalPerMin >= 0 ? '+$' : '-$'}${Math.abs(totalPerMin)}/min · ${totalPerHour >= 0 ? '+$' : '-$'}${Math.abs(totalPerHour)}/h</span>
         </div>
       </div>`;
     } else {
       retHtml = `<div class="rc-expand"><span class="rc-empty-msg">No profitable return cargo for this route.</span></div>`;
     }
-    const card = document.createElement("div");
-    card.className = "route-card" + (isTop ? " is-top" : "");
+    const card = document.createElement('div');
+    card.className = 'route-card' + (isTop ? ' is-top' : '');
     const pt = r.profitPerTrip;
-    const ptc = pt > 0 ? "profit" : pt < 0 ? "loss" : "zero";
+    const ptc = pt > 0 ? 'profit' : pt < 0 ? 'loss' : 'zero';
     card.innerHTML = `
       <div class="rc-header">
         <div class="rc-route">${topMark}${badge(r.buyCity)}<span class="rc-arrow">→</span>${badge(r.sellCity)}</div>
-        <span class="rc-ppm ${pmc}">${pm >= 0 ? "+$" : "-$"}${Math.abs(pm)}/min</span>
+        <span class="rc-ppm ${pmc}">${pm >= 0 ? '+$' : '-$'}${Math.abs(pm)}/min</span>
       </div>
       <div class="rc-body">
         <div style="flex:1">${goodCell(r.good, r.goodType)}</div>
         <div class="rc-stats">
-          <span class="rc-pu ${puc}">${pu >= 0 ? "+$" : "-$"}${Math.abs(pu)}/u</span>
+          <span class="rc-pu ${puc}">${pu >= 0 ? '+$' : '-$'}${Math.abs(pu)}/u</span>
           <span class="rc-time">${fmtTime(r.time)}</span>
         </div>
       </div>
@@ -289,32 +274,32 @@ function renderMobileCards(rows) {
         <span class="rc-sep">·</span>
         <span class="rc-price">Sell $${r.sellPrice}</span>
         <span class="rc-sep">·</span>
-        <span class="rc-pt ${ptc}">${pt >= 0 ? "+$" : "-$"}${Math.abs(pt)}/trip</span>
+        <span class="rc-pt ${ptc}">${pt >= 0 ? '+$' : '-$'}${Math.abs(pt)}/trip</span>
       </div>
       ${retHtml}`;
-    card.addEventListener("click", () => {
-      const wasOpen = card.classList.contains("card-open");
+    card.addEventListener('click', () => {
+      const wasOpen = card.classList.contains('card-open');
       document
-        .querySelectorAll(".route-card.card-open")
-        .forEach((c) => c.classList.remove("card-open"));
-      if (!wasOpen) card.classList.add("card-open");
+        .querySelectorAll('.route-card.card-open')
+        .forEach((c) => c.classList.remove('card-open'));
+      if (!wasOpen) card.classList.add('card-open');
     });
     frag.appendChild(card);
   });
-  container.innerHTML = "";
+  container.innerHTML = '';
   container.appendChild(frag);
 }
 
 function badge(city) {
-  const c = CITY_BADGE_COLORS[city] || "#888";
+  const c = CITY_BADGE_COLORS[city] || '#888';
   const ev = getActiveEvent(city);
-  let tag = "";
+  let tag = '';
   if (ev) {
     const def = EVENTS[ev.type];
     if (def) {
       const lvlLabel = EVENT_LEVELS[ev.level]?.label[ev.type] || `L${ev.level}`;
       const remaining = fmtRemaining(ev.remainingMs);
-      const dirCls = def.dir < 0 ? "event-tag dir-down" : "event-tag";
+      const dirCls = def.dir < 0 ? 'event-tag dir-down' : 'event-tag';
       const title = `${def.label} (${lvlLabel}) — ${def.desc}. ${remaining} remaining.`;
       tag = `<span class="${dirCls}" title="${title}">${def.glyph}</span>`;
     }
@@ -323,37 +308,37 @@ function badge(city) {
 }
 
 const GOODS_WITH_ICON = new Set([
-  "Barley",
-  "Copper Ingot",
-  "Cotton Yarn",
-  "Dried Fish",
-  "Earthenware",
-  "Glassware",
-  "Iron Ingot",
-  "Leather",
-  "Linen",
-  "Olive Oil",
-  "Sea Salt",
-  "Tools",
-  "Weapons",
-  "Wheat",
-  "Wool",
-  "Coriander",
-  "Sesame",
-  "Saffron",
-  "Byzantine Silk",
-  "Persian Carpets",
+  'Barley',
+  'Copper Ingot',
+  'Cotton Yarn',
+  'Dried Fish',
+  'Earthenware',
+  'Glassware',
+  'Iron Ingot',
+  'Leather',
+  'Linen',
+  'Olive Oil',
+  'Sea Salt',
+  'Tools',
+  'Weapons',
+  'Wheat',
+  'Wool',
+  'Coriander',
+  'Sesame',
+  'Saffron',
+  'Byzantine Silk',
+  'Persian Carpets',
 ]);
 const GOODS_ICON_FILE = {
-  Coriander: "coriander",
-  Sesame: "sesame",
-  Saffron: "saffron",
-  "Byzantine Silk": "byzantinesilk",
-  "Persian Carpets": "persiancarpets",
+  Coriander: 'coriander',
+  Sesame: 'sesame',
+  Saffron: 'saffron',
+  'Byzantine Silk': 'byzantinesilk',
+  'Persian Carpets': 'persiancarpets',
 };
 
 function goodIconHTML(good) {
-  if (!GOODS_WITH_ICON.has(good)) return "";
+  if (!GOODS_WITH_ICON.has(good)) return '';
   const file = GOODS_ICON_FILE[good] || good;
   return `<img class="good-icon" src="./frontend/assets/icons/${file}.webp" alt="" loading="lazy">`;
 }
@@ -364,18 +349,16 @@ function goodCell(good, type) {
 
 function renderExpandCells(r) {
   const ret = r.returnObj;
-  const sign = (v) => (v >= 0 ? "+$" : "-$") + Math.abs(v);
+  const sign = (v) => (v >= 0 ? '+$' : '-$') + Math.abs(v);
 
   if (!ret)
     return `<td class="expand-td exp-first exp-last" colspan="11"><span class="expand-label">↩ Return Leg</span><span class="expand-empty">No profitable return cargo for this route.</span></td>`;
-  const puc =
-    ret.profitPerUnit > 0 ? "profit" : ret.profitPerUnit < 0 ? "loss" : "zero";
-  const pmc =
-    ret.profitPerMin > 0 ? "profit" : ret.profitPerMin < 0 ? "loss" : "zero";
+  const puc = ret.profitPerUnit > 0 ? 'profit' : ret.profitPerUnit < 0 ? 'loss' : 'zero';
+  const pmc = ret.profitPerMin > 0 ? 'profit' : ret.profitPerMin < 0 ? 'loss' : 'zero';
   const totalTrip = r.profitPerTrip + ret.profitPerTrip;
   const totalTime = r.time + ret.time;
   const totalPerMin = totalTime > 0 ? Math.round(totalTrip / totalTime) : 0;
-  const tc = totalTrip >= 0 ? "profit" : "loss";
+  const tc = totalTrip >= 0 ? 'profit' : 'loss';
   const totalPerHour = totalPerMin * 60;
   return `
     <td class="expand-td exp-first"><span class="expand-label">↩ Return</span>${badge(ret.buyCity)}</td>
@@ -405,50 +388,32 @@ function sortBy(key) {
 }
 
 function onSortByChange() {
-  const v = document.getElementById("sortBy").value;
+  const v = document.getElementById('sortBy').value;
   sortKey = v;
-  sortDir = v === "good" || v === "buyCity" || v === "sellCity" ? 1 : -1;
+  sortDir = v === 'good' || v === 'buyCity' || v === 'sellCity' ? 1 : -1;
   renderTable();
 }
 
 function switchTab(tab) {
-  const isRoutes = tab === "routes";
-  const isPrices = tab === "prices";
-  const isTools = tab === "tools";
-  const isEvents = tab === "events";
-  const isSettings = tab === "settings";
-  const isAbout = tab === "about";
-  document.getElementById("routesPanel").style.display = isRoutes
-    ? "flex"
-    : "none";
-  document.getElementById("toolbar").style.display = isRoutes ? "flex" : "none";
-  document.getElementById("pricesPanel").style.display = isPrices
-    ? "flex"
-    : "none";
-  document.getElementById("toolsPanel").style.display = isTools
-    ? "block"
-    : "none";
-  document.getElementById("eventsPanel").style.display = isEvents
-    ? "flex"
-    : "none";
-  document.getElementById("settingsPanel").style.display = isSettings
-    ? "block"
-    : "none";
-  document.getElementById("aboutPanel").style.display = isAbout
-    ? "block"
-    : "none";
-  document.getElementById("tabRoutes").className =
-    "tab" + (isRoutes ? " active" : "");
-  document.getElementById("tabPrices").className =
-    "tab" + (isPrices ? " active" : "");
-  document.getElementById("tabTools").className =
-    "tab" + (isTools ? " active" : "");
-  document.getElementById("tabEvents").className =
-    "tab" + (isEvents ? " active" : "");
-  document.getElementById("tabSettings").className =
-    "tab" + (isSettings ? " active" : "");
-  document.getElementById("tabAbout").className =
-    "tab" + (isAbout ? " active" : "");
+  const isRoutes = tab === 'routes';
+  const isPrices = tab === 'prices';
+  const isTools = tab === 'tools';
+  const isEvents = tab === 'events';
+  const isSettings = tab === 'settings';
+  const isAbout = tab === 'about';
+  document.getElementById('routesPanel').style.display = isRoutes ? 'flex' : 'none';
+  document.getElementById('toolbar').style.display = isRoutes ? 'flex' : 'none';
+  document.getElementById('pricesPanel').style.display = isPrices ? 'flex' : 'none';
+  document.getElementById('toolsPanel').style.display = isTools ? 'block' : 'none';
+  document.getElementById('eventsPanel').style.display = isEvents ? 'flex' : 'none';
+  document.getElementById('settingsPanel').style.display = isSettings ? 'block' : 'none';
+  document.getElementById('aboutPanel').style.display = isAbout ? 'block' : 'none';
+  document.getElementById('tabRoutes').className = 'tab' + (isRoutes ? ' active' : '');
+  document.getElementById('tabPrices').className = 'tab' + (isPrices ? ' active' : '');
+  document.getElementById('tabTools').className = 'tab' + (isTools ? ' active' : '');
+  document.getElementById('tabEvents').className = 'tab' + (isEvents ? ' active' : '');
+  document.getElementById('tabSettings').className = 'tab' + (isSettings ? ' active' : '');
+  document.getElementById('tabAbout').className = 'tab' + (isAbout ? ' active' : '');
   if (isEvents) renderEventsTab();
   if (isPrices) renderPricesTab();
 }
@@ -457,22 +422,20 @@ function fmtRemaining(ms) {
   const total = Math.max(0, Math.floor(ms / 1000));
   const m = Math.floor(total / 60);
   const s = total % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 function renderEventsTab() {
-  const panel = document.getElementById("eventsPanel");
+  const panel = document.getElementById('eventsPanel');
   if (!panel) return;
 
   const legendHtml = Object.entries(EVENTS)
     .map(([, v]) => {
       const down = v.dir < 0;
-      const affects =
-        v.goodTypes.concat(v.goodNames || []).join(" & ") +
-        (down ? " ↓" : " ↑");
-      return `<div class="ev-chip${down ? " dir-down" : ""}"><span class="ev-chip-glyph">${v.glyph}</span><span class="ev-chip-label">${v.label}</span><span class="ev-chip-sub">${affects}</span></div>`;
+      const affects = v.goodTypes.concat(v.goodNames || []).join(' & ') + (down ? ' ↓' : ' ↑');
+      return `<div class="ev-chip${down ? ' dir-down' : ''}"><span class="ev-chip-glyph">${v.glyph}</span><span class="ev-chip-label">${v.label}</span><span class="ev-chip-sub">${affects}</span></div>`;
     })
-    .join("");
+    .join('');
 
   panel.innerHTML = `
     <div class="ev-desc">Events last <b>1 hour</b> and shift sell prices globally for matching goods. Set what is active in each city and the calculator updates automatically.</div>
@@ -480,33 +443,26 @@ function renderEventsTab() {
     <div class="evlist" id="eventsGrid"></div>
   `;
 
-  const grid = document.getElementById("eventsGrid");
+  const grid = document.getElementById('eventsGrid');
   const eventOptions = ['<option value="">Pick event</option>']
     .concat(
-      Object.entries(EVENTS).map(
-        ([k, v]) => `<option value="${k}">${v.glyph} ${v.label}</option>`,
-      ),
+      Object.entries(EVENTS).map(([k, v]) => `<option value="${k}">${v.glyph} ${v.label}</option>`)
     )
-    .join("");
+    .join('');
 
   for (const city of CITY_ORDER) {
     const ev = getActiveEvent(city);
     const def = ev ? EVENTS[ev.type] : null;
-    const lvlLabel =
-      ev && def
-        ? EVENT_LEVELS[ev.level]?.label[ev.type] || `Level ${ev.level}`
-        : "";
+    const lvlLabel = ev && def ? EVENT_LEVELS[ev.level]?.label[ev.type] || `Level ${ev.level}` : '';
     const totalMs = ev ? ev.durationMs || EVENT_DURATION_MS : 0;
-    const pct = ev
-      ? Math.max(0, Math.min(100, (ev.remainingMs / totalMs) * 100))
-      : 0;
+    const pct = ev ? Math.max(0, Math.min(100, (ev.remainingMs / totalMs) * 100)) : 0;
     const isLow = ev && ev.remainingMs <= 5 * 60 * 1000;
     const isDown = def && def.dir < 0;
 
-    let cls = "evrow";
-    if (ev) cls += " active";
-    if (isDown) cls += " dir-down";
-    if (isLow) cls += " is-low";
+    let cls = 'evrow';
+    if (ev) cls += ' active';
+    if (isDown) cls += ' dir-down';
+    if (isLow) cls += ' is-low';
 
     const innerHtml = ev
       ? `
@@ -542,24 +498,24 @@ function renderEventsTab() {
       </div>`;
 
     grid.insertAdjacentHTML(
-      "beforeend",
-      `<div class="${cls}" data-city="${city}">${innerHtml}</div>`,
+      'beforeend',
+      `<div class="${cls}" data-city="${city}">${innerHtml}</div>`
     );
   }
 }
 
 function evSetDur(city, mins, btn) {
-  document.getElementById("evdur-" + city).value = mins;
+  document.getElementById('evdur-' + city).value = mins;
   btn
-    .closest(".evrow-dur")
-    .querySelectorAll(".btn-preset")
-    .forEach((b) => b.classList.remove("sel"));
-  btn.classList.add("sel");
+    .closest('.evrow-dur')
+    .querySelectorAll('.btn-preset')
+    .forEach((b) => b.classList.remove('sel'));
+  btn.classList.add('sel');
 }
 
 function updateLevelOptions(city) {
-  const typeEl = document.getElementById("evtype-" + city);
-  const lvlEl = document.getElementById("evlvl-" + city);
+  const typeEl = document.getElementById('evtype-' + city);
+  const lvlEl = document.getElementById('evlvl-' + city);
   if (!typeEl || !lvlEl) return;
   const type = typeEl.value;
   if (!type) {
@@ -567,24 +523,20 @@ function updateLevelOptions(city) {
     lvlEl.disabled = true;
     return;
   }
-  const cur = lvlEl.value || "2";
+  const cur = lvlEl.value || '2';
   lvlEl.disabled = false;
   lvlEl.innerHTML = [1, 2, 3]
     .map((n) => {
       const name = EVENT_LEVELS[n].label[type];
-      return `<option value="${n}"${String(n) === cur ? " selected" : ""}>${name}</option>`;
+      return `<option value="${n}"${String(n) === cur ? ' selected' : ''}>${name}</option>`;
     })
-    .join("");
+    .join('');
 }
 
 function startCityEventFromUI(city) {
-  const type = document.getElementById("evtype-" + city)?.value;
-  const level = parseInt(
-    document.getElementById("evlvl-" + city)?.value || "2",
-  );
-  const mins = parseFloat(
-    document.getElementById("evdur-" + city)?.value || "60",
-  );
+  const type = document.getElementById('evtype-' + city)?.value;
+  const level = parseInt(document.getElementById('evlvl-' + city)?.value || '2');
+  const mins = parseFloat(document.getElementById('evdur-' + city)?.value || '60');
   if (!type) return;
   setCityEvent(city, type, level, Math.max(1, mins) * 60 * 1000);
 }
@@ -594,25 +546,23 @@ function calculateLocalSellPrice(good, city, ps) {
   return calculateSellPrice(good, city, city, ps);
 }
 
-let pricesMode = "buy";
+let pricesMode = 'buy';
 
 function setPricesMode(mode) {
   pricesMode = mode;
-  document.getElementById("pmtBuy").classList.toggle("active", mode === "buy");
-  document
-    .getElementById("pmtSell")
-    .classList.toggle("active", mode === "sell");
-  const hint = document.getElementById("pricesModeDesc");
+  document.getElementById('pmtBuy').classList.toggle('active', mode === 'buy');
+  document.getElementById('pmtSell').classList.toggle('active', mode === 'sell');
+  const hint = document.getElementById('pricesModeDesc');
   if (hint)
     hint.textContent =
-      mode === "buy"
-        ? "What each good costs to buy in every city · dot = active event"
-        : "What you earn selling each good locally · dot = active event";
+      mode === 'buy'
+        ? 'What each good costs to buy in every city · dot = active event'
+        : 'What you earn selling each good locally · dot = active event';
   renderPricesTab();
 }
 
 function renderPricesTab() {
-  const grid = document.getElementById("pricesGrid");
+  const grid = document.getElementById('pricesGrid');
   if (!grid) return;
   const ps = getPlayerState();
   const mode = pricesMode;
@@ -625,7 +575,7 @@ function renderPricesTab() {
   for (const city of CITY_ORDER) {
     const isO = city === originCity;
     parts.push(
-      `<th class="pt2-th-city${isO ? " pt2-origin-th" : ""}">${city}<span class="pt2-city-culture">${CITIES[city].culture}</span></th>`,
+      `<th class="pt2-th-city${isO ? ' pt2-origin-th' : ''}">${city}<span class="pt2-city-culture">${CITIES[city].culture}</span></th>`
     );
   }
   parts.push(`</tr></thead><tbody>`);
@@ -637,12 +587,12 @@ function renderPricesTab() {
     if (good.type !== curType) {
       curType = good.type;
       parts.push(
-        `<tr class="pt2-type-row"><td colspan="${1 + CITY_ORDER.length}">${good.type}</td></tr>`,
+        `<tr class="pt2-type-row"><td colspan="${1 + CITY_ORDER.length}">${good.type}</td></tr>`
       );
     }
 
     parts.push(
-      `<tr class="pt2-row"><td class="pt2-td-good" title="${good.name} · base $${good.base}">${good.name}</td>`,
+      `<tr class="pt2-row"><td class="pt2-td-good" title="${good.name} · base $${good.base}">${good.name}</td>`
     );
 
     for (const city of CITY_ORDER) {
@@ -652,23 +602,23 @@ function renderPricesTab() {
       const isProduced = CITIES[city].produced.includes(good.name);
       const ev = getActiveEvent(city);
       const evHits = ev && eventAffects(good, ev);
-      const evDir = evHits ? (EVENTS[ev.type].dir > 0 ? "up" : "down") : "";
+      const evDir = evHits ? (EVENTS[ev.type].dir > 0 ? 'up' : 'down') : '';
 
-      let cls = "pt2-price-cell";
-      if (isO) cls += " pt2-origin-col";
+      let cls = 'pt2-price-cell';
+      if (isO) cls += ' pt2-origin-col';
 
       let inner;
-      if (mode === "buy") {
+      if (mode === 'buy') {
         if (!canBuy) {
-          cls += " pt2-unavail";
+          cls += ' pt2-unavail';
           inner = `<span class="pt2-val">—</span>`;
         } else {
-          if (isProduced) cls += " pt2-produced";
+          if (isProduced) cls += ' pt2-produced';
           inner = `<span class="pt2-val">$${calculateBuyPrice(good, city, ps)}</span>`;
         }
       } else {
         if (isProduced) {
-          cls += " pt2-unavail";
+          cls += ' pt2-unavail';
           inner = `<span class="pt2-val">—</span>`;
         } else {
           inner = `<span class="pt2-val">$${calculateLocalSellPrice(good, city, ps)}</span>`;
@@ -676,7 +626,7 @@ function renderPricesTab() {
       }
 
       parts.push(
-        `<td class="${cls}">${inner}${evHits ? `<span class="pt2-event-dot dir-${evDir}"></span>` : ""}</td>`,
+        `<td class="${cls}">${inner}${evHits ? `<span class="pt2-event-dot dir-${evDir}"></span>` : ''}</td>`
       );
     }
 
@@ -684,12 +634,12 @@ function renderPricesTab() {
   }
 
   parts.push(`</tbody></table>`);
-  grid.innerHTML = parts.join("");
+  grid.innerHTML = parts.join('');
 }
 
 // Event floater
 function renderEventFloater() {
-  const wrap = document.getElementById("eventFloater");
+  const wrap = document.getElementById('eventFloater');
   if (!wrap) return;
   const active = [];
   for (const city of CITY_ORDER) {
@@ -701,9 +651,7 @@ function renderEventFloater() {
   }
   // Diff: keep nodes by data-city, only swap timer text on update
   const existing = new Map();
-  wrap
-    .querySelectorAll(".ef-pill")
-    .forEach((el) => existing.set(el.dataset.city, el));
+  wrap.querySelectorAll('.ef-pill').forEach((el) => existing.set(el.dataset.city, el));
 
   // Remove pills whose city no longer has an event
   for (const [city, el] of existing) {
@@ -713,12 +661,11 @@ function renderEventFloater() {
   for (const { city, ev, def } of active) {
     let pill = existing.get(city);
     if (!pill) {
-      pill = document.createElement("div");
-      pill.className = "ef-pill";
+      pill = document.createElement('div');
+      pill.className = 'ef-pill';
       pill.dataset.city = city;
-      pill.dataset.dir = def.dir > 0 ? "up" : "down";
-      const lvlLabel =
-        EVENT_LEVELS[ev.level]?.label[ev.type] || `Lv ${ev.level}`;
+      pill.dataset.dir = def.dir > 0 ? 'up' : 'down';
+      const lvlLabel = EVENT_LEVELS[ev.level]?.label[ev.type] || `Lv ${ev.level}`;
       pill.innerHTML = `
         <div class="ef-glyph" aria-hidden="true">${def.glyph}</div>
         <div class="ef-info">
@@ -734,33 +681,33 @@ function renderEventFloater() {
         <button class="ef-close" type="button" aria-label="Clear ${def.label} in ${city}" title="Clear event">✕</button>
         <div class="ef-progress"><div class="ef-progress-fill" data-fill style="width:100%"></div></div>
       `;
-      pill.querySelector(".ef-close").addEventListener("click", (e) => {
+      pill.querySelector('.ef-close').addEventListener('click', (e) => {
         e.stopPropagation();
         clearCityEvent(city);
       });
       wrap.appendChild(pill);
     } else {
       // Keep dir up to date in case of a re-trigger with a different type
-      pill.dataset.dir = def.dir > 0 ? "up" : "down";
+      pill.dataset.dir = def.dir > 0 ? 'up' : 'down';
     }
     // Refresh dynamic bits
     const totalMs = ev.durationMs || EVENT_DURATION_MS;
     const remaining = ev.remainingMs;
     const pct = Math.max(0, Math.min(100, (remaining / totalMs) * 100));
     const isLow = remaining <= 5 * 60 * 1000; // last 5 minutes
-    pill.classList.toggle("is-low", isLow);
-    const tEl = pill.querySelector("[data-time]");
+    pill.classList.toggle('is-low', isLow);
+    const tEl = pill.querySelector('[data-time]');
     if (tEl) tEl.textContent = fmtRemaining(remaining);
-    const fEl = pill.querySelector("[data-fill]");
-    if (fEl) fEl.style.width = pct + "%";
+    const fEl = pill.querySelector('[data-fill]');
+    if (fEl) fEl.style.width = pct + '%';
   }
 }
 
 function tickEventFloater() {
-  const wrap = document.getElementById("eventFloater");
+  const wrap = document.getElementById('eventFloater');
   if (!wrap) return;
   // Update timers + progress in place; only re-render if a pill needs adding/removing
-  const pills = wrap.querySelectorAll(".ef-pill");
+  const pills = wrap.querySelectorAll('.ef-pill');
   const seen = new Set();
   for (const pill of pills) {
     const city = pill.dataset.city;
@@ -773,11 +720,11 @@ function tickEventFloater() {
     const totalMs = ev.durationMs || EVENT_DURATION_MS;
     const pct = Math.max(0, Math.min(100, (ev.remainingMs / totalMs) * 100));
     const isLow = ev.remainingMs <= 5 * 60 * 1000;
-    pill.classList.toggle("is-low", isLow);
-    const tEl = pill.querySelector("[data-time]");
+    pill.classList.toggle('is-low', isLow);
+    const tEl = pill.querySelector('[data-time]');
     if (tEl) tEl.textContent = fmtRemaining(ev.remainingMs);
-    const fEl = pill.querySelector("[data-fill]");
-    if (fEl) fEl.style.width = pct + "%";
+    const fEl = pill.querySelector('[data-fill]');
+    if (fEl) fEl.style.width = pct + '%';
   }
   // Add any newly-active events not yet in DOM
   for (const city of CITY_ORDER) {
@@ -790,71 +737,69 @@ function tickEventFloater() {
 setInterval(() => {
   if (!Object.keys(eventState).length) {
     // Make sure the floater is empty if all events expired between ticks
-    const wrap = document.getElementById("eventFloater");
-    if (wrap && wrap.children.length) wrap.innerHTML = "";
+    const wrap = document.getElementById('eventFloater');
+    if (wrap && wrap.children.length) wrap.innerHTML = '';
     return;
   }
   let anyExpired = false;
   for (const city of Object.keys(eventState)) {
     const ev = eventState[city];
-    const remaining =
-      (ev.durationMs || EVENT_DURATION_MS) - (Date.now() - ev.startTime);
+    const remaining = (ev.durationMs || EVENT_DURATION_MS) - (Date.now() - ev.startTime);
     if (remaining <= 0) {
       delete eventState[city];
       anyExpired = true;
       continue;
     }
-    const tEl = document.getElementById("evt-" + city);
+    const tEl = document.getElementById('evt-' + city);
     if (tEl) tEl.textContent = fmtRemaining(remaining);
     // Also update card progress bar + low-time class
     const card = document.querySelector(`.evrow[data-city="${city}"]`);
     if (card) {
       const totalMs = ev.durationMs || EVENT_DURATION_MS;
       const pct = Math.max(0, Math.min(100, (remaining / totalMs) * 100));
-      const fill = card.querySelector(".evcard-progress-fill");
-      if (fill) fill.style.width = pct + "%";
-      card.classList.toggle("is-low", remaining <= 5 * 60 * 1000);
+      const fill = card.querySelector('.evcard-progress-fill');
+      if (fill) fill.style.width = pct + '%';
+      card.classList.toggle('is-low', remaining <= 5 * 60 * 1000);
     }
   }
   tickEventFloater();
   if (anyExpired) {
     saveEventState();
     updateAll();
-    if (document.getElementById("eventsPanel").style.display !== "none")
-      renderEventsTab();
+    if (document.getElementById('eventsPanel').style.display !== 'none') renderEventsTab();
     renderEventFloater();
   }
 }, 1000);
 
 function buildAnimalSlots(count) {
   count = count || 3;
-  const wrap = document.getElementById("animalSlots");
+  const wrap = document.getElementById('animalSlots');
   const saved = [0, 1, 2, 3, 4].map((i) => ({
-    animal: document.getElementById("animal" + i)?.value || "None",
-    saddle: document.getElementById("saddle" + i)?.checked || false,
+    animal: document.getElementById('animal' + i)?.value || 'None',
+    saddle: document.getElementById('saddle' + i)?.checked || false,
   }));
-  wrap.innerHTML = "";
-  const title = document.getElementById("animalSlotsTitle");
+  wrap.innerHTML = '';
+  const title = document.getElementById('animalSlotsTitle');
   if (title) title.textContent = `Animal Slots (${count})`;
   const animalOpts = Object.keys(ANIMALS_DATA)
     .map((a) => `<option value="${a}">${a}</option>`)
-    .join("");
+    .join('');
   for (let i = 0; i < count; i++) {
-    const d = document.createElement("div");
-    d.className = "frow";
+    const d = document.createElement('div');
+    d.className = 'frow';
     d.innerHTML = `<label>Slot ${i + 1}</label><select id="animal${i}" onchange="onAnimalChange(${i})">${animalOpts}</select>`;
     wrap.appendChild(d);
-    const sd = document.createElement("div");
-    sd.id = "sRow" + i;
-    sd.style.cssText = "display:none;margin:-2px 0 6px";
-    sd.className = "check-row";
+    const sd = document.createElement('div');
+    sd.id = 'sRow' + i;
+    sd.style.cssText = 'display:none;margin:-2px 0 6px';
+    sd.className = 'check-row';
     sd.innerHTML = `<input type="checkbox" id="saddle${i}" onchange="updateAll()"><label for="saddle${i}" data-tip="Adds 2 cargo slots to this animal">Saddlebags</label>`;
     wrap.appendChild(sd);
-    const sel = document.getElementById("animal" + i);
+    const sel = document.getElementById('animal' + i);
     if (sel) sel.value = saved[i].animal;
     const show = ANIMALS_DATA[saved[i].animal]?.saddle || false;
-    sd.style.display = show ? "flex" : "none";
-    const saddleEl = document.getElementById("saddle" + i);
+    sd.style.display = show ? 'flex' : 'none';
+    const saddleEl = document.getElementById('saddle' + i);
     if (saddleEl) saddleEl.checked = show ? saved[i].saddle : false;
   }
 }
@@ -865,61 +810,57 @@ function onCaravanChange() {
 }
 
 function onAnimalChange(i) {
-  const val = document.getElementById("animal" + i).value;
+  const val = document.getElementById('animal' + i).value;
   const show = ANIMALS_DATA[val]?.saddle || false;
-  document.getElementById("sRow" + i).style.display = show ? "flex" : "none";
+  document.getElementById('sRow' + i).style.display = show ? 'flex' : 'none';
   if (!show) {
-    const el = document.getElementById("saddle" + i);
+    const el = document.getElementById('saddle' + i);
     if (el) el.checked = false;
   }
   updateAll();
 }
 
 [
-  "culture",
-  "religion",
-  "religionLevel",
-  "langLevel",
-  "backpack",
-  "extraStorage",
-  "autoWalk",
-].forEach((id) =>
-  document.getElementById(id).addEventListener("change", updateAll),
-);
-["caravanGamepass", "byzantineRank", "sassanidRank"].forEach((id) =>
-  document.getElementById(id).addEventListener("change", onCaravanChange),
+  'culture',
+  'religion',
+  'religionLevel',
+  'langLevel',
+  'backpack',
+  'extraStorage',
+  'autoWalk',
+].forEach((id) => document.getElementById(id).addEventListener('change', updateAll));
+['caravanGamepass', 'byzantineRank', 'sassanidRank'].forEach((id) =>
+  document.getElementById(id).addEventListener('change', onCaravanChange)
 );
 
 function csvField(v) {
   const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n")
+  return s.includes(',') || s.includes('"') || s.includes('\n')
     ? '"' + s.replace(/"/g, '""') + '"'
     : s;
 }
 
 function exportCSV() {
   if (!allRoutes.length) {
-    alert("No routes to export.");
+    alert('No routes to export.');
     return;
   }
   const headers = [
-    "Buy City",
-    "Good",
-    "Type",
-    "Sell City",
-    "Buy Price",
-    "Sell Price",
-    "Profit/Unit",
-    "Profit/Trip",
-    "Time (min)",
-    "Profit/Min",
-    "Return Cargo",
+    'Buy City',
+    'Good',
+    'Type',
+    'Sell City',
+    'Buy Price',
+    'Sell Price',
+    'Profit/Unit',
+    'Profit/Trip',
+    'Time (min)',
+    'Profit/Min',
+    'Return Cargo',
   ];
-  const lines = [headers.join(",")];
+  const lines = [headers.join(',')];
   for (const r of allRoutes) {
-    const ret = r.returnObj
-      ? `${r.returnObj.good} (+$${r.returnObj.profitPerUnit})`
-      : "None";
+    const ret = r.returnObj ? `${r.returnObj.good} (+$${r.returnObj.profitPerUnit})` : 'None';
     lines.push(
       [
         r.buyCity,
@@ -935,13 +876,12 @@ function exportCSV() {
         ret,
       ]
         .map(csvField)
-        .join(","),
+        .join(',')
     );
   }
-  const a = document.createElement("a");
-  a.href =
-    "data:text/csv;charset=utf-8," + encodeURIComponent(lines.join("\n"));
-  a.download = "silk-road-routes.csv";
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+  a.download = 'silk-road-routes.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -949,8 +889,8 @@ function exportCSV() {
 
 function openCalcDiscord(e) {
   try {
-    const url = "https://discord.gg/VaHJ2PbuXN";
-    const w = window.open(url, "_blank", "noopener,noreferrer");
+    const url = 'https://discord.gg/VaHJ2PbuXN';
+    const w = window.open(url, '_blank', 'noopener,noreferrer');
     if (w) {
       e.preventDefault();
       return;
@@ -959,8 +899,8 @@ function openCalcDiscord(e) {
 }
 function openDiscord(e) {
   try {
-    const url = "https://discord.gg/dEsV8QPqSU";
-    const w = window.open(url, "_blank", "noopener,noreferrer");
+    const url = 'https://discord.gg/dEsV8QPqSU';
+    const w = window.open(url, '_blank', 'noopener,noreferrer');
     if (w) {
       e.preventDefault();
       return;
@@ -971,9 +911,8 @@ function openDiscord(e) {
 
 function openWiki(e) {
   try {
-    const url =
-      "https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki";
-    const w = window.open(url, "_blank", "noopener,noreferrer");
+    const url = 'https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki';
+    const w = window.open(url, '_blank', 'noopener,noreferrer');
     if (w) {
       e.preventDefault();
       return;
@@ -982,7 +921,7 @@ function openWiki(e) {
   // fall through to default <a target=_blank> behavior
 }
 
-const LS_KEY = "silkroad_v1";
+const LS_KEY = 'silkroad_v1';
 function stateToObj() {
   return getPlayerState();
 }
@@ -997,39 +936,39 @@ function applyState(s) {
     const el = document.getElementById(id);
     if (el && v != null) el.checked = !!v;
   };
-  set("culture", s.culture);
-  set("religion", s.religion);
-  set("religionLevel", s.religionLevel);
-  set("langLevel", s.langLevel);
-  set("backpack", s.backpack);
-  set("currentCity", s.currentCity);
-  set("sellInCity", s.sellInCity);
-  chk("extraStorage", s.extraStorage);
-  chk("caravanGamepass", s.caravanGamepass);
-  chk("autoWalk", s.autoWalk);
-  set("byzantineRank", s.byzantineRank);
-  set("sassanidRank", s.sassanidRank);
+  set('culture', s.culture);
+  set('religion', s.religion);
+  set('religionLevel', s.religionLevel);
+  set('langLevel', s.langLevel);
+  set('backpack', s.backpack);
+  set('currentCity', s.currentCity);
+  set('sellInCity', s.sellInCity);
+  chk('extraStorage', s.extraStorage);
+  chk('caravanGamepass', s.caravanGamepass);
+  chk('autoWalk', s.autoWalk);
+  set('byzantineRank', s.byzantineRank);
+  set('sassanidRank', s.sassanidRank);
   buildAnimalSlots(
     calculateCaravanSlots({
       caravanGamepass: !!s.caravanGamepass,
       byzantineRank: parseInt(s.byzantineRank) || 1,
       sassanidRank: parseInt(s.sassanidRank) || 1,
-    }),
+    })
   );
   if (s.animals)
     s.animals.forEach((a, i) => {
-      const el = document.getElementById("animal" + i);
+      const el = document.getElementById('animal' + i);
       if (!el) return;
       el.value = a;
       const show = ANIMALS_DATA[a]?.saddle || false;
-      const sRow = document.getElementById("sRow" + i);
-      if (sRow) sRow.style.display = show ? "flex" : "none";
-      const sd = document.getElementById("saddle" + i);
+      const sRow = document.getElementById('sRow' + i);
+      if (sRow) sRow.style.display = show ? 'flex' : 'none';
+      const sd = document.getElementById('saddle' + i);
       if (sd) sd.checked = show ? !!(s.saddlebags && s.saddlebags[i]) : false;
     });
   if (s.saddlebags)
     s.saddlebags.forEach((sb, i) => {
-      const el = document.getElementById("saddle" + i);
+      const el = document.getElementById('saddle' + i);
       if (el) el.checked = !!sb;
     });
 }
@@ -1038,7 +977,7 @@ function autoSave() {
   lsSet(LS_KEY, JSON.stringify(stateToObj()));
 }
 
-const SETUPS_KEY = "silkroad_setups";
+const SETUPS_KEY = 'silkroad_setups';
 function getSetups() {
   return lsGetJson(SETUPS_KEY, {});
 }
@@ -1048,33 +987,32 @@ function saveSetups(obj) {
 
 function refreshSetupDropdowns() {
   const names = Object.keys(getSetups()).sort();
-  ["loadSetupSelect", "clearSetupSelect"].forEach((id) => {
+  ['loadSetupSelect', 'clearSetupSelect'].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const placeholder =
-      id === "loadSetupSelect" ? "— choose setup —" : "— choose setup —";
+    const placeholder = id === 'loadSetupSelect' ? '— choose setup —' : '— choose setup —';
     el.innerHTML =
       `<option value="">${placeholder}</option>` +
-      names.map((n) => `<option value="${n}">${n}</option>`).join("");
+      names.map((n) => `<option value="${n}">${n}</option>`).join('');
   });
 }
 
 function saveNamedState() {
-  const nameEl = document.getElementById("setupNameInput");
-  const name = (nameEl?.value || "").trim();
+  const nameEl = document.getElementById('setupNameInput');
+  const name = (nameEl?.value || '').trim();
   if (!name) {
     return;
   }
   const setups = getSetups();
   setups[name] = stateToObj();
   saveSetups(setups);
-  nameEl.value = "";
-  document.getElementById("btnSaveSetup").disabled = true;
+  nameEl.value = '';
+  document.getElementById('btnSaveSetup').disabled = true;
   refreshSetupDropdowns();
 }
 
 function loadNamedState() {
-  const name = document.getElementById("loadSetupSelect")?.value;
+  const name = document.getElementById('loadSetupSelect')?.value;
   if (!name) {
     return;
   }
@@ -1087,7 +1025,7 @@ function loadNamedState() {
 }
 
 function clearNamedState() {
-  const name = document.getElementById("clearSetupSelect")?.value;
+  const name = document.getElementById('clearSetupSelect')?.value;
   if (!name) {
     return;
   }
@@ -1098,20 +1036,20 @@ function clearNamedState() {
 }
 
 /* Best round-trip card */
-const LS_LOOP_COLLAPSED = "silkroad_loop_collapsed";
+const LS_LOOP_COLLAPSED = 'silkroad_loop_collapsed';
 function isLoopCollapsed() {
-  return lsGet(LS_LOOP_COLLAPSED, "0") === "1";
+  return lsGet(LS_LOOP_COLLAPSED, '0') === '1';
 }
 function toggleLoopCollapsed() {
   const next = !isLoopCollapsed();
-  lsSet(LS_LOOP_COLLAPSED, next ? "1" : "0");
+  lsSet(LS_LOOP_COLLAPSED, next ? '1' : '0');
   renderBestLoop();
 }
 function renderBestLoop() {
-  const card = document.getElementById("bestLoopCard");
+  const card = document.getElementById('bestLoopCard');
   if (!card) return;
   if (!allRoutes.length) {
-    card.innerHTML = "";
+    card.innerHTML = '';
     return;
   }
   // For each pair (A,B), find the most profitable round trip:
@@ -1119,18 +1057,17 @@ function renderBestLoop() {
   let best = null;
   const byPair = {};
   for (const r of allRoutes) {
-    const k = r.buyCity + "|" + r.sellCity;
+    const k = r.buyCity + '|' + r.sellCity;
     if (!byPair[k] || r.profitPerTrip > byPair[k].profitPerTrip) byPair[k] = r;
   }
   for (const k in byPair) {
     const out = byPair[k];
-    const back = byPair[out.sellCity + "|" + out.buyCity];
+    const back = byPair[out.sellCity + '|' + out.buyCity];
     if (!back) continue;
     const totalProfit = out.profitPerTrip + back.profitPerTrip;
     const totalTime = out.time + back.time;
     const ppm = totalTime > 0 ? Math.round(totalProfit / totalTime) : 0;
-    if (!best || ppm > best.ppm)
-      best = { out, back, totalProfit, totalTime, ppm };
+    if (!best || ppm > best.ppm) best = { out, back, totalProfit, totalTime, ppm };
   }
   if (!best || best.totalProfit <= 0) {
     card.innerHTML = `<div class="loop-empty">No profitable round trip with current setup.</div>`;
@@ -1138,7 +1075,7 @@ function renderBestLoop() {
   }
   const collapsed = isLoopCollapsed();
   const { out, back, totalProfit, totalTime, ppm } = best;
-  const collapseBtn = `<button class="loop-collapse-btn" onclick="toggleLoopCollapsed()" title="${collapsed ? "Expand" : "Collapse"}">${collapsed ? "▾" : "▴"}</button>`;
+  const collapseBtn = `<button class="loop-collapse-btn" onclick="toggleLoopCollapsed()" title="${collapsed ? 'Expand' : 'Collapse'}">${collapsed ? '▾' : '▴'}</button>`;
   if (collapsed) {
     card.innerHTML = `
       <div class="loop-head loop-head-collapsed">
@@ -1197,11 +1134,11 @@ function onSellCityChange() {
 }
 
 function onCurrentCityChange() {
-  const v = document.getElementById("currentCity").value;
-  const cs = document.getElementById("courierStart");
-  if (cs && (!cs.value || cs.dataset.auto === "1")) {
-    cs.value = v || "";
-    cs.dataset.auto = "1";
+  const v = document.getElementById('currentCity').value;
+  const cs = document.getElementById('courierStart');
+  if (cs && (!cs.value || cs.dataset.auto === '1')) {
+    cs.value = v || '';
+    cs.dataset.auto = '1';
   }
   renderTable();
   autoSave();
@@ -1210,11 +1147,11 @@ function onCurrentCityChange() {
 /* Courier route planner */
 
 function onCourierQuestChange() {
-  document.getElementById("shortQuestDest").disabled =
-    !document.getElementById("shortQuestCheck").checked;
-  document.getElementById("longQuestDest").disabled =
-    !document.getElementById("longQuestCheck").checked;
-  document.getElementById("courierResult").innerHTML = "";
+  document.getElementById('shortQuestDest').disabled =
+    !document.getElementById('shortQuestCheck').checked;
+  document.getElementById('longQuestDest').disabled =
+    !document.getElementById('longQuestCheck').checked;
+  document.getElementById('courierResult').innerHTML = '';
 }
 
 // Returns ordered city array for the shortest geographic path between two cities
@@ -1265,13 +1202,13 @@ function bestGoodForLeg(from, to, ps, slots) {
 
 function getCourierRank(ps, city) {
   const culture = CITIES[city]?.culture;
-  if (culture === "Byzantine") return ps.byzantineRank || 1;
-  if (culture === "Persian") return ps.sassanidRank || 1;
+  if (culture === 'Byzantine') return ps.byzantineRank || 1;
+  if (culture === 'Persian') return ps.sassanidRank || 1;
   return Math.max(ps.byzantineRank || 1, ps.sassanidRank || 1);
 }
 
 function packageRewardAmount(type, ps, deliveryCity) {
-  const base = type === "short" ? 30 : 100;
+  const base = type === 'short' ? 30 : 100;
   const rank = getCourierRank(ps, deliveryCity);
   return Math.round(base * Math.pow(1.5, rank - 1));
 }
@@ -1280,20 +1217,18 @@ let _courierData = null;
 
 function confirmCourierDelivery() {
   if (!_courierData) return;
-  _courierData.phase = "delivered";
-  renderCourierUI(document.getElementById("courierResult"), _courierData);
+  _courierData.phase = 'delivered';
+  renderCourierUI(document.getElementById('courierResult'), _courierData);
 }
 
 function runCourierPlanner() {
-  const start = document.getElementById("courierStart").value;
-  const mustReturn = document.getElementById("courierReturn").checked;
-  const shortOn = document.getElementById("shortQuestCheck").checked;
-  const longOn = document.getElementById("longQuestCheck").checked;
-  const shortDest = shortOn
-    ? document.getElementById("shortQuestDest").value
-    : "";
-  const longDest = longOn ? document.getElementById("longQuestDest").value : "";
-  const out = document.getElementById("courierResult");
+  const start = document.getElementById('courierStart').value;
+  const mustReturn = document.getElementById('courierReturn').checked;
+  const shortOn = document.getElementById('shortQuestCheck').checked;
+  const longOn = document.getElementById('longQuestCheck').checked;
+  const shortDest = shortOn ? document.getElementById('shortQuestDest').value : '';
+  const longDest = longOn ? document.getElementById('longQuestDest').value : '';
+  const out = document.getElementById('courierResult');
 
   if (!start) {
     out.innerHTML = `<div class="planner-empty">Pick a starting city first.</div>`;
@@ -1326,12 +1261,10 @@ function runCourierPlanner() {
 
   // Build package list sorted by travel distance from start (closer first)
   const packages = [];
-  if (shortOn) packages.push({ type: "short", dest: shortDest });
-  if (longOn) packages.push({ type: "long", dest: longDest });
+  if (shortOn) packages.push({ type: 'short', dest: shortDest });
+  if (longOn) packages.push({ type: 'long', dest: longDest });
   packages.sort(
-    (a, b) =>
-      (TRAVEL_TIMES[start]?.[a.dest] || 99) -
-      (TRAVEL_TIMES[start]?.[b.dest] || 99),
+    (a, b) => (TRAVEL_TIMES[start]?.[a.dest] || 99) - (TRAVEL_TIMES[start]?.[b.dest] || 99)
   );
 
   // Build the full city sequence for the outbound trip
@@ -1368,8 +1301,7 @@ function runCourierPlanner() {
 
   // Package cash rewards
   let packageProfit = 0;
-  for (const pkg of packages)
-    packageProfit += packageRewardAmount(pkg.type, ps, pkg.dest);
+  for (const pkg of packages) packageProfit += packageRewardAmount(pkg.type, ps, pkg.dest);
 
   // Build return legs (all packages delivered -> full slots)
   const returnLegs = [];
@@ -1405,7 +1337,7 @@ function runCourierPlanner() {
     totalSlots,
     mustReturn,
     ps,
-    phase: "outbound",
+    phase: 'outbound',
   };
   renderCourierUI(out, _courierData);
 }
@@ -1434,7 +1366,7 @@ function renderCourierUI(out, data) {
       cargoHtml = `<div class="trip-leg-hint">Nothing profitable to carry</div>`;
     } else {
       cargoHtml = `<div class="trip-leg-cargo">${goodIconHTML(leg.cargo.good)}<span>${leg.cargo.good}</span></div>
-                   <div class="trip-leg-stats">${leg.avail} slot${leg.avail !== 1 ? "s" : ""} · ${fmtTime(leg.time)}</div>`;
+                   <div class="trip-leg-stats">${leg.avail} slot${leg.avail !== 1 ? 's' : ''} · ${fmtTime(leg.time)}</div>`;
     }
     return `<div class="trip-leg">
       <div class="trip-leg-num">${num}</div>
@@ -1447,11 +1379,11 @@ function renderCourierUI(out, data) {
 
   function deliveryBadges(city) {
     const pkgs = deliveryMap[city];
-    if (!pkgs) return "";
+    if (!pkgs) return '';
     return pkgs
       .map((pkg) => {
         const reward = packageRewardAmount(pkg.type, ps, city);
-        const label = pkg.type === "short" ? "Short" : "Long";
+        const label = pkg.type === 'short' ? 'Short' : 'Long';
         return `<div class="courier-delivery-event">
         <div class="courier-delivery-badge">
           📦 Deliver <span class="courier-quest-badge ${pkg.type}" style="margin:0 6px">${label}</span> quest package
@@ -1459,12 +1391,12 @@ function renderCourierUI(out, data) {
         </div>
       </div>`;
       })
-      .join("");
+      .join('');
   }
 
   // Build outbound HTML
   let legNum = 1;
-  let outHtml = "";
+  let outHtml = '';
   for (let i = 0; i < outboundLegs.length; i++) {
     const leg = outboundLegs[i];
     if (i > 0) outHtml += '<div class="trip-arrow">↓</div>';
@@ -1473,9 +1405,9 @@ function renderCourierUI(out, data) {
   }
 
   // Build return HTML (only shown after delivery confirmed)
-  let returnHtml = "";
-  if (phase === "delivered" && mustReturn && returnLegs.length > 0) {
-    let rHtml = "";
+  let returnHtml = '';
+  if (phase === 'delivered' && mustReturn && returnLegs.length > 0) {
+    let rHtml = '';
     for (let i = 0; i < returnLegs.length; i++) {
       const leg = returnLegs[i];
       if (i > 0) rHtml += '<div class="trip-arrow">↓</div>';
@@ -1491,23 +1423,20 @@ function renderCourierUI(out, data) {
   const pkgBreakdownHtml = packages
     .map((pkg) => {
       const reward = packageRewardAmount(pkg.type, ps, pkg.dest);
-      const label = pkg.type === "short" ? "Short quest" : "Long quest";
+      const label = pkg.type === 'short' ? 'Short quest' : 'Long quest';
       return `<div class="courier-pkg-reward">
       <span>${label} → ${pkg.dest}</span><b>+$${reward}</b>
     </div>`;
     })
-    .join("");
+    .join('');
 
   // Totals shown in summary
   const tradeProfitShown =
-    phase === "delivered"
-      ? outboundTradeProfit + returnTradeProfit
-      : outboundTradeProfit;
-  const totalShown =
-    phase === "delivered" ? totalProfit : outboundTradeProfit + packageProfit;
+    phase === 'delivered' ? outboundTradeProfit + returnTradeProfit : outboundTradeProfit;
+  const totalShown = phase === 'delivered' ? totalProfit : outboundTradeProfit + packageProfit;
 
   const summaryHtml =
-    phase === "delivered"
+    phase === 'delivered'
       ? `
     <div class="trip-summary" style="grid-template-columns:repeat(3,1fr)">
       <div class="trip-stat"><span>Trade profit</span><b class="profit">+$${tradeProfitShown}</b></div>
@@ -1522,13 +1451,13 @@ function renderCourierUI(out, data) {
     </div>`;
 
   const deliverBtn =
-    phase === "outbound"
+    phase === 'outbound'
       ? `
     <div class="courier-deliver-wrap">
       <button class="btn btn-gold" onclick="confirmCourierDelivery()">✔ Confirm Package Delivered</button>
     </div>`
       : mustReturn && returnLegs.length > 0
-        ? ""
+        ? ''
         : `<div class="courier-complete-msg">✦ Journey complete — all packages delivered.</div>`;
 
   out.innerHTML = `
@@ -1544,12 +1473,12 @@ function renderCourierUI(out, data) {
 
 /* Optimal setup finder */
 function runOptimalFinder() {
-  const out = document.getElementById("optimalResult");
+  const out = document.getElementById('optimalResult');
   out.innerHTML = `<div class="planner-empty">Crunching combinations…</div>`;
   // brute force every (culture × religion × faithLevel × langLevel)
   const baseState = getPlayerState();
-  const cultures = ["Byzantine", "Syriac", "Persian"];
-  const religions = ["Christianity", "Judaism", "Zoroastrianism"];
+  const cultures = ['Byzantine', 'Syriac', 'Persian'];
+  const religions = ['Christianity', 'Judaism', 'Zoroastrianism'];
   const faiths = [0, 1, 2, 3];
   const langs = [1, 2, 3];
   let best = null;
@@ -1571,20 +1500,18 @@ function runOptimalFinder() {
             // best round trip
             const byPair = {};
             for (const rt of routes) {
-              const k = rt.buyCity + "|" + rt.sellCity;
-              if (!byPair[k] || rt.profitPerTrip > byPair[k].profitPerTrip)
-                byPair[k] = rt;
+              const k = rt.buyCity + '|' + rt.sellCity;
+              if (!byPair[k] || rt.profitPerTrip > byPair[k].profitPerTrip) byPair[k] = rt;
             }
             let bestLoop = null;
             for (const k in byPair) {
               const o = byPair[k];
-              const b = byPair[o.sellCity + "|" + o.buyCity];
+              const b = byPair[o.sellCity + '|' + o.buyCity];
               if (!b) continue;
               const tp = o.profitPerTrip + b.profitPerTrip;
               const tt = o.time + b.time;
               const ppm = tt > 0 ? tp / tt : 0;
-              if (!bestLoop || ppm > bestLoop.ppm)
-                bestLoop = { out: o, back: b, tp, tt, ppm };
+              if (!bestLoop || ppm > bestLoop.ppm) bestLoop = { out: o, back: b, tp, tt, ppm };
             }
             if (bestLoop && (!best || bestLoop.ppm > best.bestLoop.ppm)) {
               best = { culture: c, religion: r, faith: f, lang: l, bestLoop };
@@ -1598,10 +1525,8 @@ function runOptimalFinder() {
       return;
     }
     const { culture, religion, faith, lang, bestLoop } = best;
-    const langLabel = ["", "Broken (−5%)", "Proficient (0%)", "Fluent (+5%)"][
-      lang
-    ];
-    const faithLabel = faith === 0 ? "None" : "Level " + faith;
+    const langLabel = ['', 'Broken (−5%)', 'Proficient (0%)', 'Fluent (+5%)'][lang];
+    const faithLabel = faith === 0 ? 'None' : 'Level ' + faith;
     out.innerHTML = `
       <div class="optimal-card">
         <div class="optimal-h">Recommended Setup</div>
@@ -1635,15 +1560,15 @@ function runOptimalFinder() {
   }, 30);
 }
 function applyOptimal(culture, religion, faith, lang) {
-  document.getElementById("culture").value = culture;
-  document.getElementById("religion").value = religion;
-  document.getElementById("religionLevel").value = String(faith);
-  document.getElementById("langLevel").value = String(lang);
+  document.getElementById('culture').value = culture;
+  document.getElementById('religion').value = religion;
+  document.getElementById('religionLevel').value = String(faith);
+  document.getElementById('langLevel').value = String(lang);
   updateAll();
 }
 
 /* Theme system */
-const THEME_KEY = "silkroad_theme";
+const THEME_KEY = 'silkroad_theme';
 function applyTheme(name) {
   document.body.dataset.theme = name;
   lsSet(THEME_KEY, name);
@@ -1653,21 +1578,21 @@ function applyTheme(name) {
   });
 }
 function loadTheme() {
-  const name = lsGet(THEME_KEY, "parchment");
+  const name = lsGet(THEME_KEY, 'parchment');
   applyTheme(name);
 }
 
-const WALKER_KEY = "srtc-walker";
+const WALKER_KEY = 'srtc-walker';
 function applyWalker(enabled) {
-  document.body.classList.toggle("no-walker", !enabled);
-  lsSet(WALKER_KEY, enabled ? "1" : "0");
-  const el = document.getElementById("walkerToggle");
+  document.body.classList.toggle('no-walker', !enabled);
+  lsSet(WALKER_KEY, enabled ? '1' : '0');
+  const el = document.getElementById('walkerToggle');
   if (el) el.checked = enabled;
 }
 function loadWalker() {
   let enabled = true;
   const v = lsGet(WALKER_KEY, null);
-  if (v !== null) enabled = v !== "0";
+  if (v !== null) enabled = v !== '0';
   applyWalker(enabled);
 }
 
@@ -1675,15 +1600,15 @@ function loadWalker() {
 function buildPriceBreakdown(route, kind) {
   const ps = getPlayerState();
   const good = GOODS.find((g) => g.name === route.good);
-  if (!good) return "";
-  const city = kind === "buy" ? route.buyCity : route.sellCity;
+  if (!good) return '';
+  const city = kind === 'buy' ? route.buyCity : route.sellCity;
   const rawCityMod = calculateCityModifier(
     good,
     city,
     ps.culture,
     ps.religion,
     ps.religionLevel,
-    kind,
+    kind
   );
   const cityMod = rawCityMod;
   const langMod = calculateLanguageModifier(
@@ -1691,113 +1616,83 @@ function buildPriceBreakdown(route, kind) {
     ps.culture,
     ps.langLevel,
     ps.religion,
-    ps.religionLevel,
+    ps.religionLevel
   );
-  const relMod = calculateReligionModifier(
-    good,
-    city,
-    ps.religion,
-    ps.religionLevel,
-  );
-  const repMod = kind === "buy" ? calculateRepDiscount(city, ps) : 0;
-  const importCost = kind === "buy" ? calculateImportCost(good, city) : 0;
-  const importHops = kind === "buy" ? getMinHopsFromProducers(good, city) : 0;
-  const distHops =
-    kind === "sell" ? getMinHopsFromProducers(good, route.sellCity) : 0;
-  const distBonus =
-    kind === "sell" ? Math.floor(good.base * distHops * good.hopPct) : 0;
-  const modSign = kind === "buy" ? -1 : 1;
+  const relMod = calculateReligionModifier(good, city, ps.religion, ps.religionLevel);
+  const repMod = kind === 'buy' ? calculateRepDiscount(city, ps) : 0;
+  const importCost = kind === 'buy' ? calculateImportCost(good, city) : 0;
+  const importHops = kind === 'buy' ? getMinHopsFromProducers(good, city) : 0;
+  const distHops = kind === 'sell' ? getMinHopsFromProducers(good, route.sellCity) : 0;
+  const distBonus = kind === 'sell' ? Math.floor(good.base * distHops * good.hopPct) : 0;
+  const modSign = kind === 'buy' ? -1 : 1;
   const cityAmt = cityMod
-    ? Math.floor(good.base * Math.abs(cityMod)) *
-      (cityMod >= 0 ? modSign : -modSign)
+    ? Math.floor(good.base * Math.abs(cityMod)) * (cityMod >= 0 ? modSign : -modSign)
     : 0;
   const langAmt = langMod
-    ? Math.floor(good.base * Math.abs(langMod)) *
-      (langMod >= 0 ? modSign : -modSign)
+    ? Math.floor(good.base * Math.abs(langMod)) * (langMod >= 0 ? modSign : -modSign)
     : 0;
   const relAmt = relMod
-    ? Math.floor(good.base * Math.abs(relMod)) *
-      (relMod >= 0 ? modSign : -modSign)
+    ? Math.floor(good.base * Math.abs(relMod)) * (relMod >= 0 ? modSign : -modSign)
     : 0;
   const lines = [];
   lines.push(
-    `<div class="bk-title">${kind === "buy" ? "Buy" : "Sell"} Price · ${good.name} in ${city}</div>`,
+    `<div class="bk-title">${kind === 'buy' ? 'Buy' : 'Sell'} Price · ${good.name} in ${city}</div>`
   );
-  lines.push(
-    `<div class="bk-row"><span>Base price</span><b>$${good.base}</b></div>`,
-  );
+  lines.push(`<div class="bk-row"><span>Base price</span><b>$${good.base}</b></div>`);
   if (importCost > 0)
     lines.push(
-      `<div class="bk-row"><span>Imported (${importHops} hop${importHops !== 1 ? "s" : ""} from producer)</span><b class="loss">+$${importCost}</b></div>`,
+      `<div class="bk-row"><span>Imported (${importHops} hop${importHops !== 1 ? 's' : ''} from producer)</span><b class="loss">+$${importCost}</b></div>`
     );
   if (distBonus > 0)
     lines.push(
-      `<div class="bk-row"><span>Distance (${distHops} hop${distHops !== 1 ? "s" : ""} from producer)</span><b class="profit">+$${distBonus}</b></div>`,
+      `<div class="bk-row"><span>Distance (${distHops} hop${distHops !== 1 ? 's' : ''} from producer)</span><b class="profit">+$${distBonus}</b></div>`
     );
   const modCls = (amt) =>
-    kind === "buy"
-      ? amt <= 0
-        ? "profit"
-        : "loss"
-      : amt >= 0
-        ? "profit"
-        : "loss";
-  const modFmt = (amt) => `${amt >= 0 ? "+" : ""}$${amt}`;
+    kind === 'buy' ? (amt <= 0 ? 'profit' : 'loss') : amt >= 0 ? 'profit' : 'loss';
+  const modFmt = (amt) => `${amt >= 0 ? '+' : ''}$${amt}`;
   if (cityMod)
     lines.push(
-      `<div class="bk-row"><span>City modifier</span><b class="${modCls(cityAmt)}">${modFmt(cityAmt)}</b></div>`,
+      `<div class="bk-row"><span>City modifier</span><b class="${modCls(cityAmt)}">${modFmt(cityAmt)}</b></div>`
     );
   if (langMod)
     lines.push(
-      `<div class="bk-row"><span>Language</span><b class="${modCls(langAmt)}">${modFmt(langAmt)}</b></div>`,
+      `<div class="bk-row"><span>Language</span><b class="${modCls(langAmt)}">${modFmt(langAmt)}</b></div>`
     );
   if (relMod)
     lines.push(
-      `<div class="bk-row"><span>Religion</span><b class="${modCls(relAmt)}">${modFmt(relAmt)}</b></div>`,
+      `<div class="bk-row"><span>Religion</span><b class="${modCls(relAmt)}">${modFmt(relAmt)}</b></div>`
     );
   if (repMod)
     lines.push(
-      `<div class="bk-row"><span>Reputation rank 6</span><b class="profit">-$${Math.floor(good.base * repMod)}</b></div>`,
+      `<div class="bk-row"><span>Reputation rank 6</span><b class="profit">-$${Math.floor(good.base * repMod)}</b></div>`
     );
   const evDelta = getActiveEventDelta(good, city);
   if (evDelta) {
     const ev = getActiveEvent(city);
     const def = EVENTS[ev.type];
     const lvlLabel = EVENT_LEVELS[ev.level]?.label[ev.type] || `L${ev.level}`;
-    const sign = evDelta > 0 ? "+" : "−";
+    const sign = evDelta > 0 ? '+' : '−';
     lines.push(
-      `<div class="bk-row"><span>${def.glyph} Event: ${def.label} (${lvlLabel})</span><b class="${evDelta > 0 ? "profit" : "loss"}">${sign}$${Math.abs(Math.round(evDelta))}</b></div>`,
+      `<div class="bk-row"><span>${def.glyph} Event: ${def.label} (${lvlLabel})</span><b class="${evDelta > 0 ? 'profit' : 'loss'}">${sign}$${Math.abs(Math.round(evDelta))}</b></div>`
     );
   }
-  if (
-    !importCost &&
-    !cityMod &&
-    !langMod &&
-    !relMod &&
-    !repMod &&
-    !distMod &&
-    !evDelta
-  )
-    lines.push(
-      `<div class="bk-row"><span>No modifiers apply</span><b>-</b></div>`,
-    );
-  const finalPrice = kind === "buy" ? route.buyPrice : route.sellPrice;
-  lines.push(
-    `<div class="bk-row total"><span>Final</span><b>$${finalPrice}</b></div>`,
-  );
-  return lines.join("");
+  if (!importCost && !cityMod && !langMod && !relMod && !repMod && !distMod && !evDelta)
+    lines.push(`<div class="bk-row"><span>No modifiers apply</span><b>-</b></div>`);
+  const finalPrice = kind === 'buy' ? route.buyPrice : route.sellPrice;
+  lines.push(`<div class="bk-row total"><span>Final</span><b>$${finalPrice}</b></div>`);
+  return lines.join('');
 }
 let priceTip = null;
 function ensurePriceTip() {
   if (priceTip) return priceTip;
-  priceTip = document.createElement("div");
-  priceTip.id = "priceTip";
-  priceTip.style.display = "none";
+  priceTip = document.createElement('div');
+  priceTip.id = 'priceTip';
+  priceTip.style.display = 'none';
   document.body.appendChild(priceTip);
   return priceTip;
 }
-document.addEventListener("mouseover", (e) => {
-  const cell = e.target.closest(".price-cell");
+document.addEventListener('mouseover', (e) => {
+  const cell = e.target.closest('.price-cell');
   if (!cell) return;
   const idx = parseInt(cell.dataset.routeIdx);
   const kind = cell.dataset.priceKind;
@@ -1805,15 +1700,15 @@ document.addEventListener("mouseover", (e) => {
   if (!r) return;
   const tip = ensurePriceTip();
   tip.innerHTML = buildPriceBreakdown(r, kind);
-  tip.style.display = "block";
+  tip.style.display = 'block';
   const rect = cell.getBoundingClientRect();
-  tip.style.left = rect.left + window.scrollX + "px";
-  tip.style.top = rect.bottom + window.scrollY + 6 + "px";
+  tip.style.left = rect.left + window.scrollX + 'px';
+  tip.style.top = rect.bottom + window.scrollY + 6 + 'px';
 });
-document.addEventListener("mouseout", (e) => {
-  const cell = e.target.closest(".price-cell");
+document.addEventListener('mouseout', (e) => {
+  const cell = e.target.closest('.price-cell');
   if (!cell) return;
-  if (priceTip) priceTip.style.display = "none";
+  if (priceTip) priceTip.style.display = 'none';
 });
 
 /* Discord copy */
@@ -1822,56 +1717,51 @@ function copyRouteForDiscord(idx) {
   if (!r) return;
   const ret = r.returnObj
     ? `\n↩ Return: **${r.returnObj.good}** (\`+$${r.returnObj.profitPerUnit}/unit\`)`
-    : "";
+    : '';
 
   const ps = getPlayerState();
-  const langLabels = { 1: "Broken", 2: "Proficient", 3: "Fluent" };
+  const langLabels = { 1: 'Broken', 2: 'Proficient', 3: 'Fluent' };
   const backpackLabels = {
     None: null,
-    SmallSatchel: "Small Satchel",
-    LargeSatchel: "Large Satchel",
-    BasketBackpack: "Basket Backpack",
-    FramePack: "Frame Pack",
+    SmallSatchel: 'Small Satchel',
+    LargeSatchel: 'Large Satchel',
+    BasketBackpack: 'Basket Backpack',
+    FramePack: 'Frame Pack',
   };
-  const faithStr = ps.religionLevel > 0 ? ` L${ps.religionLevel}` : "";
-  const langStr = langLabels[ps.langLevel] || "Proficient";
+  const faithStr = ps.religionLevel > 0 ? ` L${ps.religionLevel}` : '';
+  const langStr = langLabels[ps.langLevel] || 'Proficient';
   const backLabel = backpackLabels[ps.backpack];
 
   const gamepasses = [];
-  if (ps.extraStorage) gamepasses.push("+1 Storage Slot");
-  if (ps.caravanGamepass) gamepasses.push("Caravan");
-  if (ps.autoWalk) gamepasses.push("Auto-Walk");
+  if (ps.extraStorage) gamepasses.push('+1 Storage Slot');
+  if (ps.caravanGamepass) gamepasses.push('Caravan');
+  if (ps.autoWalk) gamepasses.push('Auto-Walk');
 
   const animalCounts = {};
   ps.animals.forEach((a) => {
-    if (a !== "None") animalCounts[a] = (animalCounts[a] || 0) + 1;
+    if (a !== 'None') animalCounts[a] = (animalCounts[a] || 0) + 1;
   });
   const animalStr = Object.entries(animalCounts)
     .map(([a, c]) => (c > 1 ? `${a} ×${c}` : a))
-    .join(", ");
+    .join(', ');
   const saddlebagCount = ps.saddlebags.filter(Boolean).length;
   const animalParts = [
     animalStr,
-    saddlebagCount
-      ? `${saddlebagCount} saddlebag${saddlebagCount > 1 ? "s" : ""}`
-      : "",
+    saddlebagCount ? `${saddlebagCount} saddlebag${saddlebagCount > 1 ? 's' : ''}` : '',
   ].filter(Boolean);
 
   const rankParts = [];
-  if ((ps.byzantineRank || 1) > 1)
-    rankParts.push(`Byzantine R${ps.byzantineRank}`);
-  if ((ps.sassanidRank || 1) > 1)
-    rankParts.push(`Sassanid R${ps.sassanidRank}`);
+  if ((ps.byzantineRank || 1) > 1) rankParts.push(`Byzantine R${ps.byzantineRank}`);
+  if ((ps.sassanidRank || 1) > 1) rankParts.push(`Sassanid R${ps.sassanidRank}`);
 
   const setupLines = [
     `👤 \`${ps.culture}\`  ·  \`${ps.religion}\`${faithStr}  ·  Language: \`${langStr}\``,
   ];
   if (backLabel) setupLines.push(`🧳 ${backLabel}`);
-  if (gamepasses.length)
-    setupLines.push(`🎫 Gamepasses: \`${gamepasses.join(", ")}\``);
-  if (animalParts.length) setupLines.push(`🐎 ${animalParts.join("  ·  ")}`);
-  if (rankParts.length) setupLines.push(`⚔️ ${rankParts.join("  ·  ")}`);
-  const setup = `\n\n⚙️ **Merchant Setup**\n${setupLines.join("\n")}`;
+  if (gamepasses.length) setupLines.push(`🎫 Gamepasses: \`${gamepasses.join(', ')}\``);
+  if (animalParts.length) setupLines.push(`🐎 ${animalParts.join('  ·  ')}`);
+  if (rankParts.length) setupLines.push(`⚔️ ${rankParts.join('  ·  ')}`);
+  const setup = `\n\n⚙️ **Merchant Setup**\n${setupLines.join('\n')}`;
 
   const msg = `🐪 **Silk Road Trade Route**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1884,15 +1774,15 @@ function copyRouteForDiscord(idx) {
 
   const fallbackCopy = (text) => {
     try {
-      const ta = document.createElement("textarea");
+      const ta = document.createElement('textarea');
       ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      ta.style.left = "-9999px";
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      ta.style.left = '-9999px';
       document.body.appendChild(ta);
       ta.focus();
       ta.select();
-      const ok = document.execCommand("copy");
+      const ok = document.execCommand('copy');
       document.body.removeChild(ta);
       return ok;
     } catch (_) {
@@ -1900,10 +1790,10 @@ function copyRouteForDiscord(idx) {
     }
   };
 
-  const onSuccess = () => showToast("Route copied to clipboard");
+  const onSuccess = () => showToast('Route copied to clipboard');
   const onFail = () => {
     if (fallbackCopy(msg)) onSuccess();
-    else showToast("Copy failed - try opening the live site");
+    else showToast('Copy failed - try opening the live site');
   };
 
   if (navigator.clipboard && window.isSecureContext) {
@@ -1914,17 +1804,17 @@ function copyRouteForDiscord(idx) {
   }
 }
 function showToast(text) {
-  let t = document.getElementById("toast");
+  let t = document.getElementById('toast');
   if (!t) {
-    t = document.createElement("div");
-    t.id = "toast";
+    t = document.createElement('div');
+    t.id = 'toast';
     document.body.appendChild(t);
   }
   t.textContent = text;
-  t.className = "show";
+  t.className = 'show';
   clearTimeout(showToast._tid);
   showToast._tid = setTimeout(() => {
-    t.className = "";
+    t.className = '';
   }, 1800);
 }
 
@@ -1935,31 +1825,28 @@ loadEventState();
 renderEventFloater();
 
 // Sidebar collapse
-const SIDEBAR_KEY = "srtc-sidebar";
+const SIDEBAR_KEY = 'srtc-sidebar';
 function applySidebarState(collapsed) {
-  document.body.dataset.sidebar = collapsed ? "collapsed" : "open";
-  const btn = document.getElementById("sidebarToggle");
+  document.body.dataset.sidebar = collapsed ? 'collapsed' : 'open';
+  const btn = document.getElementById('sidebarToggle');
   if (btn) {
-    btn.setAttribute(
-      "aria-label",
-      collapsed ? "Expand sidebar" : "Collapse sidebar",
-    );
-    btn.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+    btn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
   }
 }
 (function initSidebar() {
   const isMobile = window.innerWidth <= 768;
   let collapsed = isMobile; // default collapsed on mobile
   const stored = lsGet(SIDEBAR_KEY, null);
-  if (stored !== null) collapsed = stored === "1";
+  if (stored !== null) collapsed = stored === '1';
   else if (isMobile) collapsed = true;
   applySidebarState(collapsed);
-  const btn = document.getElementById("sidebarToggle");
+  const btn = document.getElementById('sidebarToggle');
   if (btn)
-    btn.addEventListener("click", () => {
-      const isOpen = document.body.dataset.sidebar !== "collapsed";
+    btn.addEventListener('click', () => {
+      const isOpen = document.body.dataset.sidebar !== 'collapsed';
       applySidebarState(isOpen);
-      lsSet(SIDEBAR_KEY, isOpen ? "1" : "0");
+      lsSet(SIDEBAR_KEY, isOpen ? '1' : '0');
     });
 })();
 refreshSetupDropdowns();
@@ -1969,10 +1856,10 @@ refreshSetupDropdowns();
 }
 updateAll();
 
-const API_BASE = "https://admin.silkroadcalc.eu";
+const API_BASE = 'https://admin.silkroadcalc.eu';
 
 function renderAboutChangelogs(logs) {
-  const wrap = document.getElementById("aboutChangelogList");
+  const wrap = document.getElementById('aboutChangelogList');
   if (!wrap) return;
   if (!logs?.length) {
     wrap.innerHTML = `<div class="changelog-entry"><div class="changelog-ver">No updates yet</div></div>`;
@@ -1981,14 +1868,11 @@ function renderAboutChangelogs(logs) {
 
   wrap.innerHTML = logs
     .map((l, idx) => {
-      const latestBadge =
-        idx === 0 ? `<span class="changelog-date">Latest</span>` : "";
-      const entries = (l.entries || [])
-        .map((e) => `<li>${escHtml(e)}</li>`)
-        .join("");
+      const latestBadge = idx === 0 ? `<span class="changelog-date">Latest</span>` : '';
+      const entries = (l.entries || []).map((e) => `<li>${escHtml(e)}</li>`).join('');
       const thanks = l.thanks
         ? `<div class="changelog-thanks">Special thanks: ${escHtml(l.thanks)}</div>`
-        : "";
+        : '';
       return `
         <div class="changelog-entry">
           <div class="changelog-ver">${escHtml(l.version)}${latestBadge}</div>
@@ -1997,22 +1881,23 @@ function renderAboutChangelogs(logs) {
         </div>
       `;
     })
-    .join("");
+    .join('');
 }
 
 async function syncFromApi() {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 5000);
-    const [gr, tr, mr, cr, citr, evr, tefr, rpr] = await Promise.all([
-      fetch(API_BASE + "/api/goods", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/travel-times", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/maintenance", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/changelogs", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/cities", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/events", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/trait-effects", { signal: ctrl.signal }),
-      fetch(API_BASE + "/api/religion-perks", { signal: ctrl.signal }),
+    const [gr, tr, mr, cr, nr, citr, evr, tefr, rpr] = await Promise.all([
+      fetch(API_BASE + '/api/goods', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/travel-times', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/maintenance', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/changelogs', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/notices', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/cities', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/events', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/trait-effects', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/religion-perks', { signal: ctrl.signal }),
     ]);
     clearTimeout(t);
     let changed = false;
@@ -2070,8 +1955,7 @@ async function syncFromApi() {
             desc: e.description,
           };
           for (const l of e.levels || []) {
-            if (!lm[l.level])
-              lm[l.level] = { pct: l.pct, base: l.base_bonus, label: {} };
+            if (!lm[l.level]) lm[l.level] = { pct: l.pct, base: l.base_bonus, label: {} };
             lm[l.level].label[e.name] = l.label;
           }
         }
@@ -2109,10 +1993,10 @@ async function syncFromApi() {
     if (changed) updateAll();
     if (mr.ok) {
       const m = await mr.json();
-      const ov = document.getElementById("maintOverlay");
+      const ov = document.getElementById('maintOverlay');
       if (ov) {
-        ov.style.display = m.active ? "flex" : "none";
-        const msg = document.getElementById("maintMsg");
+        ov.style.display = m.active ? 'flex' : 'none';
+        const msg = document.getElementById('maintMsg');
         if (msg && m.message) msg.textContent = m.message;
       }
     }
@@ -2121,18 +2005,41 @@ async function syncFromApi() {
       renderAboutChangelogs(logs);
       if (logs.length) {
         const latest = logs[0];
-        window._wnKey = "silkroad_whatsnew_id" + latest.id;
-        const badge = document.querySelector("#whatsNewTitle .wn-ver-badge");
+        window._wnKey = 'silkroad_whatsnew_id' + latest.id;
+        const badge = document.querySelector('#whatsNewTitle .wn-ver-badge');
         if (badge) badge.textContent = latest.version;
-        const body = document.querySelector("#whatsNewBox .wn-body");
+        const body = document.querySelector('#whatsNewBox .wn-body');
         if (body && latest.entries && latest.entries.length) {
           body.innerHTML =
-            "<ul>" +
-            latest.entries.map((e) => `<li>${escHtml(e)}</li>`).join("") +
-            "</ul>" +
+            '<ul>' +
+            latest.entries.map((e) => `<li>${escHtml(e)}</li>`).join('') +
+            '</ul>' +
             (latest.thanks
               ? `<div class="wn-thanks">Special thanks: ${escHtml(latest.thanks)}</div>`
-              : "");
+              : '');
+        }
+      }
+    }
+    if (nr.ok) {
+      const notices = await nr.json();
+      const noticeBar = document.getElementById('noticeBar');
+      if (noticeBar) {
+        if (notices.length && notices[0].active) {
+          noticeBar.style.display = 'flex';
+          const noticeText = document.getElementById('noticeText');
+          if (noticeText) noticeText.textContent = notices[0].message;
+          const level = notices[0].level || 'info';
+          const colors = {
+            info: { bg: '#3a3a2e', border: '#5a5a4e', text: '#ddd' },
+            warning: { bg: '#4a3a2e', border: '#8a6a3e', text: '#f0d080' },
+            error: { bg: '#4a2a2e', border: '#8a3a3e', text: '#ff9999' },
+          };
+          const c = colors[level] || colors.info;
+          noticeBar.style.background = c.bg;
+          noticeBar.style.borderBottomColor = c.border;
+          noticeBar.style.color = c.text;
+        } else {
+          noticeBar.style.display = 'none';
         }
       }
     }
@@ -2140,14 +2047,14 @@ async function syncFromApi() {
 }
 
 function pingSession() {
-  let sid = lsGet("srtc-session-id", null);
+  let sid = lsGet('srtc-session-id', null);
   if (!sid) {
     sid = crypto.randomUUID();
-    lsSet("srtc-session-id", sid);
+    lsSet('srtc-session-id', sid);
   }
-  fetch(API_BASE + "/api/session/ping", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  fetch(API_BASE + '/api/session/ping', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId: sid }),
   }).catch(() => {});
 }
@@ -2159,48 +2066,47 @@ setInterval(pingSession, 60000);
 // Webhooks per feedback type
 const FB_WEBHOOKS = {
   feedback:
-    "https://discord.com/api/webhooks/1498685411936178340/zvZ2bQGi3KXsbljh-SHZbZwiP8Xlm6wtHvFXmYQUrgFv2-FGtwWh_v6gpQRu022RT6c3",
+    'https://discord.com/api/webhooks/1498685411936178340/zvZ2bQGi3KXsbljh-SHZbZwiP8Xlm6wtHvFXmYQUrgFv2-FGtwWh_v6gpQRu022RT6c3',
   suggestion:
-    "https://discord.com/api/webhooks/1498685636780232839/Unhj-myxfubtYeT2u_vREIAbQI_2SpBeywcpPZz-id6d6u6KKeiJzLcb2WR510jucJnN",
-  bug: "https://discord.com/api/webhooks/1498685765171937290/hfq83Lh3NkJUkUiVf4mLKbJohmPscpfhkRCSkR3QAXLJZemajtbz4Hjn2LWhXiQbqbhW",
+    'https://discord.com/api/webhooks/1498685636780232839/Unhj-myxfubtYeT2u_vREIAbQI_2SpBeywcpPZz-id6d6u6KKeiJzLcb2WR510jucJnN',
+  bug: 'https://discord.com/api/webhooks/1498685765171937290/hfq83Lh3NkJUkUiVf4mLKbJohmPscpfhkRCSkR3QAXLJZemajtbz4Hjn2LWhXiQbqbhW',
 };
 const FB_META = {
   feedback: {
-    title: "💬 New Feedback",
+    title: '💬 New Feedback',
     color: 0xd4a843,
     placeholder: "Tell us what's on your mind…",
-    submit: "Send Feedback",
+    submit: 'Send Feedback',
   },
   suggestion: {
-    title: "✨ New Suggestion",
+    title: '✨ New Suggestion',
     color: 0x9aef9a,
-    placeholder: "What would you like to see added or improved?",
-    submit: "Send Suggestion",
+    placeholder: 'What would you like to see added or improved?',
+    submit: 'Send Suggestion',
   },
   bug: {
-    title: "🐞 New Bug Report",
+    title: '🐞 New Bug Report',
     color: 0xd96b5a,
-    placeholder:
-      "Describe the bug, what you expected, and how to reproduce it.",
-    submit: "Send Bug Report",
+    placeholder: 'Describe the bug, what you expected, and how to reproduce it.',
+    submit: 'Send Bug Report',
   },
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   initTableEvents();
-  const feedbackBtn = document.getElementById("feedbackBtn");
-  const modal = document.getElementById("feedbackModal");
-  const closeBtn = document.getElementById("closeBtn");
-  const form = document.getElementById("feedbackForm");
-  const statusEl = document.getElementById("status");
-  const messageEl = document.getElementById("message");
-  const submitBtn = document.getElementById("sendBtn");
-  const fbContainer = document.getElementById("feedbackContainer");
+  const feedbackBtn = document.getElementById('feedbackBtn');
+  const modal = document.getElementById('feedbackModal');
+  const closeBtn = document.getElementById('closeBtn');
+  const form = document.getElementById('feedbackForm');
+  const statusEl = document.getElementById('status');
+  const messageEl = document.getElementById('message');
+  const submitBtn = document.getElementById('sendBtn');
+  const fbContainer = document.getElementById('feedbackContainer');
   const typeRadios = form.querySelectorAll('input[name="fbType"]');
 
   function getType() {
     const r = form.querySelector('input[name="fbType"]:checked');
-    return r ? r.value : "feedback";
+    return r ? r.value : 'feedback';
   }
   function applyType() {
     const meta = FB_META[getType()];
@@ -2208,107 +2114,104 @@ document.addEventListener("DOMContentLoaded", () => {
     messageEl.placeholder = meta.placeholder;
     submitBtn.textContent = meta.submit;
   }
-  typeRadios.forEach((r) => r.addEventListener("change", applyType));
+  typeRadios.forEach((r) => r.addEventListener('change', applyType));
   applyType();
 
   function setStatus(text, kind) {
-    statusEl.textContent = text || "";
-    statusEl.classList.remove("ok", "err", "pending");
+    statusEl.textContent = text || '';
+    statusEl.classList.remove('ok', 'err', 'pending');
     if (kind) statusEl.classList.add(kind);
   }
 
   function openForm() {
-    modal.style.display = "flex";
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => modal.classList.add("is-visible")),
-    );
-    if (fbContainer) fbContainer.classList.add("is-open");
-    document.body.style.overflow = "hidden";
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add('is-visible')));
+    if (fbContainer) fbContainer.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
   }
   function closeForm() {
-    modal.classList.remove("is-visible");
+    modal.classList.remove('is-visible');
     setTimeout(() => {
-      modal.style.display = "none";
+      modal.style.display = 'none';
     }, 320);
-    if (fbContainer) fbContainer.classList.remove("is-open");
-    document.body.style.overflow = "";
+    if (fbContainer) fbContainer.classList.remove('is-open');
+    document.body.style.overflow = '';
   }
 
-  feedbackBtn.addEventListener("click", () => {
-    modal.classList.contains("is-visible") ? closeForm() : openForm();
+  feedbackBtn.addEventListener('click', () => {
+    modal.classList.contains('is-visible') ? closeForm() : openForm();
   });
 
-  closeBtn.addEventListener("click", closeForm);
+  closeBtn.addEventListener('click', closeForm);
 
   // Click the overlay backdrop (not the box) to close
-  modal.addEventListener("click", (e) => {
+  modal.addEventListener('click', (e) => {
     if (e.target === modal) closeForm();
   });
 
   // Escape to close
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modal.classList.contains("is-visible"))
-      closeForm();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-visible')) closeForm();
   });
 
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const type = getType();
     const meta = FB_META[type];
     const url = FB_WEBHOOKS[type];
     if (!url) {
-      setStatus("Unknown type.", "err");
+      setStatus('Unknown type.', 'err');
       return;
     }
 
-    const username = document.getElementById("username").value.trim();
+    const username = document.getElementById('username').value.trim();
     const message = messageEl.value.trim();
     if (!message) return;
 
-    setStatus("Sending…", "pending");
+    setStatus('Sending…', 'pending');
     submitBtn.disabled = true;
 
     const payload = {
       embeds: [
         {
-          title: meta.title + " — silkroadcalc.eu",
+          title: meta.title + ' — silkroadcalc.eu',
           color: meta.color,
           timestamp: new Date().toISOString(),
           fields: [
             {
-              name: "Type",
+              name: 'Type',
               value: type.charAt(0).toUpperCase() + type.slice(1),
               inline: true,
             },
-            { name: "Username", value: username || "Anonymous", inline: true },
-            { name: "Message", value: message },
+            { name: 'Username', value: username || 'Anonymous', inline: true },
+            { name: 'Message', value: message },
           ],
-          footer: { text: "silkroadcalc.eu" },
+          footer: { text: 'silkroadcalc.eu' },
         },
       ],
     };
 
     try {
       const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        setStatus("Thank you — sent!", "ok");
+        setStatus('Thank you — sent!', 'ok');
         form.reset();
         applyType(); // restore default placeholder/submit copy
         setTimeout(() => {
           closeForm();
-          setStatus("");
+          setStatus('');
           submitBtn.disabled = false;
         }, 1800);
       } else {
         throw new Error();
       }
     } catch (err) {
-      setStatus("Failed to send. Please try again.", "err");
+      setStatus('Failed to send. Please try again.', 'err');
       submitBtn.disabled = false;
     }
   });

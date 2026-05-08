@@ -1,9 +1,9 @@
-require("dotenv").config();
+require('dotenv').config();
 
 // Discord webhook delivery should not depend on the Node runtime providing global fetch.
 // Some deploy environments run older Node versions, so we fall back to node-fetch.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchImpl = global.fetch || require("node-fetch");
+const fetchImpl = global.fetch || require('node-fetch');
 
 async function postWebhook(webhookUrl, payload, label) {
   if (!webhookUrl) {
@@ -13,15 +13,15 @@ async function postWebhook(webhookUrl, payload, label) {
 
   try {
     const response = await fetchImpl(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
-    const text = await response.text().catch(() => "");
+    const text = await response.text().catch(() => '');
     if (!response.ok) {
       console.error(`[discord] ${label} failed:`, response.status, text);
-    } else if (process.env.DISCORD_WEBHOOK_DEBUG === "1") {
+    } else if (process.env.DISCORD_WEBHOOK_DEBUG === '1') {
       console.log(`[discord] ${label} ok:`, response.status, text);
     }
   } catch (err) {
@@ -31,21 +31,20 @@ async function postWebhook(webhookUrl, payload, label) {
 
 async function sendChangelogToDiscord(changelog) {
   const webhookUrl =
-    process.env.DISCORD_CHANGELOG_WEBHOOK_URL ||
-    process.env.DISCORD_CHANGELOG_WEBHOOK;
+    process.env.DISCORD_CHANGELOG_WEBHOOK_URL || process.env.DISCORD_CHANGELOG_WEBHOOK;
   const embed = {
-    title: `Silk Road Update: ${changelog.version || "New Update"}`,
+    title: `Silk Road Update: ${changelog.version || 'New Update'}`,
     color: 0x00ff88,
     timestamp: new Date().toISOString(),
     fields: [],
   };
 
   if (changelog.entries?.length > 0) {
-    embed.description = changelog.entries.map((e) => `- ${e}`).join("\n");
+    embed.description = changelog.entries.map((e) => `- ${e}`).join('\n');
   }
   if (changelog.thanks)
     embed.fields.push({
-      name: "Thanks",
+      name: 'Thanks',
       value: String(changelog.thanks),
       inline: true,
     });
@@ -53,10 +52,10 @@ async function sendChangelogToDiscord(changelog) {
   await postWebhook(
     webhookUrl,
     {
-      content: "<@&1498879548551467008>",
+      content: '<@&1498879548551467008>',
       embeds: [embed],
     },
-    "changelog",
+    'changelog'
   );
 }
 
@@ -65,27 +64,25 @@ async function sendPermissionRequestToDiscord({ username, role, note }) {
     process.env.DISCORD_OWNER_ALERT_WEBHOOK_URL ||
     process.env.DISCORD_PERMISSION_REQUEST_WEBHOOK_URL;
   const embed = {
-    title: "Admin Edit Permission Request",
+    title: 'Admin Edit Permission Request',
     color: 0xf0d080,
     timestamp: new Date().toISOString(),
     fields: [
-      { name: "User", value: username || "unknown", inline: true },
-      { name: "Role", value: role || "helper", inline: true },
-      { name: "Note", value: note || "No note provided", inline: false },
+      { name: 'User', value: username || 'unknown', inline: true },
+      { name: 'Role', value: role || 'helper', inline: true },
+      { name: 'Note', value: note || 'No note provided', inline: false },
     ],
   };
 
-  await postWebhook(
-    webhookUrl,
-    { embeds: [embed] },
-    "permission-request",
-  );
+  await postWebhook(webhookUrl, { embeds: [embed] }, 'permission-request');
 }
 
 async function sendMaintenanceToDiscord({ active, message }) {
   const webhookUrl = process.env.DISCORD_ANNOUNCEMENTS_WEBHOOK_URL;
   const embed = {
-    title: active ? "Silk Road Calculator is under Maintenance" : "Silk Road Calculator is back Online",
+    title: active
+      ? 'Silk Road Calculator is under Maintenance'
+      : 'Silk Road Calculator is back Online',
     color: active ? 0xff4444 : 0x00ff88,
     timestamp: new Date().toISOString(),
   };
@@ -94,10 +91,39 @@ async function sendMaintenanceToDiscord({ active, message }) {
   await postWebhook(
     webhookUrl,
     {
-      content: "<@&1498879548551467008>",
+      content: '<@&1498879548551467008>',
       embeds: [embed],
     },
-    "maintenance",
+    'maintenance'
+  );
+}
+
+async function sendNoticeToDiscord({ active, message, level }) {
+  const webhookUrl = process.env.DISCORD_ANNOUNCEMENTS_WEBHOOK_URL;
+  const colorMap = {
+    info: 0x4488ff,
+    warning: 0xf0d080,
+    error: 0xff4444,
+  };
+  const titleMap = {
+    info: '📢 Silk Road Notice',
+    warning: '⚠️ Silk Road Warning',
+    error: '🚨 Silk Road Alert',
+  };
+  const embed = {
+    title: titleMap[level] || titleMap.info,
+    color: colorMap[level] || colorMap.info,
+    timestamp: new Date().toISOString(),
+  };
+  if (message) embed.description = message;
+
+  await postWebhook(
+    webhookUrl,
+    {
+      content: active ? '<@&1498879548551467008>' : undefined,
+      embeds: [embed],
+    },
+    'notice'
   );
 }
 
@@ -105,4 +131,5 @@ module.exports = {
   sendChangelogToDiscord,
   sendMaintenanceToDiscord,
   sendPermissionRequestToDiscord,
+  sendNoticeToDiscord,
 };

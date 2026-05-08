@@ -1,19 +1,35 @@
 // Site + analytics feature area
 
 async function loadSite() {
-  const [mr, cr] = await Promise.all([api('/api/maintenance'), api('/api/changelogs')]);
+  const [mr, cr, nr] = await Promise.all([
+    api('/api/maintenance'),
+    api('/api/changelogs'),
+    api('/api/notices'),
+  ]);
   if (mr.ok) {
     const m = await mr.json();
     el('maint-active').checked = !!m.active;
     el('maint-msg').value = m.message || '';
   }
   if (cr.ok) renderChangelogs(await cr.json());
+  if (nr.ok) {
+    const notices = await nr.json();
+    if (notices.length) {
+      const notice = notices[0];
+      el('notice-msg').value = notice.message || '';
+      el('notice-level').value = notice.level || 'info';
+      el('clear-notice-btn').style.display = notice.active ? 'inline-block' : 'none';
+    }
+  }
 }
 
 async function saveMaintenance() {
   const active = el('maint-active').checked;
   const message = el('maint-msg').value.trim();
-  const res = await api('/api/admin/maintenance', { method: 'POST', body: JSON.stringify({ active, message }) });
+  const res = await api('/api/admin/maintenance', {
+    method: 'POST',
+    body: JSON.stringify({ active, message }),
+  });
   ss('maint-ss', res.ok, res.ok ? (active ? '⚠ Maintenance ON' : 'Maintenance off') : 'Error');
 }
 
@@ -29,7 +45,7 @@ function renderChangelogs(logs) {
     <div style="background:#13151e;border:1px solid #2a2d3a;border-radius:5px;padding:16px;margin-bottom:10px;max-width:660px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span class="hl" style="font-size:15px">${safeVersion}</span>
-        <span style="font-size:12px;color:#666">${l.date ? new Date(l.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : ''}</span>
+        <span style="font-size:12px;color:#666">${l.date ? new Date(l.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span>
         <button class="btn btn-del" style="margin-left:auto;padding:3px 10px" data-id="${id}" onclick="delChangelog(this)">Delete</button>
         <span class="ss" id="cl-save-${id}"></span>
       </div>
@@ -51,9 +67,15 @@ async function addChangelog() {
   const version = v('cl-ver'),
     thanks = v('cl-thanks');
   const date = v('cl-date') || new Date().toISOString().slice(0, 10);
-  const entries = el('cl-entries').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  const entries = el('cl-entries')
+    .value.split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (!version) return ss('cl-ss', false, 'Need version');
-  const res = await api('/api/admin/changelogs', { method: 'POST', body: JSON.stringify({ version, date, entries, thanks }) });
+  const res = await api('/api/admin/changelogs', {
+    method: 'POST',
+    body: JSON.stringify({ version, date, entries, thanks }),
+  });
   ss('cl-ss', res.ok);
   if (res.ok) {
     ['cl-ver', 'cl-date', 'cl-thanks'].forEach((i) => (el(i).value = ''));
@@ -66,8 +88,14 @@ async function saveChangelog(btn) {
   const id = btn.dataset.id;
   const version = el(`cl-ver-${id}`).value.trim();
   const thanks = el(`cl-thanks-${id}`).value.trim();
-  const entries = el(`cl-ent-${id}`).value.split('\n').map((s) => s.trim()).filter(Boolean);
-  const res = await api('/api/admin/changelogs/' + id, { method: 'PATCH', body: JSON.stringify({ version, thanks, entries }) });
+  const entries = el(`cl-ent-${id}`)
+    .value.split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const res = await api('/api/admin/changelogs/' + id, {
+    method: 'PATCH',
+    body: JSON.stringify({ version, thanks, entries }),
+  });
   ss(`cl-save-${id}`, res.ok);
 }
 
@@ -84,6 +112,33 @@ async function loadAnalytics() {
   el('stat-online').textContent = d.onlineNow;
   el('stat-today').textContent = d.todayVisits;
   el('week-body').innerHTML = d.last7Days
-    .map((r) => `<tr><td>${new Date(r.date).toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}</td><td>${r.visits}</td></tr>`)
+    .map(
+      (r) =>
+        `<tr><td>${new Date(r.date).toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}</td><td>${r.visits}</td></tr>`
+    )
     .join('');
+}
+
+async function saveNotice() {
+  const message = el('notice-msg').value.trim();
+  const level = el('notice-level').value;
+  if (!message) return ss('notice-ss', false, 'Need message');
+  const res = await api('/api/admin/notices', {
+    method: 'POST',
+    body: JSON.stringify({ active: true, message, level }),
+  });
+  ss('notice-ss', res.ok, res.ok ? '✓ Notice ON' : 'Error');
+  if (res.ok) {
+    el('clear-notice-btn').style.display = 'inline-block';
+    loadSite();
+  }
+}
+
+async function clearNotice() {
+  const res = await api('/api/admin/notices/disable', { method: 'POST' });
+  ss('notice-ss', res.ok, res.ok ? '✓ Notice OFF' : 'Error');
+  if (res.ok) {
+    el('clear-notice-btn').style.display = 'none';
+    loadSite();
+  }
 }

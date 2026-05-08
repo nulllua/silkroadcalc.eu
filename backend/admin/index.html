@@ -23,11 +23,7 @@
           onkeydown="if (event.key === 'Enter') doLogin();"
         />
         <div class="login-err" id="loginErr">Wrong password.</div>
-        <button
-          class="btn btn-save"
-          style="width: 100%; padding: 10px"
-          onclick="doLogin()"
-        >
+        <button class="btn btn-save" style="width: 100%; padding: 10px" onclick="doLogin()">
           Login
         </button>
       </div>
@@ -40,12 +36,8 @@
         <span id="lock-badge" class="tag"></span>
         <span id="global-status" class="ss"></span>
         <div id="owner-lock-controls" style="display: none; gap: 8px">
-          <button class="btn btn-save" onclick="setLocked(false)">
-            Unlock Panel
-          </button>
-          <button class="btn btn-del" onclick="setLocked(true)">
-            Lock Panel
-          </button>
+          <button class="btn btn-save" onclick="setLocked(false)">Unlock Panel</button>
+          <button class="btn btn-del" onclick="setLocked(true)">Lock Panel</button>
         </div>
         <button
           id="request-edit-btn"
@@ -107,14 +99,7 @@
             max-width: 540px;
           "
         >
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 14px;
-              margin-bottom: 14px;
-            "
-          >
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px">
             <label style="font-size: 13px; color: #ccc">
               <input
                 type="checkbox"
@@ -158,37 +143,90 @@
             Save Maintenance Settings
           </button>
           <div style="margin-top: 10px; font-size: 11px; color: #555">
-            When active, a full-screen overlay blocks the site for all visitors.
-            You can still access the admin panel.
+            When active, a full-screen overlay blocks the site for all visitors. You can still
+            access the admin panel.
+          </div>
+        </div>
+
+        <h2>Notices</h2>
+        <div
+          style="
+            background: #13151e;
+            border: 1px solid #2a2d3a;
+            border-radius: 5px;
+            padding: 18px;
+            max-width: 540px;
+          "
+        >
+          <div style="margin-bottom: 14px">
+            <label
+              style="
+                font-size: 11px;
+                color: #666;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Notice message</label
+            >
+            <textarea
+              id="notice-msg"
+              rows="2"
+              style="
+                width: 100%;
+                background: #0f1117;
+                border: 1px solid #2a2d3a;
+                color: #ccc;
+                padding: 8px;
+                border-radius: 3px;
+                font-size: 13px;
+                font-family: inherit;
+                resize: vertical;
+                margin-bottom: 10px;
+              "
+              placeholder="Tonight the website will be offline for updates..."
+            ></textarea>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px">
+            <label style="font-size: 12px; color: #ccc">
+              Level:
+              <select id="notice-level" class="ifield" style="margin-left: 8px; font-size: 12px">
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="error">Error</option>
+              </select>
+            </label>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button class="btn btn-save" onclick="saveNotice()">Save Notice</button>
+            <button
+              class="btn btn-del"
+              onclick="clearNotice()"
+              style="display: none"
+              id="clear-notice-btn"
+            >
+              Turn OFF
+            </button>
+            <span class="ss" id="notice-ss"></span>
+          </div>
+          <div style="margin-top: 12px; font-size: 11px; color: #555">
+            Active notice will appear at the top of the page and cannot be closed by users.
           </div>
         </div>
 
         <h2>Changelogs / What's New</h2>
-        <button
-          class="btn btn-add"
-          style="margin-bottom: 8px"
-          onclick="tog('add-cl-row')"
-        >
+        <button class="btn btn-add" style="margin-bottom: 8px" onclick="tog('add-cl-row')">
           + Add Changelog Entry
         </button>
         <div class="add-row" id="add-cl-row">
           <div class="field">
             <label>Version (e.g. v1.8)</label
-            ><input
-              id="cl-ver"
-              class="ifield"
-              type="text"
-              style="width: 100px"
-            />
+            ><input id="cl-ver" class="ifield" type="text" style="width: 100px" />
           </div>
           <div class="field">
             <label>Date</label
-            ><input
-              id="cl-date"
-              class="ifield"
-              type="date"
-              style="width: 140px"
-            />
+            ><input id="cl-date" class="ifield" type="date" style="width: 140px" />
           </div>
           <div class="field">
             <label>Thanks (optional)</label
@@ -220,8 +258,7 @@
             ></textarea>
           </div>
           <div class="field" style="justify-content: flex-end">
-            <button class="btn btn-save" onclick="addChangelog()">
-              Add Entry</button
+            <button class="btn btn-save" onclick="addChangelog()">Add Entry</button
             ><span class="ss" id="cl-ss"></span>
           </div>
         </div>
@@ -230,38 +267,18 @@
 
       <!-- GOODS -->
       <div class="panel" id="panel-goods">
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px">
           <h2 style="margin: 0">Goods</h2>
-          <button class="btn btn-add" onclick="tog('add-good-row')">
-            + Add Good
-          </button>
+          <button class="btn btn-add" onclick="tog('add-good-row')">+ Add Good</button>
         </div>
         <div class="add-row" id="add-good-row">
           <div class="field">
             <label>Name</label
-            ><input
-              id="ng-name"
-              class="ifield"
-              type="text"
-              style="width: 150px"
-            />
+            ><input id="ng-name" class="ifield" type="text" style="width: 150px" />
           </div>
           <div class="field">
             <label>Base Price</label
-            ><input
-              id="ng-price"
-              class="ifield"
-              type="number"
-              min="1"
-              style="width: 90px"
-            />
+            ><input id="ng-price" class="ifield" type="number" min="1" style="width: 90px" />
           </div>
           <div class="field">
             <label>Type</label>
@@ -315,37 +332,18 @@
 
       <!-- EVENTS -->
       <div class="panel" id="panel-events">
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px">
           <h2 style="margin: 0">Event Types</h2>
-          <button class="btn btn-add" onclick="tog('add-event-row')">
-            + Add Event Type
-          </button>
+          <button class="btn btn-add" onclick="tog('add-event-row')">+ Add Event Type</button>
         </div>
         <div class="add-row" id="add-event-row">
           <div class="field">
             <label>Name</label
-            ><input
-              id="ne-name"
-              class="ifield"
-              type="text"
-              style="width: 110px"
-            />
+            ><input id="ne-name" class="ifield" type="text" style="width: 110px" />
           </div>
           <div class="field">
             <label>Glyph</label
-            ><input
-              id="ne-glyph"
-              class="ifield"
-              type="text"
-              style="width: 45px"
-            />
+            ><input id="ne-glyph" class="ifield" type="text" style="width: 45px" />
           </div>
           <div class="field">
             <label>Direction</label>
@@ -376,12 +374,7 @@
           </div>
           <div class="field">
             <label>Description</label
-            ><input
-              id="ne-desc"
-              class="ifield"
-              type="text"
-              style="width: 200px"
-            />
+            ><input id="ne-desc" class="ifield" type="text" style="width: 200px" />
           </div>
           <div class="field" style="justify-content: flex-end">
             <button class="btn btn-save" onclick="addEventType()">Add</button
@@ -406,46 +399,22 @@
 
       <!-- CITIES -->
       <div class="panel" id="panel-cities">
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px">
           <h2 style="margin: 0">Cities</h2>
-          <button class="btn btn-add" onclick="tog('add-city-row')">
-            + Add City
-          </button>
+          <button class="btn btn-add" onclick="tog('add-city-row')">+ Add City</button>
         </div>
         <div class="add-row" id="add-city-row">
           <div class="field">
             <label>Name</label
-            ><input
-              id="nc-name"
-              class="ifield"
-              type="text"
-              style="width: 120px"
-            />
+            ><input id="nc-name" class="ifield" type="text" style="width: 120px" />
           </div>
           <div class="field">
             <label>Culture</label
-            ><input
-              id="nc-culture"
-              class="ifield"
-              type="text"
-              style="width: 100px"
-            />
+            ><input id="nc-culture" class="ifield" type="text" style="width: 100px" />
           </div>
           <div class="field">
             <label>Language</label
-            ><input
-              id="nc-lang"
-              class="ifield"
-              type="text"
-              style="width: 100px"
-            />
+            ><input id="nc-lang" class="ifield" type="text" style="width: 100px" />
           </div>
           <div class="field">
             <label>Fire Temple</label>
@@ -475,37 +444,18 @@
 
       <!-- TRAITS -->
       <div class="panel" id="panel-traits">
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px">
           <h2 style="margin: 0">City Traits</h2>
-          <button class="btn btn-add" onclick="tog('add-trait-row')">
-            + Add Trait
-          </button>
+          <button class="btn btn-add" onclick="tog('add-trait-row')">+ Add Trait</button>
         </div>
         <div class="add-row" id="add-trait-row">
           <div class="field">
             <label>Name</label
-            ><input
-              id="nt-name"
-              class="ifield"
-              type="text"
-              style="width: 150px"
-            />
+            ><input id="nt-name" class="ifield" type="text" style="width: 150px" />
           </div>
           <div class="field">
             <label>Description</label
-            ><input
-              id="nt-desc"
-              class="ifield"
-              type="text"
-              style="width: 300px"
-            />
+            ><input id="nt-desc" class="ifield" type="text" style="width: 300px" />
           </div>
           <div class="field" style="justify-content: flex-end">
             <button class="btn btn-save" onclick="addTrait()">Add</button
@@ -524,22 +474,13 @@
         </table>
 
         <h2>Trait Effects</h2>
-        <button
-          class="btn btn-add"
-          style="margin-bottom: 8px"
-          onclick="tog('add-effect-row')"
-        >
+        <button class="btn btn-add" style="margin-bottom: 8px" onclick="tog('add-effect-row')">
           + Add Effect
         </button>
         <div class="add-row" id="add-effect-row">
           <div class="field">
             <label>Trait Name</label
-            ><input
-              id="nfx-trait"
-              class="ifield"
-              type="text"
-              style="width: 130px"
-            />
+            ><input id="nfx-trait" class="ifield" type="text" style="width: 130px" />
           </div>
           <div class="field">
             <label>Kind</label>
@@ -551,13 +492,7 @@
           </div>
           <div class="field">
             <label>Bonus (e.g. 0.05)</label
-            ><input
-              id="nfx-bonus"
-              class="ifield"
-              type="number"
-              step="0.001"
-              style="width: 90px"
-            />
+            ><input id="nfx-bonus" class="ifield" type="number" step="0.001" style="width: 90px" />
           </div>
           <div class="field">
             <label>Cond Type</label>
@@ -572,12 +507,7 @@
           </div>
           <div class="field">
             <label>Cond Value</label
-            ><input
-              id="nfx-cval"
-              class="ifield"
-              type="text"
-              style="width: 120px"
-            />
+            ><input id="nfx-cval" class="ifield" type="text" style="width: 120px" />
           </div>
           <div class="field" style="justify-content: flex-end">
             <button class="btn btn-save" onclick="addEffect()">Add</button
@@ -601,28 +531,14 @@
 
       <!-- RELIGIONS -->
       <div class="panel" id="panel-religions">
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px">
           <h2 style="margin: 0">Religions</h2>
-          <button class="btn btn-add" onclick="tog('add-rel-row')">
-            + Add Religion
-          </button>
+          <button class="btn btn-add" onclick="tog('add-rel-row')">+ Add Religion</button>
         </div>
         <div class="add-row" id="add-rel-row">
           <div class="field">
             <label>Name</label
-            ><input
-              id="nr-name"
-              class="ifield"
-              type="text"
-              style="width: 160px"
-            />
+            ><input id="nr-name" class="ifield" type="text" style="width: 160px" />
           </div>
           <div class="field" style="justify-content: flex-end">
             <button class="btn btn-save" onclick="addReligion()">Add</button
@@ -640,33 +556,17 @@
         </table>
 
         <h2>Religion Perks</h2>
-        <button
-          class="btn btn-add"
-          style="margin-bottom: 8px"
-          onclick="tog('add-perk-row')"
-        >
+        <button class="btn btn-add" style="margin-bottom: 8px" onclick="tog('add-perk-row')">
           + Add Perk
         </button>
         <div class="add-row" id="add-perk-row">
           <div class="field">
             <label>Religion</label
-            ><input
-              id="np-rel"
-              class="ifield"
-              type="text"
-              style="width: 120px"
-            />
+            ><input id="np-rel" class="ifield" type="text" style="width: 120px" />
           </div>
           <div class="field">
             <label>Min Level</label
-            ><input
-              id="np-lvl"
-              class="ifield"
-              type="number"
-              min="1"
-              max="3"
-              style="width: 65px"
-            />
+            ><input id="np-lvl" class="ifield" type="number" min="1" max="3" style="width: 65px" />
           </div>
           <div class="field">
             <label>Perk Type</label>
@@ -679,22 +579,11 @@
           </div>
           <div class="field">
             <label>Multiplier</label
-            ><input
-              id="np-mult"
-              class="ifield"
-              type="number"
-              step="0.1"
-              style="width: 80px"
-            />
+            ><input id="np-mult" class="ifield" type="number" step="0.1" style="width: 80px" />
           </div>
           <div class="field">
             <label>Description</label
-            ><input
-              id="np-desc"
-              class="ifield"
-              type="text"
-              style="width: 240px"
-            />
+            ><input id="np-desc" class="ifield" type="text" style="width: 240px" />
           </div>
           <div class="field" style="justify-content: flex-end">
             <button class="btn btn-save" onclick="addPerk()">Add</button
@@ -719,14 +608,7 @@
       <!-- LANGUAGES -->
       <div class="panel" id="panel-languages">
         <h2>Languages</h2>
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px">
           <input
             id="nl-name"
             class="ifield"
@@ -752,12 +634,7 @@
         <h2>Activity (Last 24h)</h2>
         <div
           id="owner-user-tools"
-          style="
-            display: none;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-          "
+          style="display: none; align-items: center; gap: 8px; margin-bottom: 10px"
         >
           <input
             id="new-helper-user"
@@ -773,25 +650,12 @@
             placeholder="helper password"
             style="width: 180px"
           />
-          <button class="btn btn-save" onclick="createHelperUser()">
-            Create Helper
-          </button>
+          <button class="btn btn-save" onclick="createHelperUser()">Create Helper</button>
         </div>
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-          "
-        >
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px">
           <label
-            ><input
-              type="checkbox"
-              id="act-show-owner"
-              onchange="loadActivity()"
-            />
-            Show owner changes</label
+            ><input type="checkbox" id="act-show-owner" onchange="loadActivity()" /> Show owner
+            changes</label
           >
           <button class="btn btn-add" onclick="loadActivity()">Refresh</button>
         </div>
