@@ -503,7 +503,7 @@ function calculateBuyPrice(good, buyCity, ps) {
   const applyMod = (mod) => Math.floor(good.base * Math.abs(mod)) * (mod >= 0 ? -1 : 1);
   const distance = calculateDistanceValue(good, buyCity);
   let price =
-    good.base -
+    good.base +
     distance +
     applyMod(rawCityMod) +
     applyMod(langMod) +
