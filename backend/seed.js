@@ -370,28 +370,42 @@ const TRAVEL_TIMES_RAW = {
 
 const HISTORICAL_CHANGELOGS = [
   {
-    version: 'v1.7',
-    date: '2026-05-05',
+    version: 'v1.0',
+    date: '2026-04-28',
+    entries: ['Initial release with cities, goods and religion modifiers'],
+  },
+  {
+    version: 'v1.1',
+    date: '2026-04-29',
     entries: [
-      'Travel times have been remeasured in-game and recalibrated for route ranking accuracy',
-      'Prices tab rebuilt as a compact matrix grouped by type',
-      'Trip Planner replaced with Courier Route Planner',
-      'Events tab visual refresh with city cards and countdown',
-      "What's New window appears after updates",
-      'Routes table performance and search responsiveness improved',
-      'General UI decluttering',
-      'Display setting added to turn off walking animation',
+      'Tools tab with trip planner and optimal setup finder',
+      'Best round-trip card and price breakdown tooltips',
     ],
   },
   {
-    version: 'v1.6',
-    date: '2026-05-04',
+    version: 'v1.2',
+    date: '2026-04-30',
     entries: [
-      'Prices recalculated from scratch to match in-game values',
-      'Routes include all goods in all cities with import cost factored in',
-      'Fixed missing/incorrect city trait bonuses',
+      'Events tab introduced with city countdown timers',
+      'Price calculations now include event modifiers',
     ],
-    thanks: 'KuglerKnight',
+  },
+  {
+    version: 'v1.3',
+    date: '2026-05-01',
+    entries: [
+      'Inline return-leg route expansion',
+      'Named setup save slots',
+      'Custom event durations',
+    ],
+  },
+  {
+    version: 'v1.4',
+    date: '2026-05-02',
+    entries: [
+      'Mobile support improvements for calculator layout and onboarding',
+      'Routes shown as tappable cards on phones',
+    ],
   },
   {
     version: 'v1.5',
@@ -406,42 +420,28 @@ const HISTORICAL_CHANGELOGS = [
     thanks: 'MinisterOfYapping & Bird',
   },
   {
-    version: 'v1.4',
-    date: '2026-05-02',
+    version: 'v1.6',
+    date: '2026-05-04',
     entries: [
-      'Mobile support improvements for calculator layout and onboarding',
-      'Routes shown as tappable cards on phones',
+      'Prices recalculated from scratch to match in-game values',
+      'Routes include all goods in all cities with import cost factored in',
+      'Fixed missing/incorrect city trait bonuses',
     ],
+    thanks: 'KuglerKnight',
   },
   {
-    version: 'v1.3',
-    date: '2026-05-01',
+    version: 'v1.7',
+    date: '2026-05-05',
     entries: [
-      'Inline return-leg route expansion',
-      'Named setup save slots',
-      'Custom event durations',
+      'Travel times have been remeasured in-game and recalibrated for route ranking accuracy',
+      'Prices tab rebuilt as a compact matrix grouped by type',
+      'Trip Planner replaced with Courier Route Planner',
+      'Events tab visual refresh with city cards and countdown',
+      "What's New window appears after updates",
+      'Routes table performance and search responsiveness improved',
+      'General UI decluttering',
+      'Display setting added to turn off walking animation',
     ],
-  },
-  {
-    version: 'v1.2',
-    date: '2026-04-30',
-    entries: [
-      'Events tab introduced with city countdown timers',
-      'Price calculations now include event modifiers',
-    ],
-  },
-  {
-    version: 'v1.1',
-    date: '2026-04-29',
-    entries: [
-      'Tools tab with trip planner and optimal setup finder',
-      'Best round-trip card and price breakdown tooltips',
-    ],
-  },
-  {
-    version: 'v1.0',
-    date: '2026-04-28',
-    entries: ['Initial release with cities, goods and religion modifiers'],
   },
 ];
 
