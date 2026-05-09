@@ -42,16 +42,47 @@
     });
 
     var saveBtn = document.getElementById('webhookSave');
-    if (saveBtn) saveBtn.addEventListener('click', function () {
+    if (saveBtn) saveBtn.addEventListener('click', async function () {
       var v = (document.getElementById('webhookUrl')?.value || '').trim();
-      localStorage.setItem(KEYS.webhook, v);
-      fetch('/api/user/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: v }),
-      }).catch(function () {});
-      saveBtn.textContent = 'Saved';
-      setTimeout(function () { saveBtn.textContent = 'Save'; }, 1500);
+      if (!v) {
+        localStorage.removeItem(KEYS.webhook);
+        fetch('/api/user/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: '' }) }).catch(function () {});
+        saveBtn.textContent = 'Cleared';
+        setTimeout(function () { saveBtn.textContent = 'Save'; }, 1500);
+        return;
+      }
+      if (!v.startsWith('https://discord.com/api/webhooks/')) {
+        saveBtn.textContent = 'Invalid URL';
+        setTimeout(function () { saveBtn.textContent = 'Save'; }, 2000);
+        return;
+      }
+      saveBtn.textContent = 'Testing...';
+      saveBtn.disabled = true;
+      try {
+        var res = await fetch(v, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            embeds: [{
+              title: 'SilkRoadCalc Webhook Connected',
+              description: 'You will receive update announcements and maintenance notices here.',
+              color: 0xe7c885,
+              timestamp: new Date().toISOString(),
+            }],
+          }),
+        });
+        if (res.ok || res.status === 204) {
+          localStorage.setItem(KEYS.webhook, v);
+          fetch('/api/user/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }) }).catch(function () {});
+          saveBtn.textContent = 'Saved';
+        } else {
+          saveBtn.textContent = 'Invalid webhook';
+        }
+      } catch (_) {
+        saveBtn.textContent = 'Failed';
+      }
+      saveBtn.disabled = false;
+      setTimeout(function () { saveBtn.textContent = 'Save'; }, 2000);
     });
   }
 

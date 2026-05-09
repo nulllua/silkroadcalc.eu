@@ -238,21 +238,6 @@
     if (btn.dataset.pg) { state.page = +btn.dataset.pg; loadPosts(); }
   });
 
-  /* ── maintenance / notice ─────────────────────────────────────────────── */
-  async function checkMaintenance() {
-    try {
-      var res  = await fetch('/api/status');
-      if (!res.ok) return;
-      var data = await res.json();
-      if (data.maintenance) {
-        var ov = document.getElementById('maintenanceOverlay');
-        var msg = document.getElementById('maintenanceMsg');
-        if (msg && data.message) msg.textContent = data.message;
-        if (ov) ov.style.display = 'flex';
-      }
-    } catch (_) {}
-  }
-
   /* ── sort ─────────────────────────────────────────────────────────────── */
   document.querySelectorAll('.fsort').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -270,6 +255,5 @@
     loadPosts();
     loadCounts();
     loadChangelog();
-    checkMaintenance();
   });
 })();
