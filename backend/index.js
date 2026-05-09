@@ -214,6 +214,14 @@ function isAdmin(userId) {
   return ids.includes(String(userId));
 }
 
+function displayName(userId, fallback) {
+  for (const part of (process.env.DISPLAY_NAMES || '').split(',')) {
+    const [id, name] = part.split(':');
+    if (id && name && id.trim() === String(userId)) return name.trim();
+  }
+  return fallback;
+}
+
 function requireUserAuth(req, res, next) {
   const token = parseCookies(req).auth_token;
   if (!token) return res.status(401).json({ error: 'Login required' });
@@ -593,11 +601,13 @@ app.get('/api/forum/posts', async (req, res) => {
   const sort  = req.query.sort;
   const offset = (page - 1) * limit;
 
+  let uidFilter = null;
   if (['feedback','bugs'].includes(cat)) {
     const token = parseCookies(req).auth_token;
     let uid = null;
     try { uid = jwt.verify(token, process.env.JWT_SECRET)?.id; } catch {}
-    if (!isAdmin(uid)) return res.status(403).json({ error: 'Admin only' });
+    if (!uid) return res.status(403).json({ error: 'Login required' });
+    if (!isAdmin(uid)) uidFilter = String(uid);
   }
 
   const orderBy = sort === 'hot' ? 'upvotes - downvotes DESC, created_at DESC'
@@ -605,13 +615,16 @@ app.get('/api/forum/posts', async (req, res) => {
                 : 'created_at DESC';
 
   try {
+    const whereExtra = uidFilter ? ' AND author_id=$4' : '';
+    const params     = uidFilter ? [cat, limit, offset, uidFilter] : [cat, limit, offset];
     const [postsRes, countRes] = await Promise.all([
       pool.query(
         `SELECT id, category, title, author_id, author_name, created_at, upvotes, downvotes, reply_count
-         FROM forum_posts WHERE category=$1 ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
-        [cat, limit, offset]
+         FROM forum_posts WHERE category=$1${whereExtra} ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
+        params
       ),
-      pool.query('SELECT COUNT(*) FROM forum_posts WHERE category=$1', [cat]),
+      pool.query(`SELECT COUNT(*) FROM forum_posts WHERE category=$1${whereExtra}`,
+        uidFilter ? [cat, uidFilter] : [cat]),
     ]);
     res.json({ posts: postsRes.rows, total: parseInt(countRes.rows[0].count) });
   } catch (e) { err(res, e); }
@@ -630,7 +643,9 @@ app.get('/api/forum/posts/:id', async (req, res) => {
       const token = parseCookies(req).auth_token;
       let uid = null;
       try { uid = jwt.verify(token, process.env.JWT_SECRET)?.id; } catch {}
-      if (!isAdmin(uid)) return res.status(403).json({ error: 'Admin only' });
+      if (!uid) return res.status(403).json({ error: 'Login required' });
+      if (!isAdmin(uid) && String(uid) !== String(post.author_id))
+        return res.status(403).json({ error: 'Forbidden' });
     }
     res.json(post);
   } catch (e) { err(res, e); }
@@ -654,7 +669,7 @@ app.post('/api/forum/posts/:id/comments', requireUserAuth, async (req, res) => {
   try {
     await pool.query(
       'INSERT INTO forum_comments (post_id, author_id, author_name, body) VALUES ($1,$2,$3,$4)',
-      [postId, req.discordUser.id, req.discordUser.username, body]
+      [postId, req.discordUser.id, displayName(req.discordUser.id, req.discordUser.username), body]
     );
     await pool.query('UPDATE forum_posts SET reply_count = reply_count + 1 WHERE id=$1', [postId]);
     res.json({ ok: true });
@@ -695,7 +710,7 @@ app.post('/api/forum/posts', requireUserAuth, async (req, res) => {
     const { rows } = await pool.query(
       `INSERT INTO forum_posts (category, title, body, author_id, author_name)
        VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-      [category, title, body, req.discordUser.id, req.discordUser.username]
+      [category, title, body, req.discordUser.id, displayName(req.discordUser.id, req.discordUser.username)]
     );
     res.json({ ok: true, id: rows[0].id });
   } catch (e) { err(res, e); }

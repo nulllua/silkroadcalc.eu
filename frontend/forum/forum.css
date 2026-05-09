@@ -442,7 +442,7 @@
 }
 
 /* ─── POST DETAIL PANEL ──────────────────────────────────────────────────── */
-.pdp-content-wrap { max-width: 900px; }
+.pdp-content-wrap { max-width: 900px; margin: 0 auto; }
 
 .pdp-comments-disabled {
   padding: 22px 16px;

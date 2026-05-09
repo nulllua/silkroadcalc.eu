@@ -58,9 +58,9 @@
   }
 
   function applyUserUI() {
-    var isAdmin = state.user && state.user.isAdmin;
+    var loggedIn = !!state.user;
     document.querySelectorAll('.fcat[data-cat="feedback"], .fcat[data-cat="bugs"]').forEach(function (el) {
-      el.style.display = isAdmin ? '' : 'none';
+      el.style.display = loggedIn ? '' : 'none';
     });
   }
 
