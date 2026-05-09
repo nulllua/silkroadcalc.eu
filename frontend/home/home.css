@@ -403,6 +403,85 @@
   padding: 8px 0;
 }
 
+/* ─── DISCORD TRUST ──────────────────────────────────────────────────────── */
+.dtrust-card {
+  display: flex;
+  gap: 24px;
+  padding: 28px 32px;
+  align-items: flex-start;
+}
+.dtrust-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(88,101,242,0.12);
+  border: 1px solid rgba(88,101,242,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7289da;
+  margin-top: 3px;
+}
+.dtrust-body { flex: 1; min-width: 0; }
+.dtrust-title {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.dtrust-text {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+.dtrust-data {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(231,200,133,0.1);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
+}
+.dtrust-data-title {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 10px;
+}
+.dtrust-items { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.dtrust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.dtrust-item svg { color: var(--green); flex-shrink: 0; }
+.dtrust-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  border-top: 1px solid rgba(231,200,133,0.08);
+  padding-top: 12px;
+}
+.dtrust-note code {
+  font-family: monospace;
+  background: rgba(231,200,133,0.08);
+  border: 1px solid rgba(231,200,133,0.15);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 10px;
+  color: var(--gold-dim);
+}
+@media (max-width: 540px) {
+  .dtrust-card { flex-direction: column; gap: 16px; padding: 20px; }
+}
+
 /* ─── DISCORD CTA ─────────────────────────────────────────────────────────── */
 .discord-cta-section { padding: 40px 0 72px; }
 .discord-cta-card {
