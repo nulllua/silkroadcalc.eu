@@ -48,12 +48,13 @@
   /* ── Maintenance check ────────────────────────────────────────────────── */
   async function checkMaintenance() {
     try {
-      var res  = await fetch(API + '/api/status');
+      var res  = await fetch(API + '/api/maintenance');
+      if (!res.ok) return;
       var data = await res.json();
-      if (data.maintenance) {
+      if (data.active) {
         var overlay = document.getElementById('maintenanceOverlay');
         var msg     = document.getElementById('maintenanceMsg');
-        if (overlay) overlay.classList.add('active');
+        if (overlay) overlay.style.cssText = 'display:flex!important';
         if (msg && data.message) msg.textContent = data.message;
       }
     } catch (_) { /* non-critical */ }
