@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  var API = 'https://admin.silkroadcalc.eu';
   var PAGE_SIZE = 15;
   var state = { cat: 'general', page: 1, total: 0, sort: 'new' };
 
@@ -38,7 +39,7 @@
     pagEl.innerHTML = '';
 
     try {
-      var res  = await fetch('/api/forum/posts?category=' + state.cat + '&page=' + state.page + '&limit=' + PAGE_SIZE + '&sort=' + state.sort);
+      var res  = await fetch(API + '/api/forum/posts?category=' + state.cat + '&page=' + state.page + '&limit=' + PAGE_SIZE + '&sort=' + state.sort);
       if (!res.ok) throw new Error(res.status);
       var data = await res.json();
       state.total = data.total || 0;
@@ -106,7 +107,7 @@
   /* ── category counts ──────────────────────────────────────────────────── */
   async function loadCounts() {
     try {
-      var res  = await fetch('/api/forum/counts');
+      var res  = await fetch(API + '/api/forum/counts');
       if (!res.ok) return;
       var data = await res.json();
       ['general','feedback','bugs'].forEach(function (k) {
@@ -121,7 +122,7 @@
     var el = document.getElementById('forumChangelog');
     if (!el) return;
     try {
-      var res  = await fetch('/api/changelog');
+      var res  = await fetch(API + '/api/changelog');
       if (!res.ok) return;
       var data = await res.json();
       var entries = (data.entries || data).slice(0, 4);
@@ -144,7 +145,7 @@
   async function openModal() {
     modal.hidden = false;
     try {
-      var res  = await fetch('/api/auth/me');
+      var res  = await fetch(API + '/api/auth/me', { credentials: 'include' });
       var data = res.ok ? await res.json() : {};
       if (data.username) {
         loginGate.style.display = 'none';
@@ -178,8 +179,9 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Posting…';
     try {
-      var res = await fetch('/api/forum/posts', {
+      var res = await fetch(API + '/api/forum/posts', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: cat, title: title, body: body }),
       });
@@ -203,8 +205,9 @@
     var id   = btn.dataset.id;
     var dir  = btn.dataset.vote;
     try {
-      await fetch('/api/forum/posts/' + id + '/vote', {
+      await fetch(API + '/api/forum/posts/' + id + '/vote', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction: dir }),
       });

@@ -74,13 +74,13 @@
     ].filter(Boolean);
     if (!btns.length) return;
     try {
-      var res  = await fetch('/api/auth/me');
+      var res  = await fetch('https://admin.silkroadcalc.eu/api/auth/me', { credentials: 'include' });
       if (!res.ok) return;
       var data = await res.json();
       if (!data.username) return;
       var name = data.username.length > 16 ? data.username.slice(0, 15) + '…' : data.username;
       btns.forEach(function (btn) {
-        btn.href = '/api/auth/logout';
+        btn.href = 'https://admin.silkroadcalc.eu/api/auth/logout';
         var lbl = btn.querySelector('.nav-auth-label');
         if (lbl) lbl.textContent = name;
       });

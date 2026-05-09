@@ -1,9 +1,11 @@
 (function () {
   'use strict';
 
+  var API = 'https://admin.silkroadcalc.eu';
+
   async function checkMaintenance() {
     try {
-      var res  = await fetch('/api/status');
+      var res  = await fetch(API + '/api/status');
       if (!res.ok) return;
       var data = await res.json();
       if (data.maintenance) {
@@ -17,7 +19,7 @@
 
   async function loadNotice() {
     try {
-      var res  = await fetch('/api/notice');
+      var res  = await fetch(API + '/api/notice');
       if (!res.ok) return;
       var data = await res.json();
       if (!data.text) return;

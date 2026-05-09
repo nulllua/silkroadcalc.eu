@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const { pool, initSchema } = require('./db');
+const fetchImpl = globalThis.fetch || require('node-fetch');
 const {
   sendChangelogToDiscord,
   sendMaintenanceToDiscord,
@@ -24,6 +25,7 @@ app.use(
       'http://localhost:5500',
       'http://localhost:3000',
     ],
+    credentials: true,
   })
 );
 app.use(express.json());

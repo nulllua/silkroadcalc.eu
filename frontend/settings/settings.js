@@ -19,7 +19,7 @@
     var wu = document.getElementById('webhookUrl');
     if (!wu) return;
     wu.value = localStorage.getItem(KEYS.webhook) || '';
-    fetch('/api/user/webhook').then(function (r) {
+    fetch('https://admin.silkroadcalc.eu/api/user/webhook', { credentials: 'include' }).then(function (r) {
       if (!r.ok) return;
       return r.json();
     }).then(function (d) {
@@ -46,7 +46,7 @@
       var v = (document.getElementById('webhookUrl')?.value || '').trim();
       if (!v) {
         localStorage.removeItem(KEYS.webhook);
-        fetch('/api/user/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: '' }) }).catch(function () {});
+        fetch('https://admin.silkroadcalc.eu/api/user/webhook', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: '' }) }).catch(function () {});
         saveBtn.textContent = 'Cleared';
         setTimeout(function () { saveBtn.textContent = 'Save'; }, 1500);
         return;
@@ -73,7 +73,7 @@
         });
         if (res.ok || res.status === 204) {
           localStorage.setItem(KEYS.webhook, v);
-          fetch('/api/user/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }) }).catch(function () {});
+          fetch('https://admin.silkroadcalc.eu/api/user/webhook', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }) }).catch(function () {});
           saveBtn.textContent = 'Saved';
         } else {
           saveBtn.textContent = 'Invalid webhook';
@@ -90,7 +90,7 @@
     var status = document.getElementById('accountStatus');
     if (!status) return;
     try {
-      var res  = await fetch('/api/auth/me');
+      var res  = await fetch('https://admin.silkroadcalc.eu/api/auth/me', { credentials: 'include' });
       if (!res.ok) return;
       var data = await res.json();
       if (data.username) {
@@ -98,7 +98,7 @@
           '<span class="sas-text" style="color:var(--gold)">Logged in as <b>' +
           data.username.replace(/</g,'&lt;') + '</b></span>';
         var loginBtn = document.querySelector('.saccount-login');
-        if (loginBtn) { loginBtn.textContent = 'Log out'; loginBtn.href = '/api/auth/logout'; }
+        if (loginBtn) { loginBtn.textContent = 'Log out'; loginBtn.href = 'https://admin.silkroadcalc.eu/api/auth/logout'; }
       }
     } catch (_) {}
   }

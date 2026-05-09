@@ -1,12 +1,13 @@
 (function () {
   'use strict';
+  var API = 'https://admin.silkroadcalc.eu';
 
   /* ── Changelog ────────────────────────────────────────────────────────── */
   async function loadChangelog() {
     var el = document.getElementById('homeChangelog');
     if (!el) return;
     try {
-      var res  = await fetch('/api/changelog');
+      var res  = await fetch(API + '/api/changelog');
       var data = await res.json();
       renderChangelog(el, Array.isArray(data) ? data : data.entries || []);
     } catch (_) {
@@ -47,7 +48,7 @@
   /* ── Maintenance check ────────────────────────────────────────────────── */
   async function checkMaintenance() {
     try {
-      var res  = await fetch('/api/status');
+      var res  = await fetch(API + '/api/status');
       var data = await res.json();
       if (data.maintenance) {
         var overlay = document.getElementById('maintenanceOverlay');
@@ -61,7 +62,7 @@
   /* ── Notice bar ───────────────────────────────────────────────────────── */
   async function loadNotice() {
     try {
-      var res  = await fetch('/api/notice');
+      var res  = await fetch(API + '/api/notice');
       var data = await res.json();
       if (data.text) {
         var bar  = document.getElementById('noticeBar');
@@ -80,7 +81,7 @@
     var el = document.getElementById('statRouteCount');
     if (!el) return;
     try {
-      var res  = await fetch('/api/routes/count');
+      var res  = await fetch(API + '/api/routes/count');
       var data = await res.json();
       if (data.count) el.textContent = data.count + '+';
     } catch (_) { el.textContent = '100+'; }
