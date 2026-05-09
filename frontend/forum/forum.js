@@ -11,6 +11,15 @@
     bugs:     { title: 'Bug Reports',             desc: 'Report issues or unexpected behaviour.' },
   };
 
+  var PINNED_POST = {
+    id: 'pinned',
+    title: 'Forum Rules & Guidelines',
+    author_name: 'SilkRoadCalc',
+    created_at: '2025-01-01T00:00:00Z',
+    body: 'Welcome to the SilkRoadCalc community forum.\n\nWHAT THIS FORUM IS FOR\n\nGeneral Discussion: Routes, trading strategies, game tips, and anything related to Silk Road Trading Simulator.\nFeedback & Suggestions: Ideas for new features, improvements to the calculator, or changes to the website.\nBug Reports: Issues, broken features, or unexpected behavior. Include steps to reproduce.\n\nRULES\n\n1. Be respectful. No harassment or hostility toward other users.\n2. Post in the correct category. Off-topic posts may be removed.\n3. Search before posting to avoid duplicate threads.\n4. For bug reports: describe the steps to reproduce the issue, what you expected, and what actually happened.\n5. No spam, self-promotion, or unrelated content.\n6. Keep posts in English so the whole community can participate.\n\nFor real-time discussion and direct access to the team, join the Discord server linked in the sidebar.',
+    upvotes: 0, downvotes: 0, reply_count: 0, pinned: true,
+  };
+
   /* ── helpers ─────────────────────────────────────────────────────────── */
   function relTime(iso) {
     var d = new Date(iso), now = Date.now(), diff = (now - d) / 1000;
@@ -77,9 +86,21 @@
     }
   }
 
+  function renderPinnedRow() {
+    return '<div class="fpost fpost-pinned fpost-clickable" data-id="pinned">' +
+      avatar('SilkRoadCalc', 36) +
+      '<div class="fpost-body">' +
+        '<div class="fpost-title"><span class="fpost-pin-badge">PINNED</span>' + esc('Forum Rules & Guidelines') + '</div>' +
+        '<div class="fpost-meta"><span class="fpost-author">SilkRoadCalc</span><span class="fpost-sep">·</span><span class="fpost-time">Always here</span></div>' +
+      '</div>' +
+      '<div class="fpost-stats"></div>' +
+    '</div>';
+  }
+
   function renderPosts(posts, container) {
-    if (!posts.length) { container.innerHTML = '<div class="fposts-empty">No posts yet. Be the first to post!</div>'; return; }
-    container.innerHTML = posts.map(function (p) {
+    var pinned = state.cat === 'general' ? renderPinnedRow() : '';
+    if (!posts.length) { container.innerHTML = pinned + '<div class="fposts-empty">No posts yet. Be the first to post!</div>'; return; }
+    container.innerHTML = pinned + posts.map(function (p) {
       var score  = (p.upvotes || 0) - (p.downvotes || 0);
       var author = p.author_name || 'Anonymous';
       return '<div class="fpost fpost-clickable" data-id="' + esc(p.id) + '">' +
@@ -118,10 +139,20 @@
   function showPostList() {
     document.getElementById('forumPostList').hidden = false;
     document.getElementById('postDetailPanel').hidden = true;
+    document.querySelector('.forum-layout').classList.remove('pdp-open');
   }
 
   async function showPost(id) {
+    if (id === 'pinned') {
+      document.getElementById('forumPostList').hidden = true;
+      document.querySelector('.forum-layout').classList.add('pdp-open');
+      var panel = document.getElementById('postDetailPanel');
+      panel.hidden = false;
+      renderPostDetail(panel, PINNED_POST, []);
+      return;
+    }
     document.getElementById('forumPostList').hidden = true;
+    document.querySelector('.forum-layout').classList.add('pdp-open');
     var panel = document.getElementById('postDetailPanel');
     panel.hidden = false;
     panel.innerHTML = '<div class="fposts-loading">Loading…</div>';
@@ -141,9 +172,10 @@
   }
 
   function renderPostDetail(panel, post, comments) {
-    var author   = post.author_name || 'Anonymous';
-    var canDel   = state.user && (String(state.user.id) === String(post.author_id) || state.user.isAdmin);
+    var author   = post.author_name || 'SilkRoadCalc';
+    var canDel   = !post.pinned && state.user && (String(state.user.id) === String(post.author_id) || state.user.isAdmin);
     panel.innerHTML =
+      '<div class="pdp-content-wrap">' +
       '<div class="pdp-back-row">' +
         '<button class="btn btn-ghost pdp-back" id="pdpBack">← Back</button>' +
         (canDel ? '<button class="btn pdp-del-btn" id="pdpDeletePost">Delete Post</button>' : '') +
@@ -158,9 +190,13 @@
         '<div class="pdp-body">' + esc(post.body).replace(/\n/g,'<br>') + '</div>' +
       '</div>' +
       '<div class="pdp-comments-section">' +
-        '<div class="pdp-comments-title">Comments (<span id="pdpCommentCount">' + comments.length + '</span>)</div>' +
-        '<div id="pdpCommentsList">' + renderComments(comments, post.id) + '</div>' +
-        renderCommentForm(post.id) +
+        (post.pinned
+          ? '<div class="pdp-comments-disabled">Comments are disabled for this post.</div>'
+          : '<div class="pdp-comments-title">Comments (<span id="pdpCommentCount">' + comments.length + '</span>)</div>' +
+            '<div id="pdpCommentsList">' + renderComments(comments) + '</div>' +
+            renderCommentForm(post.id)
+        ) +
+      '</div>' +
       '</div>';
 
     document.getElementById('pdpBack').addEventListener('click', function () { showPostList(); loadPosts(); });
