@@ -412,6 +412,171 @@
   margin-top: 18px;
 }
 
+/* ─── POST DETAIL PANEL ──────────────────────────────────────────────────── */
+.pdp-back-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pdp-back {
+  background: none;
+  border: 1px solid rgba(231,200,133,0.15);
+  color: var(--text-dim);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  padding: 5px 11px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+.pdp-back:hover { border-color: var(--gold-dark); color: var(--gold); }
+
+.pdp-del-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid rgba(223,79,79,0.25);
+  color: var(--red);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  padding: 5px 11px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.pdp-del-btn:hover { border-color: var(--red); background: rgba(223,79,79,0.08); }
+
+.pdp-post {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(231,200,133,0.1);
+  border-radius: var(--r-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.pdp-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pdp-author-info { display: flex; flex-direction: column; gap: 2px; }
+.pdp-author-name { font-size: 12px; font-weight: 600; color: var(--gold-dim); }
+.pdp-author-time { font-size: 11px; color: var(--text-muted); }
+
+.pdp-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.pdp-body {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pdp-comments-section { margin-top: 8px; }
+
+.pdp-comments-title {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(231,200,133,0.08);
+}
+
+.pdp-no-comments {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(0,0,0,0.1);
+  border: 1px solid rgba(231,200,133,0.07);
+  border-radius: var(--r-sm);
+}
+
+.pdp-comment {
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.12);
+  border: 1px solid rgba(231,200,133,0.07);
+  border-radius: var(--r-sm);
+  margin-bottom: 4px;
+}
+
+.pdp-comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pdp-comment-author { font-size: 11px; font-weight: 600; color: var(--gold-dim); }
+.pdp-comment-time { font-size: 11px; color: var(--text-muted); }
+.pdp-comment-del {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: color var(--t-fast);
+}
+.pdp-comment-del:hover { color: var(--red); }
+
+.pdp-comment-body {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pdp-comment-form { margin-top: 12px; }
+.pdp-comment-form textarea {
+  width: 100%;
+  background: var(--bg-inset);
+  color: var(--text);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  resize: vertical;
+  min-height: 72px;
+  box-sizing: border-box;
+  transition: border-color var(--t-fast);
+}
+.pdp-comment-form textarea:focus {
+  outline: none;
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 2px rgba(231,200,133,0.1);
+}
+.pdp-comment-form > .btn {
+  display: block;
+  margin-top: 8px;
+  margin-left: auto;
+}
+.pdp-comment-login {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 10px 0;
+}
+.pdp-comment-login a { color: var(--gold-dim); }
+
 /* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
 @media (max-width: 1080px) {
   .forum-layout { grid-template-columns: 180px 1fr; }

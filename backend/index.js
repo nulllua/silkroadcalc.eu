@@ -209,6 +209,11 @@ function parseCookies(req) {
   return out;
 }
 
+function isAdmin(userId) {
+  const ids = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  return ids.includes(String(userId));
+}
+
 function requireUserAuth(req, res, next) {
   const token = parseCookies(req).auth_token;
   if (!token) return res.status(401).json({ error: 'Login required' });
@@ -528,7 +533,7 @@ app.get('/api/auth/me', (req, res) => {
   if (!token) return res.json({});
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ id: payload.id, username: payload.username });
+    res.json({ id: payload.id, username: payload.username, isAdmin: isAdmin(payload.id) });
   } catch {
     res.json({});
   }
@@ -588,6 +593,13 @@ app.get('/api/forum/posts', async (req, res) => {
   const sort  = req.query.sort;
   const offset = (page - 1) * limit;
 
+  if (['feedback','bugs'].includes(cat)) {
+    const token = parseCookies(req).auth_token;
+    let uid = null;
+    try { uid = jwt.verify(token, process.env.JWT_SECRET)?.id; } catch {}
+    if (!isAdmin(uid)) return res.status(403).json({ error: 'Admin only' });
+  }
+
   const orderBy = sort === 'hot' ? 'upvotes - downvotes DESC, created_at DESC'
                 : sort === 'top' ? 'upvotes DESC, created_at DESC'
                 : 'created_at DESC';
@@ -595,13 +607,82 @@ app.get('/api/forum/posts', async (req, res) => {
   try {
     const [postsRes, countRes] = await Promise.all([
       pool.query(
-        `SELECT id, category, title, author_name, created_at, upvotes, downvotes, reply_count
+        `SELECT id, category, title, author_id, author_name, created_at, upvotes, downvotes, reply_count
          FROM forum_posts WHERE category=$1 ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
         [cat, limit, offset]
       ),
       pool.query('SELECT COUNT(*) FROM forum_posts WHERE category=$1', [cat]),
     ]);
     res.json({ posts: postsRes.rows, total: parseInt(countRes.rows[0].count) });
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/forum/posts/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, category, title, body, author_id, author_name, created_at, upvotes, downvotes, reply_count FROM forum_posts WHERE id=$1',
+      [id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    const post = rows[0];
+    if (['feedback','bugs'].includes(post.category)) {
+      const token = parseCookies(req).auth_token;
+      let uid = null;
+      try { uid = jwt.verify(token, process.env.JWT_SECRET)?.id; } catch {}
+      if (!isAdmin(uid)) return res.status(403).json({ error: 'Admin only' });
+    }
+    res.json(post);
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/forum/posts/:id/comments', async (req, res) => {
+  const postId = parseInt(req.params.id);
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, author_id, author_name, body, created_at FROM forum_comments WHERE post_id=$1 ORDER BY created_at ASC',
+      [postId]
+    );
+    res.json(rows);
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/forum/posts/:id/comments', requireUserAuth, async (req, res) => {
+  const postId = parseInt(req.params.id);
+  const body   = String(req.body.body || '').trim().slice(0, 2000);
+  if (!body) return res.status(400).json({ error: 'Empty comment' });
+  try {
+    await pool.query(
+      'INSERT INTO forum_comments (post_id, author_id, author_name, body) VALUES ($1,$2,$3,$4)',
+      [postId, req.discordUser.id, req.discordUser.username, body]
+    );
+    await pool.query('UPDATE forum_posts SET reply_count = reply_count + 1 WHERE id=$1', [postId]);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/forum/posts/:id', requireUserAuth, async (req, res) => {
+  const postId = parseInt(req.params.id);
+  try {
+    const { rows } = await pool.query('SELECT author_id FROM forum_posts WHERE id=$1', [postId]);
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    if (String(rows[0].author_id) !== String(req.discordUser.id) && !isAdmin(req.discordUser.id))
+      return res.status(403).json({ error: 'Forbidden' });
+    await pool.query('DELETE FROM forum_posts WHERE id=$1', [postId]);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/forum/comments/:id', requireUserAuth, async (req, res) => {
+  const commentId = parseInt(req.params.id);
+  try {
+    const { rows } = await pool.query('SELECT author_id, post_id FROM forum_comments WHERE id=$1', [commentId]);
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    if (String(rows[0].author_id) !== String(req.discordUser.id) && !isAdmin(req.discordUser.id))
+      return res.status(403).json({ error: 'Forbidden' });
+    await pool.query('DELETE FROM forum_comments WHERE id=$1', [commentId]);
+    await pool.query('UPDATE forum_posts SET reply_count = GREATEST(reply_count - 1, 0) WHERE id=$1', [rows[0].post_id]);
+    res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
 

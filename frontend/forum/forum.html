@@ -81,27 +81,31 @@
 
         <!-- ── CENTER: Posts ──────────────────────────────────────────── -->
         <main class="forum-main">
-          <div class="forum-main-header">
-            <div class="fmh-left">
-              <h1 id="forumCatTitle" class="forum-title">General Discussion</h1>
-              <p id="forumCatDesc" class="forum-desc">General chat about routes, strategies, and the game.</p>
+          <div id="forumPostList">
+            <div class="forum-main-header">
+              <div class="fmh-left">
+                <h1 id="forumCatTitle" class="forum-title">General Discussion</h1>
+                <p id="forumCatDesc" class="forum-desc">General chat about routes, strategies, and the game.</p>
+              </div>
+              <button class="btn btn-primary fmh-new" id="newPostBtn">
+                <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3v14M3 10h14"/></svg>
+                New Post
+              </button>
             </div>
-            <button class="btn btn-primary fmh-new" id="newPostBtn">
-              <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3v14M3 10h14"/></svg>
-              New Post
-            </button>
-          </div>
-          <div class="forum-sort-bar">
-            <button class="fsort active" data-sort="new">New</button>
-            <button class="fsort" data-sort="hot">Hot</button>
-            <button class="fsort" data-sort="top">Top</button>
+            <div class="forum-sort-bar">
+              <button class="fsort active" data-sort="new">New</button>
+              <button class="fsort" data-sort="hot">Hot</button>
+              <button class="fsort" data-sort="top">Top</button>
+            </div>
+
+            <div id="forumPosts" class="forum-posts">
+              <div class="fposts-loading">Loading posts…</div>
+            </div>
+
+            <div id="forumPagination" class="forum-pagination"></div>
           </div>
 
-          <div id="forumPosts" class="forum-posts">
-            <div class="fposts-loading">Loading posts…</div>
-          </div>
-
-          <div id="forumPagination" class="forum-pagination"></div>
+          <div id="postDetailPanel" hidden></div>
         </main>
 
         <!-- ── RIGHT: Sidebar ────────────────────────────────────────── -->

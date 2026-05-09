@@ -203,6 +203,15 @@ async function initSchema() {
       direction VARCHAR(4)   NOT NULL,
       PRIMARY KEY (post_id, user_id)
     );
+
+    CREATE TABLE IF NOT EXISTS forum_comments (
+      id          SERIAL       PRIMARY KEY,
+      post_id     INTEGER      NOT NULL REFERENCES forum_posts(id) ON DELETE CASCADE,
+      author_id   BIGINT       NOT NULL,
+      author_name VARCHAR(100) NOT NULL,
+      body        TEXT         NOT NULL,
+      created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
   `);
   // Add id column to event_levels if upgrading from old schema
   await pool.query(`ALTER TABLE event_levels ADD COLUMN IF NOT EXISTS id SERIAL`).catch(() => {});
