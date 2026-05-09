@@ -169,6 +169,40 @@ async function initSchema() {
       request_json  JSONB,
       changed_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS discord_users (
+      id         BIGINT       PRIMARY KEY,
+      username   VARCHAR(100) NOT NULL,
+      avatar     VARCHAR(200),
+      created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS user_webhooks (
+      user_id    BIGINT       PRIMARY KEY,
+      url        TEXT         NOT NULL,
+      updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS forum_posts (
+      id          SERIAL       PRIMARY KEY,
+      category    VARCHAR(50)  NOT NULL,
+      title       VARCHAR(200) NOT NULL,
+      body        TEXT         NOT NULL DEFAULT '',
+      author_id   BIGINT       NOT NULL,
+      author_name VARCHAR(100) NOT NULL,
+      created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      upvotes     INTEGER      NOT NULL DEFAULT 0,
+      downvotes   INTEGER      NOT NULL DEFAULT 0,
+      reply_count INTEGER      NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS forum_votes (
+      post_id   INTEGER      NOT NULL,
+      user_id   BIGINT       NOT NULL,
+      direction VARCHAR(4)   NOT NULL,
+      PRIMARY KEY (post_id, user_id)
+    );
   `);
   // Add id column to event_levels if upgrading from old schema
   await pool.query(`ALTER TABLE event_levels ADD COLUMN IF NOT EXISTS id SERIAL`).catch(() => {});

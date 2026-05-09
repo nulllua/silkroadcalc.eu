@@ -196,6 +196,41 @@ const err = (res, e) => {
   res.status(500).json({ error: 'DB error' });
 };
 
+function parseCookies(req) {
+  const out = {};
+  const rc = req.headers.cookie;
+  if (rc) rc.split(';').forEach(c => {
+    const i = c.indexOf('=');
+    if (i < 0) return;
+    out[c.slice(0, i).trim()] = decodeURIComponent(c.slice(i + 1).trim());
+  });
+  return out;
+}
+
+function requireUserAuth(req, res, next) {
+  const token = parseCookies(req).auth_token;
+  if (!token) return res.status(401).json({ error: 'Login required' });
+  try {
+    req.discordUser = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid session' });
+  }
+}
+
+async function fireUserWebhooks(embed) {
+  try {
+    const { rows } = await pool.query('SELECT url FROM user_webhooks');
+    await Promise.allSettled(rows.map(r =>
+      fetchImpl(r.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embeds: [embed] }),
+      }).catch(() => {})
+    ));
+  } catch (_) {}
+}
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 app.get('/api/goods', async (_req, res) => {
@@ -366,6 +401,47 @@ app.get('/api/notices', async (_req, res) => {
   }
 });
 
+// Frontend calls /api/status, /api/notice, /api/changelog (aliases for existing routes)
+app.get('/api/status', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT value FROM settings WHERE key='maintenance'`);
+    const data = rows.length ? JSON.parse(rows[0].value) : { active: false, message: '' };
+    res.json({ maintenance: data.active, message: data.message || '' });
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/notice', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT message FROM notices WHERE active=true ORDER BY created_at DESC LIMIT 1`
+    );
+    res.json(rows.length ? { text: rows[0].message } : {});
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/changelog', async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM changelogs ORDER BY created_at DESC');
+    res.json(rows.map(r => ({
+      ...r,
+      changes: r.entries,
+      text: (r.entries || []).slice(0, 2).join('; '),
+    })));
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/routes/count', async (_req, res) => {
+  try {
+    const [a, b] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM travel_times'),
+      pool.query('SELECT COUNT(*) FROM goods'),
+    ]);
+    const routes = parseInt(a.rows[0].count);
+    const goods  = parseInt(b.rows[0].count);
+    res.json({ count: routes * goods || 100 });
+  } catch (e) { err(res, e); }
+});
+
 app.post('/api/session/ping', async (req, res) => {
   const { sessionId } = req.body;
   if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 64)
@@ -384,6 +460,191 @@ app.post('/api/session/ping', async (req, res) => {
   } catch (e) {
     err(res, e);
   }
+});
+
+// ── Discord OAuth (public users) ──────────────────────────────────────────────
+
+app.get('/api/auth/discord', (_req, res) => {
+  const params = new URLSearchParams({
+    client_id:     process.env.DISCORD_CLIENT_ID,
+    redirect_uri:  process.env.DISCORD_REDIRECT_URI,
+    response_type: 'code',
+    scope:         'identify',
+  });
+  res.redirect(`https://discord.com/api/oauth2/authorize?${params}`);
+});
+
+app.get('/api/auth/discord/callback', async (req, res) => {
+  const code = req.query.code;
+  const siteUrl = process.env.SITE_URL || '/';
+  if (!code) return res.redirect(siteUrl);
+  try {
+    const tokenRes = await fetchImpl('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id:     process.env.DISCORD_CLIENT_ID,
+        client_secret: process.env.DISCORD_CLIENT_SECRET,
+        grant_type:    'authorization_code',
+        code,
+        redirect_uri:  process.env.DISCORD_REDIRECT_URI,
+      }),
+    });
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) return res.redirect(siteUrl);
+
+    const userRes = await fetchImpl('https://discord.com/api/users/@me', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const u = await userRes.json();
+    if (!u.id) return res.redirect(siteUrl);
+
+    await pool.query(
+      `INSERT INTO discord_users (id, username, avatar, updated_at)
+       VALUES ($1,$2,$3,NOW())
+       ON CONFLICT (id) DO UPDATE SET username=$2, avatar=$3, updated_at=NOW()`,
+      [u.id, u.username || u.global_name || 'Unknown', u.avatar]
+    );
+
+    const token = jwt.sign(
+      { id: u.id, username: u.username || u.global_name || 'Unknown' },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+    res.setHeader('Set-Cookie',
+      `auth_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30*24*3600}; Secure`
+    );
+    res.redirect(siteUrl);
+  } catch (e) {
+    console.error('Discord OAuth error:', e);
+    res.redirect(siteUrl);
+  }
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const token = parseCookies(req).auth_token;
+  if (!token) return res.json({});
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    res.json({ id: payload.id, username: payload.username });
+  } catch {
+    res.json({});
+  }
+});
+
+app.get('/api/auth/logout', (req, res) => {
+  res.setHeader('Set-Cookie', 'auth_token=; Path=/; HttpOnly; Max-Age=0');
+  res.redirect(process.env.SITE_URL || '/');
+});
+
+// ── User webhooks ─────────────────────────────────────────────────────────────
+
+app.get('/api/user/webhook', requireUserAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT url FROM user_webhooks WHERE user_id=$1', [req.discordUser.id]
+    );
+    res.json({ url: rows[0]?.url || '' });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/user/webhook', requireUserAuth, async (req, res) => {
+  const url = String(req.body.url || '').trim();
+  if (url && !url.startsWith('https://discord.com/api/webhooks/'))
+    return res.status(400).json({ error: 'Invalid webhook URL' });
+  try {
+    if (!url) {
+      await pool.query('DELETE FROM user_webhooks WHERE user_id=$1', [req.discordUser.id]);
+    } else {
+      await pool.query(
+        `INSERT INTO user_webhooks (user_id, url, updated_at) VALUES ($1,$2,NOW())
+         ON CONFLICT (user_id) DO UPDATE SET url=$2, updated_at=NOW()`,
+        [req.discordUser.id, url]
+      );
+    }
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+// ── Forum ─────────────────────────────────────────────────────────────────────
+
+app.get('/api/forum/counts', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT category, COUNT(*) FROM forum_posts GROUP BY category`
+    );
+    const counts = { general: 0, feedback: 0, bugs: 0 };
+    rows.forEach(r => { counts[r.category] = parseInt(r.count); });
+    res.json(counts);
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/forum/posts', async (req, res) => {
+  const cat   = ['general','feedback','bugs'].includes(req.query.category) ? req.query.category : 'general';
+  const page  = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 15));
+  const sort  = req.query.sort;
+  const offset = (page - 1) * limit;
+
+  const orderBy = sort === 'hot' ? 'upvotes - downvotes DESC, created_at DESC'
+                : sort === 'top' ? 'upvotes DESC, created_at DESC'
+                : 'created_at DESC';
+
+  try {
+    const [postsRes, countRes] = await Promise.all([
+      pool.query(
+        `SELECT id, category, title, author_name, created_at, upvotes, downvotes, reply_count
+         FROM forum_posts WHERE category=$1 ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
+        [cat, limit, offset]
+      ),
+      pool.query('SELECT COUNT(*) FROM forum_posts WHERE category=$1', [cat]),
+    ]);
+    res.json({ posts: postsRes.rows, total: parseInt(countRes.rows[0].count) });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/forum/posts', requireUserAuth, async (req, res) => {
+  const category = ['general','feedback','bugs'].includes(req.body.category) ? req.body.category : 'general';
+  const title    = String(req.body.title || '').trim().slice(0, 200);
+  const body     = String(req.body.body  || '').trim().slice(0, 10000);
+  if (!title || !body) return res.status(400).json({ error: 'Missing title or body' });
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO forum_posts (category, title, body, author_id, author_name)
+       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [category, title, body, req.discordUser.id, req.discordUser.username]
+    );
+    res.json({ ok: true, id: rows[0].id });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/forum/posts/:id/vote', requireUserAuth, async (req, res) => {
+  const postId  = parseInt(req.params.id);
+  const dir     = req.body.direction === 'down' ? 'down' : 'up';
+  const userId  = req.discordUser.id;
+  if (!postId) return res.status(400).json({ error: 'Invalid post' });
+  try {
+    const existing = await pool.query(
+      'SELECT direction FROM forum_votes WHERE post_id=$1 AND user_id=$2', [postId, userId]
+    );
+    if (existing.rows.length && existing.rows[0].direction === dir) {
+      await pool.query('DELETE FROM forum_votes WHERE post_id=$1 AND user_id=$2', [postId, userId]);
+    } else {
+      await pool.query(
+        `INSERT INTO forum_votes (post_id, user_id, direction) VALUES ($1,$2,$3)
+         ON CONFLICT (post_id, user_id) DO UPDATE SET direction=$3`,
+        [postId, userId, dir]
+      );
+    }
+    await pool.query(
+      `UPDATE forum_posts SET
+        upvotes   = (SELECT COUNT(*) FROM forum_votes WHERE post_id=$1 AND direction='up'),
+        downvotes = (SELECT COUNT(*) FROM forum_votes WHERE post_id=$1 AND direction='down')
+       WHERE id=$1`,
+      [postId]
+    );
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
 });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -1000,6 +1261,12 @@ app.post('/api/admin/maintenance', requireAuth, requireUnlockedOrOwner, async (r
       [JSON.stringify({ active: !!active, message: message || '' })]
     );
     await sendMaintenanceToDiscord({ active: !!active, message: message || '' });
+    fireUserWebhooks({
+      title: active ? '🔧 SilkRoadCalc — Maintenance' : '✅ SilkRoadCalc — Back Online',
+      description: message || undefined,
+      color: active ? 0xff4444 : 0x00ff88,
+      timestamp: new Date().toISOString(),
+    });
     res.json({ ok: true });
   } catch (e) {
     err(res, e);
@@ -1032,8 +1299,13 @@ app.post('/api/admin/changelogs', requireAuth, requireUnlockedOrOwner, async (re
     );
 
     const newChangelog = result.rows[0];
-    await sendChangelogToDiscord(newChangelog); // ← Sends to Discord
-
+    await sendChangelogToDiscord(newChangelog);
+    fireUserWebhooks({
+      title: `📜 SilkRoadCalc Update — ${newChangelog.version}`,
+      description: (newChangelog.entries || []).map(e => `• ${e}`).join('\n') || undefined,
+      color: 0xe7c885,
+      timestamp: new Date().toISOString(),
+    });
     res.json({ ok: true });
   } catch (e) {
     err(res, e);
@@ -1088,7 +1360,15 @@ app.post('/api/admin/notices', requireAuth, requireUnlockedOrOwner, async (req, 
       action: 'update',
       afterJson: result.rows[0],
     });
-    if (active) await sendNoticeToDiscord(result.rows[0]);
+    if (active) {
+      await sendNoticeToDiscord(result.rows[0]);
+      fireUserWebhooks({
+        title: '📢 SilkRoadCalc Notice',
+        description: message,
+        color: 0x4488ff,
+        timestamp: new Date().toISOString(),
+      });
+    }
     res.json({ ok: true });
   } catch (e) {
     err(res, e);

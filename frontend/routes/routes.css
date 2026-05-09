@@ -1,0 +1,195 @@
+/* ─── PALETTE BRIDGE ─────────────────────────────────────────────────────── */
+/* Overrides styles.css variables with the new base.css palette so all
+   existing component styles automatically pick up the new colours.         */
+:root {
+  --nav-h: 58px;
+
+  --wood-deep:   #160b06;
+  --wood:        #291610;
+  --wood-mid:    #3d1e10;
+  --wood-light:  #4E2F22;
+  --panel:       #3a1a0e;
+  --panel-inset: #200d06;
+  --panel-stripe:#321608;
+
+  --gold:        #E7C885;
+  --gold-light:  #F5DC9F;
+  --gold-soft:   rgba(231,200,133,0.45);
+  --gold-dark:   #C8A850;
+  --gold-deep:   rgba(231,200,133,0.12);
+
+  --cream:       #F0E0C0;
+  --cream-dim:   rgba(240,224,192,0.7);
+  --dim:         rgba(240,224,192,0.45);
+  --muted:       rgba(240,224,192,0.28);
+
+  --green:       #B4CC62;
+  --green-dark:  #7a9a30;
+  --red:         #DF4F4F;
+  --red-dark:    #a03030;
+
+  --gold-border:      1px solid rgba(231,200,133,0.28);
+  --gold-border-soft: 1px solid rgba(231,200,133,0.12);
+}
+
+/* ─── BODY ───────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse at 50% 0%, #5a3018 0%, #291610 45%, #160b06 100%);
+  background-attachment: fixed;
+}
+body::before { content: none; }
+
+/* ─── APP LAYOUT ─────────────────────────────────────────────────────────── */
+#app {
+  margin-top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  padding: 14px 16px 16px;
+}
+#sidebar { display: none !important; }
+
+/* ─── NAV ────────────────────────────────────────────────────────────────── */
+#topnav {
+  background: rgba(22, 10, 4, 0.96);
+  border-bottom: 1px solid rgba(231,200,133,0.15);
+}
+
+/* ─── MOBILE NAV PANEL ───────────────────────────────────────────────────── */
+.nav-mobile-panel {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0;
+  background: rgba(16, 7, 2, 0.97);
+  border-bottom: 1px solid rgba(231,200,133,0.2);
+  backdrop-filter: blur(16px);
+  padding: 14px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transform: translateY(calc(-100% - var(--nav-h) - 20px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+}
+.nav-mobile-panel.open { transform: translateY(0); }
+.nav-mobile-panel .nav-link {
+  padding: 10px 14px;
+  font-size: 11px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+.nav-mobile-panel .nav-link:hover,
+.nav-mobile-panel .nav-link.active {
+  border-color: rgba(231,200,133,0.2);
+  background: rgba(231,200,133,0.05);
+}
+.nav-mobile-panel .nav-discord {
+  margin-top: 6px;
+  padding: 10px 14px;
+  justify-content: center;
+}
+
+/* ─── LOCATION BAR ───────────────────────────────────────────────────────── */
+#locationBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(0,0,0,0.15);
+  border-bottom: 1px solid rgba(231,200,133,0.08);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+#locationBar .tlabel {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  white-space: nowrap;
+}
+#locationBar select {
+  background: var(--panel-inset);
+  color: var(--cream);
+  border: 1px solid var(--gold-dark);
+  border-radius: 2px;
+  padding: 4px 24px 4px 7px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23C8A850'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-color: var(--panel-inset);
+  min-width: 0;
+}
+#locationBar select:focus { outline: none; border-color: var(--gold); }
+
+/* ─── EVENT QUICK-BAR ────────────────────────────────────────────────────── */
+#eventToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(231,200,133,0.1);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+#eventToolbar .tlabel {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  white-space: nowrap;
+}
+#eventToolbar select {
+  background: var(--panel-inset);
+  color: var(--cream);
+  border: 1px solid var(--gold-dark);
+  border-radius: 2px;
+  padding: 4px 24px 4px 7px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23C8A850'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-color: var(--panel-inset);
+  min-width: 0;
+}
+#eventToolbar select:disabled { opacity: 0.4; cursor: not-allowed; }
+#eventToolbar select:focus { outline: none; border-color: var(--gold); }
+.evq-btn {
+  padding: 4px 12px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.evq-btn-clear {
+  padding: 4px 10px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  background: rgba(223,79,79,0.1);
+  border-color: rgba(223,79,79,0.4);
+  color: var(--red);
+}
+.evq-btn-clear:hover {
+  background: rgba(223,79,79,0.2);
+  border-color: var(--red);
+}
+
+@media (max-width: 900px) {
+  .nav-links, .nav-actions { display: none; }
+  .nav-hamburger { display: flex; }
+}
+@media (max-width: 540px) {
+  :root { --nav-h: 50px; }
+  .nav-logo span { display: none; }
+}

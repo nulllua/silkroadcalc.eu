@@ -1,0 +1,104 @@
+/* ─── SETUP PAGE ──────────────────────────────────────────────────────────── */
+.srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+.srow label {
+  font-size: 13px;
+  color: var(--text-dim, rgba(255,255,255,0.65));
+  white-space: nowrap;
+}
+.srow + .srow {
+  border-top: 1px solid rgba(231,200,133,0.06);
+}
+
+.sselect {
+  background: var(--bg-inset);
+  color: var(--text);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--r-sm);
+  padding: 7px 28px 7px 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%236B4E1A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-color: var(--bg-inset);
+  min-width: 160px;
+  transition: border-color var(--t-fast, 0.12s ease);
+}
+.sselect:focus {
+  outline: none;
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 2px rgba(231,200,133,0.1);
+}
+
+/* ─── FULL-WIDTH CARD ─────────────────────────────────────────────────────── */
+.scard-full { grid-column: 1 / -1; }
+
+.setup-animal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 16px;
+}
+
+/* ─── STATS BAR ──────────────────────────────────────────────────────────── */
+.setup-stats {
+  display: flex;
+  gap: 2px;
+  margin-top: 16px;
+  border: 1px solid rgba(231,200,133,0.15);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.setup-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 10px;
+  background: rgba(0,0,0,0.25);
+  border-right: 1px solid rgba(231,200,133,0.08);
+}
+.setup-stat:last-child { border-right: none; }
+.setup-stat.highlight { background: rgba(231,200,133,0.05); }
+.ss-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.setup-stat b {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+}
+.setup-stat.highlight b { color: var(--gold-bright, #F5DFA0); }
+
+/* ─── SAVE BAR ────────────────────────────────────────────────────────────── */
+.setup-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 28px;
+  padding: 14px 18px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(231,200,133,0.1);
+  border-radius: var(--r-sm);
+}
+
+.setup-status {
+  font-size: 12px;
+  color: var(--green);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.setup-status.visible { opacity: 1; }

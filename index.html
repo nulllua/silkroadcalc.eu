@@ -1,1123 +1,341 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-    <!-- Primary SEO -->
-    <title>
-      Silk Road Trading Calculator | Best Routes, Profits & Prices for Silk Road Trading Simulator
-    </title>
-    <meta
-      name="description"
-      content="The ultimate Silk Road Trading Simulator calculator. Find the most profitable trade routes, compare buy and sell prices across Constantinople, Damascus, Baghdad, Bukhara, Samarkand, Kashgar and Chang'an, factor in religion, language, culture, animals and storage to maximize your profit per minute."
-    />
-    <meta
-      name="keywords"
-      content="silk road, silk road calculator, silk road trading calculator, silk road trading simulator, silk road simulator, silk road profit calculator, silk road routes, silk road best routes, silk road prices, silk road trade calculator, srt calculator, srt simulator, srt trading, silk road game, silk road roblox, trading simulator calculator"
-    />
+    <title>Silk Road Trading Calculator | Best Routes, Profits &amp; Prices</title>
+    <meta name="description" content="The ultimate Silk Road Trading Simulator calculator. Find the most profitable trade routes, compare buy and sell prices across all cities, and maximize your profit per minute." />
+    <meta name="keywords" content="silk road, silk road calculator, silk road trading calculator, silk road trading simulator, silk road simulator, silk road profit calculator, silk road routes, silk road best routes, silk road prices, silk road trade calculator, srt calculator, srt simulator, srt trading, silk road game, silk road roblox, trading simulator calculator" />
     <meta name="author" content="domi (@nulllua)" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
     <meta name="googlebot" content="index, follow" />
     <link rel="canonical" href="https://silkroadcalc.eu/" />
 
-    <!-- Open Graph (Discord, Facebook, LinkedIn share previews) -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Silk Road Trading Calculator" />
-    <meta
-      property="og:description"
-      content="Find the most profitable trade routes in Silk Road Trading Simulator. Compare prices across all 5 cities, factor in religion, language, culture, animals and storage."
-    />
+    <meta property="og:description" content="Find the most profitable trade routes in Silk Road Trading Simulator. Compare prices across all cities, factor in religion, language, culture, animals and storage." />
     <meta property="og:url" content="https://silkroadcalc.eu/" />
     <meta property="og:site_name" content="Silk Road Trading Calculator" />
-    <meta
-      property="og:image"
-      content="https://silkroadcalc.eu/frontend/assets/images/og-image.png"
-    />
+    <meta property="og:image" content="https://silkroadcalc.eu/frontend/assets/images/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_US" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Silk Road Trading Calculator" />
-    <meta
-      name="twitter:description"
-      content="The ultimate calculator for Silk Road Trading Simulator. Best routes, profits and prices."
-    />
-    <meta
-      name="twitter:image"
-      content="https://silkroadcalc.eu/frontend/assets/images/og-image.png"
-    />
+    <meta name="twitter:description" content="The ultimate calculator for Silk Road Trading Simulator. Best routes, profits and prices." />
+    <meta name="twitter:image" content="https://silkroadcalc.eu/frontend/assets/images/og-image.png" />
 
-    <!-- Theme color for mobile browsers -->
-    <meta name="theme-color" content="#1c100a" />
+    <meta name="theme-color" content="#291610" />
 
-    <!-- Structured data for Google rich results -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Silk Road Trading Calculator",
-        "alternateName": [
-          "Silk Road Calculator",
-          "SRT Calculator",
-          "Silk Road Trading Simulator Calculator"
-        ],
-        "description": "Calculator for the Silk Road Trading Simulator game. Finds the most profitable trade routes across all cities, with full support for religion, language, culture, animals and storage modifiers.",
-        "url": "https://silkroadcalc.eu/",
-        "applicationCategory": "GameApplication",
-        "operatingSystem": "Any (Web)",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "author": {
-          "@type": "Person",
-          "name": "domi",
-          "alternateName": "@nulllua"
-        },
-        "keywords": "silk road, silk road calculator, silk road trading simulator, srt, trading routes, profit calculator"
-      }
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Silk Road Trading Calculator",
+      "alternateName": ["Silk Road Calculator","SRT Calculator","Silk Road Trading Simulator Calculator"],
+      "description": "Calculator for the Silk Road Trading Simulator game. Finds the most profitable trade routes across all cities, with full support for religion, language, culture, animals and storage modifiers.",
+      "url": "https://silkroadcalc.eu/",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Any (Web)",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "domi", "alternateName": "@nulllua" }
+    }
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/frontend/assets/images/icon.png" />
 
-    <link rel="stylesheet" href="./frontend/assets/css/styles.css" />
+    <link rel="stylesheet" href="./frontend/shared/base.css" />
+    <link rel="stylesheet" href="./frontend/home/home.css" />
   </head>
   <body>
-    <div class="fx-shimmer" id="fxShimmer" aria-hidden="true"></div>
 
-    <div id="app">
-      <!-- ───── Sidebar ───── -->
-      <aside id="sidebar" class="panel">
-        <span class="corner-tl"></span><span class="corner-br"></span>
-        <button
-          id="sidebarToggle"
-          type="button"
-          aria-label="Collapse sidebar"
-          title="Collapse sidebar"
-        ></button>
-        <div id="sidebarInner">
-          <div class="s-section" id="onb-current-location">
-            <div class="s-title">Current Location</div>
-            <div class="frow">
-              <label
-                data-tip="Where your merchant is right now. Drives the Courier Planner and pins routes from this city."
-                >I'm in</label
-              >
-              <select id="currentCity" onchange="onCurrentCityChange()">
-                <option value="">- Not set -</option>
-                <option value="Antioch">Antioch</option>
-                <option value="Tyre">Tyre</option>
-                <option value="Damascus">Damascus</option>
-                <option value="Palmyra">Palmyra</option>
-                <option value="Ctesiphon">Ctesiphon</option>
-                <option value="Ecbatana">Ecbatana</option>
-              </select>
-            </div>
-            <div class="frow">
-              <label data-tip="Filter routes to only show goods you can sell in this city."
-                >Sell in</label
-              >
-              <select id="sellInCity" onchange="onSellCityChange()">
-                <option value="">- Any city -</option>
-                <option value="Antioch">Antioch</option>
-                <option value="Tyre">Tyre</option>
-                <option value="Damascus">Damascus</option>
-                <option value="Palmyra">Palmyra</option>
-                <option value="Ctesiphon">Ctesiphon</option>
-                <option value="Ecbatana">Ecbatana</option>
-              </select>
-            </div>
-          </div>
+    <div class="fx-shimmer" aria-hidden="true"></div>
 
-          <div class="s-section" id="onb-setup">
-            <div class="s-title">Your Setup</div>
-            <div class="frow">
-              <label>Culture</label>
-              <select id="culture">
-                <option value="Byzantine">Byzantine</option>
-                <option value="Syriac">Syriac</option>
-                <option value="Persian">Persian</option>
-              </select>
-            </div>
-            <div class="frow">
-              <label>Religion</label>
-              <select id="religion">
-                <option value="Christianity">Christianity</option>
-                <option value="Judaism">Judaism</option>
-                <option value="Zoroastrianism">Zoroastrianism</option>
-              </select>
-            </div>
-            <div class="frow">
-              <label>Faith Level</label>
-              <select id="religionLevel">
-                <option value="0">None</option>
-                <option value="1">Level 1</option>
-                <option value="2">Level 2</option>
-                <option value="3">Level 3</option>
-              </select>
-            </div>
-            <div class="frow">
-              <label data-tip="Your skill in languages other than your native tongue"
-                >Language at Sell City</label
-              >
-              <select id="langLevel">
-                <option value="1">Broken (−3%)</option>
-                <option value="2" selected>Proficient (0%)</option>
-                <option value="3">Fluent/Native (+3%)</option>
-              </select>
-            </div>
-            <div class="frow">
-              <label>Storage</label>
-              <select id="backpack">
-                <option value="None">None (3)</option>
-                <option value="SmallSatchel">Small Satchel (5)</option>
-                <option value="LargeSatchel">Large Satchel (7)</option>
-                <option value="BasketBackpack">Basket Backpack (9)</option>
-                <option value="FramePack">Frame Pack (9)</option>
-              </select>
-            </div>
-            <div class="check-row" style="margin-top: 8px">
-              <input type="checkbox" id="extraStorage" />
-              <label for="extraStorage" data-tip="Gamepass: permanently adds 1 cargo slot"
-                >Extra Storage Gamepass (+1 Slot)</label
-              >
-            </div>
-          </div>
-
-          <div class="s-section">
-            <div class="s-title" id="animalSlotsTitle">Animal Slots (3)</div>
-            <div id="animalSlots"></div>
-          </div>
-
-          <div class="s-section">
-            <div class="s-title">Gamepasses</div>
-            <div class="check-row">
-              <input type="checkbox" id="autoWalk" />
-              <label for="autoWalk" data-tip="Auto-Walk Speed Boost: +4 to base walkspeed"
-                >Auto-Walk Speed Boost (+4)</label
-              >
-            </div>
-            <div class="check-row" style="margin-top: 6px">
-              <input type="checkbox" id="caravanGamepass" />
-              <label
-                for="caravanGamepass"
-                data-tip="Gamepass: adds 1 animal slot (max 5 with Rank 8)"
-                >Caravan Slot Gamepass (+1 Animal Slot)</label
-              >
-            </div>
-          </div>
-
-          <div class="s-section">
-            <div class="s-title">Faction Ranks</div>
-            <div class="frow">
-              <label data-tip="Rank 8 grants +1 animal slot">Byzantine Rank</label>
-              <select id="byzantineRank">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-              </select>
-            </div>
-            <div class="frow">
-              <label data-tip="Rank 8 grants +1 animal slot">Sassanid Rank</label>
-              <select id="sassanidRank">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="stats-block">
-            <div class="row"><span>Base Speed:</span><b id="statBaseSpeed">16</b></div>
-            <div class="row"><span>Auto-Walk Bonus:</span><b id="statAutoBonus">+0</b></div>
-            <div class="row"><span>Animal Speed Bonus:</span><b id="statAnimalBonus">0</b></div>
-            <div class="row total"><span>Total Walkspeed:</span><b id="statSpeed">16.0</b></div>
-            <div class="row" style="margin-top: 6px">
-              <span>Cargo Slots:</span><b id="statSlots">3</b>
-            </div>
-          </div>
+    <!-- ── NAVIGATION ──────────────────────────────────────────────────── -->
+    <nav id="topnav">
+      <div class="nav-inner">
+        <a class="nav-logo" href="/index.html">
+          <img src="/frontend/assets/images/icon.png" alt="SilkRoadCalc" width="28" height="28" />
+          <span>SilkRoadCalc</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="/index.html"    class="nav-link" data-page="home">Home</a>
+          <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
+          <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
+          <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
+          <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
+          <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
         </div>
-      </aside>
-
-      <!-- ───── Main ───── -->
-      <main id="main" class="panel">
-        <span class="corner-tl"></span><span class="corner-br"></span>
-        <div id="mainInner">
-          <div id="masthead">
-            <span class="title">Silk Road Trading Calculator</span>
-          </div>
-
-          <div id="tabsRow">
-            <span class="tab active" id="tabRoutes" onclick="switchTab('routes')"
-              >Trading Routes</span
-            >
-            <span class="tab" id="tabPrices" onclick="switchTab('prices')">Prices</span>
-            <span class="tab" id="tabTools" onclick="switchTab('tools')">Tools</span>
-            <span class="tab" id="tabEvents" onclick="switchTab('events')">Events</span>
-            <span class="tab" id="tabSettings" onclick="switchTab('settings')">Settings</span>
-            <span class="tab" id="tabAbout" onclick="switchTab('about')">About</span>
-          </div>
-
-          <div id="toolbar">
-            <span class="tlabel">Sort by:</span>
-            <select id="sortBy" onchange="onSortByChange()">
-              <option value="profitPerMin">Profit per Minute</option>
-              <option value="profitPerHour">Profit per Hour</option>
-              <option value="profitPerTrip">Profit per Trip</option>
-              <option value="profitPerUnit">Profit per Unit</option>
-              <option value="time">Travel Time</option>
-              <option value="sellPrice">Sell Price</option>
-              <option value="buyPrice">Buy Price</option>
-              <option value="good">Good (A to Z)</option>
-              <option value="buyCity">Buy City</option>
-              <option value="sellCity">Sell City</option>
-            </select>
-            <span class="tlabel" style="margin-left: 14px">Show:</span>
-            <select id="rowLimit" onchange="renderTable()">
-              <option value="5">Top 5</option>
-              <option value="10">Top 10</option>
-              <option value="25">Top 25</option>
-              <option value="50" selected>Top 50</option>
-              <option value="100">Top 100</option>
-              <option value="0">All routes</option>
-            </select>
-            <span class="spacer"></span>
-            <span class="toolbar-notice">⚠ Prices may differ slightly from in-game values ⚠</span>
-            <span class="spacer"></span>
-            <input type="text" id="searchInput" placeholder="Search…" oninput="onSearchInput()" />
-          </div>
-
-          <div id="routesPanel">
-            <div id="bestLoopCard"></div>
-            <div class="routes-divider">
-              <span class="routes-divider-label">Trading Routes</span>
-            </div>
-            <div id="tableWrap">
-              <table id="routeTable">
-                <thead id="thead">
-                  <tr>
-                    <th
-                      id="h-buyCity"
-                      onclick="sortBy('buyCity')"
-                      data-tip="City where you buy the good"
-                    >
-                      Buy City
-                    </th>
-                    <th id="h-good" onclick="sortBy('good')" data-tip="Tradeable commodity">
-                      Good
-                    </th>
-                    <th
-                      id="h-sellCity"
-                      onclick="sortBy('sellCity')"
-                      data-tip="City where you sell the good"
-                    >
-                      Sell City
-                    </th>
-                    <th id="h-buyPrice" onclick="sortBy('buyPrice')" data-tip="Base purchase price">
-                      Buy Price
-                    </th>
-                    <th
-                      id="h-sellPrice"
-                      onclick="sortBy('sellPrice')"
-                      data-tip="Estimated sell price with all modifiers"
-                    >
-                      Sell Price
-                    </th>
-                    <th
-                      id="h-profitPerUnit"
-                      onclick="sortBy('profitPerUnit')"
-                      data-tip="Profit per cargo slot used"
-                    >
-                      Profit / Unit
-                    </th>
-                    <th
-                      id="h-profitPerTrip"
-                      onclick="sortBy('profitPerTrip')"
-                      data-tip="Total profit filling all your cargo slots"
-                    >
-                      Profit / Trip
-                    </th>
-                    <th
-                      id="h-time"
-                      onclick="sortBy('time')"
-                      data-tip="Estimated one-way travel time at your walkspeed. Auto-walk speed varies in-game, so treat these as approximate."
-                    >
-                      Travel Time ~
-                    </th>
-                    <th
-                      id="h-profitPerMin"
-                      onclick="sortBy('profitPerMin')"
-                      data-tip="Outbound profit divided by travel time, the headline metric"
-                    >
-                      Profit / Min
-                    </th>
-                    <th data-tip="Best good to haul on the return journey">Return Cargo (Best)</th>
-                    <th data-tip="Copy this route as a Discord-friendly message">Share</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-              </table>
-              <div id="routeCards"></div>
-            </div>
-          </div>
-
-          <div id="pricesPanel">
-            <div class="prices-head-row">
-              <div class="prices-mode-toggle">
-                <button class="pmt-btn active" id="pmtBuy" onclick="setPricesMode('buy')">
-                  Buy Prices
-                </button>
-                <button class="pmt-btn" id="pmtSell" onclick="setPricesMode('sell')">
-                  Sell Prices
-                </button>
-              </div>
-              <span id="pricesModeDesc" class="prices-mode-hint"></span>
-            </div>
-            <div id="pricesGrid"></div>
-          </div>
-
-          <div id="toolsPanel">
-            <div class="set-h">📦 Courier Route Planner</div>
-            <p class="set-p">
-              Pick up courier quests, plan your journey with the most profitable goods at every stop
-              along the way.
-            </p>
-
-            <div class="frow" style="margin-top: 8px">
-              <label>I'm currently in</label>
-              <select
-                id="courierStart"
-                onchange="document.getElementById('courierResult').innerHTML = ''"
-              >
-                <option value="">— Pick your city —</option>
-                <option value="Antioch">Antioch</option>
-                <option value="Tyre">Tyre</option>
-                <option value="Damascus">Damascus</option>
-                <option value="Palmyra">Palmyra</option>
-                <option value="Ctesiphon">Ctesiphon</option>
-                <option value="Ecbatana">Ecbatana</option>
-              </select>
-            </div>
-
-            <div class="courier-quest-block">
-              <div class="courier-quest-block-title">Courier Quests (optional)</div>
-              <div class="courier-quest-row">
-                <label class="courier-quest-check">
-                  <input type="checkbox" id="shortQuestCheck" onchange="onCourierQuestChange()" />
-                  <span class="courier-quest-badge short">Short</span>
-                  <span class="courier-quest-label">Quest</span>
-                </label>
-                <select id="shortQuestDest" disabled>
-                  <option value="">— Destination —</option>
-                  <option value="Antioch">Antioch</option>
-                  <option value="Tyre">Tyre</option>
-                  <option value="Damascus">Damascus</option>
-                  <option value="Palmyra">Palmyra</option>
-                  <option value="Ctesiphon">Ctesiphon</option>
-                  <option value="Ecbatana">Ecbatana</option>
-                </select>
-              </div>
-              <div class="courier-quest-row">
-                <label class="courier-quest-check">
-                  <input type="checkbox" id="longQuestCheck" onchange="onCourierQuestChange()" />
-                  <span class="courier-quest-badge long">Long</span>
-                  <span class="courier-quest-label">Quest</span>
-                </label>
-                <select id="longQuestDest" disabled>
-                  <option value="">— Destination —</option>
-                  <option value="Antioch">Antioch</option>
-                  <option value="Tyre">Tyre</option>
-                  <option value="Damascus">Damascus</option>
-                  <option value="Palmyra">Palmyra</option>
-                  <option value="Ctesiphon">Ctesiphon</option>
-                  <option value="Ecbatana">Ecbatana</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="check-row" style="margin-top: 10px">
-              <input type="checkbox" id="courierReturn" checked />
-              <label
-                for="courierReturn"
-                data-tip="If checked, after all packages are delivered the route continues back to your starting city — with the best goods to carry on the way home."
-                >Return to starting city</label
-              >
-            </div>
-            <div class="set-btns" style="margin-top: 14px">
-              <button class="btn btn-gold" onclick="runCourierPlanner()">⚜ Plan Route</button>
-            </div>
-            <div id="courierResult"></div>
-
-            <div class="set-h" style="margin-top: 34px">✦ Find Optimal Setup</div>
-            <p class="set-p">
-              Language obviously: Fluent/Native instead of 'Broken'. Will fix when I have time. Apologies.
-            </p>
-            <div class="set-btns">
-              <button class="btn btn-gold" onclick="runOptimalFinder()">
-                ⚜ Find Optimal Setup
-              </button>
-            </div>
-            <div id="optimalResult"></div>
-          </div>
-
-          <div id="eventsPanel"></div>
-
-          <div id="settingsPanel">
-            <div class="set-h">Theme</div>
-            <p class="set-p">Choose how the calculator looks. Your choice is remembered.</p>
-            <div class="theme-picker">
-              <label class="theme-card" data-theme="parchment">
-                <input
-                  type="radio"
-                  name="theme"
-                  value="parchment"
-                  checked
-                  onchange="applyTheme(this.value)"
-                />
-                <div class="theme-swatch theme-swatch-parchment">
-                  <div class="ts-row" style="background: #382316"></div>
-                  <div class="ts-row" style="background: #d4a843; height: 6px"></div>
-                  <div class="ts-row" style="background: #1a0e07"></div>
-                </div>
-                <div class="theme-name">Parchment & Gold</div>
-                <div class="theme-desc">Tavern ledger style, warm wood tones</div>
-              </label>
-              <label class="theme-card" data-theme="slate">
-                <input type="radio" name="theme" value="slate" onchange="applyTheme(this.value)" />
-                <div class="theme-swatch theme-swatch-slate">
-                  <div class="ts-row" style="background: #0f1115"></div>
-                  <div class="ts-row" style="background: #3d8eff; height: 6px"></div>
-                  <div class="ts-row" style="background: #1a1d24"></div>
-                </div>
-                <div class="theme-name">Modern Slate</div>
-                <div class="theme-desc">Minimalist dark UI, clean and quiet</div>
-              </label>
-            </div>
-
-            <div class="set-h">Display</div>
-            <div class="check-row">
-              <input
-                type="checkbox"
-                id="walkerToggle"
-                checked
-                onchange="applyWalker(this.checked)"
-              />
-              <label for="walkerToggle">Show walking animation at the bottom of the screen</label>
-            </div>
-
-            <div class="set-h">Save / Load Settings</div>
-            <p class="set-p">
-              Save named setups to this browser. Each setup stores your character, animals, and
-              gamepass selections.
-            </p>
-
-            <div class="setup-block">
-              <div class="setup-label">Save current setup</div>
-              <div class="setup-row">
-                <input
-                  type="text"
-                  id="setupNameInput"
-                  placeholder="Setup name…"
-                  maxlength="40"
-                  oninput="document.getElementById('btnSaveSetup').disabled = !this.value.trim()"
-                />
-                <button class="btn" id="btnSaveSetup" onclick="saveNamedState()" disabled>
-                  Save
-                </button>
-              </div>
-            </div>
-
-            <div class="setup-block">
-              <div class="setup-label">Load setup</div>
-              <div class="setup-row">
-                <select id="loadSetupSelect">
-                  <option value="">— choose setup —</option>
-                </select>
-                <button class="btn" onclick="loadNamedState()">Load</button>
-              </div>
-            </div>
-
-            <div class="setup-block">
-              <div class="setup-label">Delete setup</div>
-              <div class="setup-row">
-                <select id="clearSetupSelect">
-                  <option value="">— choose setup —</option>
-                </select>
-                <button class="btn btn-red" onclick="clearNamedState()">Delete</button>
-              </div>
-            </div>
-
-            <div class="set-h">Onboarding Tour</div>
-            <p class="set-p">
-              The tour runs automatically when you first open the site. You can replay it anytime or
-              turn it off completely.
-            </p>
-            <div class="setup-block">
-              <div class="setup-row" style="gap: 12px; flex-wrap: wrap">
-                <button class="btn" onclick="startTour()">Replay Tour</button>
-                <label
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    font-family: 'Cinzel', serif;
-                    font-size: 11px;
-                    letter-spacing: 0.8px;
-                    color: var(--dim);
-                  "
-                >
-                  <input type="checkbox" id="tourOffToggle" onchange="onTourToggle(this.checked)" />
-                  Disable tour on startup
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div id="aboutPanel">
-            <div class="about-hero">Silk Road Trading Calculator</div>
-            <div class="about-sub">An honest merchant's ledger</div>
-
-            <div class="credits-card">
-              <div class="credits-team-box">
-                <div class="credits-label">Created by</div>
-                <div class="credits-name">Anonymous user</div>
-                <hr class="credits-divider" />
-                <div class="credits-label">Lead Analyst</div>
-                <div class="credits-analyst">KuglerKnight</div>
-                <div class="credits-analyst-role">Price research &amp; in-game verification</div>
-              </div>
-              <div class="credits-special-thanks">Special Thanks</div>
-              <div class="credits-label">Original Idea</div>
-              <div class="credits-analyst">Ming</div>
-              <div class="credits-analyst-role">Sparked the idea to build the calculator</div>
-              <div class="credits-label" style="margin-top: 16px">Design Vision</div>
-              <div class="credits-analyst">Sensitive Young Man</div>
-              <div class="credits-analyst-role">Shaped how the site looks and feels</div>
-              <div class="credits-buttons">
-                <a
-                  class="discord-btn"
-                  href="https://discord.gg/dEsV8QPqSU"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onclick="openDiscord(event)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"
-                    />
-                  </svg>
-                  Official Silk Road Discord
-                </a>
-                <a
-                  class="discord-btn"
-                  href="https://discord.gg/VaHJ2PbuXN"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onclick="openCalcDiscord(event)"
-                  style="display: none"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"
-                    />
-                  </svg>
-                  silkroadcalc.eu Discord
-                </a>
-                <a
-                  class="wiki-btn"
-                  href="https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onclick="openWiki(event)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3zm0 4.5L17 8v3.5c0 3.5-2.3 6.7-5 7.8-2.7-1.1-5-4.3-5-7.8V8l5-1.5z"
-                    />
-                  </svg>
-                  Visit Wiki
-                </a>
-              </div>
-            </div>
-
-            <div class="changelog-card">
-              <div class="changelog-h">Updates</div>
-              <div id="aboutChangelogList">
-                <div class="changelog-entry">
-                  <div class="changelog-ver">Loading updates...</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="nav-actions">
+          <a href="/api/auth/discord" class="nav-discord">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
+            <span class="nav-auth-label">Login with Discord</span>
+          </a>
         </div>
-      </main>
-    </div>
-
-    <!-- Active event timers -->
-    <div id="eventFloater" aria-live="polite"></div>
-
-    <!-- Onboarding tour overlay -->
-    <div id="onbScrim" role="dialog" aria-modal="true" aria-labelledby="onbCardTitle">
-      <div id="onbBackdrop">
-        <div class="onb-frame frame-t"></div>
-        <div class="onb-frame frame-r"></div>
-        <div class="onb-frame frame-b"></div>
-        <div class="onb-frame frame-l"></div>
+        <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
-      <div id="onbSpot"></div>
-      <div id="onbCard">
-        <span class="onb-arrow"></span>
-        <div class="onb-eyebrow">
-          <span class="onb-eyebrow-label" id="onbEyebrow">Welcome</span>
-          <span class="onb-step" id="onbStep">1 / 1</span>
-        </div>
-        <h3 id="onbCardTitle">Title</h3>
-        <div id="onbCardBody"></div>
-        <div class="onb-try" id="onbTry" style="display: none">
-          <span id="onbTryText">Try it now</span>
-        </div>
-        <div class="onb-actions">
-          <div class="onb-dots" id="onbDots"></div>
-          <div class="onb-btn-row">
-            <button class="onb-btn ghost" id="onbSkip" type="button">Skip tour</button>
-            <button class="onb-btn" id="onbBack" type="button">Back</button>
-            <button class="onb-btn primary" id="onbNext" type="button">Next</button>
-          </div>
-        </div>
-        <div class="onb-skip-row" id="onbDontShow">
-          <label
-            ><input type="checkbox" id="onbDontShowCheck" /> Don't show this again on opening</label
-          >
-        </div>
+      <div class="nav-mobile-panel" id="navMobilePanel">
+        <a href="/index.html"    class="nav-link" data-page="home">Home</a>
+        <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
+        <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
+        <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
+        <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
+          <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
+        <a href="/api/auth/discord" class="nav-discord">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
+          <span class="nav-auth-label">Login with Discord</span>
+        </a>
       </div>
-    </div>
+    </nav>
 
-    <!-- Tour character -->
-    <div id="tourChar">
-      <svg viewBox="0 0 70 110" xmlns="http://www.w3.org/2000/svg">
-        <!-- Head -->
-        <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060" />
-        <!-- Hair -->
-        <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07" />
-        <!-- Eyes -->
-        <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
-        <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
-        <!-- Mouth -->
-        <rect id="tcMouth" x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00" />
-        <!-- Neck -->
-        <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060" />
-        <!-- Body -->
-        <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c" />
-        <!-- Jacket seam lines -->
-        <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-        <line x1="10" y1="74" x2="60" y2="74" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-        <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-        <!-- Left arm (static) -->
-        <rect x="2" y="46" width="10" height="30" rx="3" fill="#5e6c34" />
-        <!-- Right arm (pointing — rotates around shoulder) -->
-        <g id="tcArmR">
-          <rect x="58" y="46" width="10" height="30" rx="3" fill="#5e6c34" />
-          <!-- Hand nub -->
-          <rect x="58" y="72" width="10" height="7" rx="2" fill="#c09060" />
-        </g>
-        <!-- Legs -->
-        <rect id="tcLegL" x="14" y="80" width="16" height="30" rx="2" fill="#253012" />
-        <rect id="tcLegR" x="40" y="80" width="16" height="30" rx="2" fill="#253012" />
-      </svg>
-    </div>
-
-    <!-- Notice Bar -->
-    <div
-      id="noticeBar"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        background: rgba(58, 58, 46, 0.85);
-        border-bottom: 2px solid #5a5a4e;
-        padding: 14px 20px;
-        font-size: 16px;
-        font-weight: bold;
-        color: #ddd;
-        font-family: Georgia, serif;
-        align-items: center;
-        justify-content: center;
-      "
-    >
+    <!-- ── NOTICE BAR ───────────────────────────────────────────────────── -->
+    <div id="noticeBar">
       <span id="noticeText"></span>
+      <button class="notice-close" id="noticeClose" aria-label="Dismiss">&times;</button>
     </div>
 
-    <!-- What's New popup -->
-    <div
-      id="maintOverlay"
-      style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        background: rgba(5, 3, 0, 0.96);
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 40px;
-      "
-    >
-      <div
-        style="
-          font-family: Georgia, serif;
-          font-size: 26px;
-          color: #f0d080;
-          letter-spacing: 0.18em;
-          margin-bottom: 20px;
-        "
-      >
-        ⚙ Under Maintenance
-      </div>
-      <div
-        id="maintMsg"
-        style="
-          font-size: 15px;
-          color: #aaa;
-          max-width: 480px;
-          line-height: 1.75;
-          margin-bottom: 24px;
-        "
-      >
-        We'll be back shortly.
-      </div>
-      <div style="font-size: 11px; color: #555; letter-spacing: 0.12em; text-transform: uppercase">
-        Check back soon
-      </div>
-    </div>
+    <div class="page-wrap">
 
-    <div id="whatsNewModal" role="dialog" aria-modal="true" aria-labelledby="whatsNewTitle">
-      <div id="whatsNewBox">
-        <div class="wn-title" id="whatsNewTitle">
-          What's New <span class="wn-ver-badge">v1.7</span>
-        </div>
-        <div class="wn-body">
-          <div class="wn-notice">
-            If something looks wrong, please use the
-            <strong>feedback button</strong> at the side of the screen. I am not always in the Silk
-            Road chat to catch every issue mentioned there, but I see every single report sent
-            through the feedback button.
+      <!-- ── HERO ───────────────────────────────────────────────────────── -->
+      <section class="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <div class="hero-eyebrow section-label">Silk Road Trading Simulator</div>
+          <h1 class="hero-title">The Merchant's<br>Ledger</h1>
+          <p class="hero-sub">Plan every caravan. Maximize every coin.<br>The most accurate profit calculator on the Silk Road.</p>
+          <div class="hero-actions">
+            <a href="/frontend/routes/routes.html" class="btn btn-primary hero-cta">
+              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 10h14M10 3l7 7-7 7"/></svg>
+              Open Routes
+            </a>
+            <a href="/frontend/planner/planner.html" class="btn hero-cta">
+              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10h6M10 7v6"/></svg>
+              Courier Planner
+            </a>
           </div>
-          <ul>
-            <li>
-              <strong>Travel times</strong> remeasured in-game. Still estimates since auto-walk
-              varies, but calibrated so route rankings stay accurate
-            </li>
-            <li>
-              The <strong>Prices tab</strong> is now a compact matrix: every good across every city
-              at a glance
-            </li>
-            <li>
-              The old Trip Planner has been replaced with a dedicated
-              <strong>Courier Route Planner</strong> built around courier quests
-            </li>
-            <li>
-              The <strong>Events tab</strong> has been given a visual refresh with per-city cards
-            </li>
-            <li>Routes table scrolling and search are now faster and smoother</li>
-            <li>New setting to turn off the walking animation at the bottom of the screen</li>
-          </ul>
+          <div class="hero-cities">
+            <span>Antioch</span><span class="hero-sep">·</span>
+            <span>Tyre</span><span class="hero-sep">·</span>
+            <span>Damascus</span><span class="hero-sep">·</span>
+            <span>Palmyra</span><span class="hero-sep">·</span>
+            <span>Ctesiphon</span><span class="hero-sep">·</span>
+            <span>Ecbatana</span>
+          </div>
         </div>
-        <div class="wn-footer">
-          <label class="wn-dont-label">
-            <input type="checkbox" id="whatsNewDontShow" /> Don't show again until next update
-          </label>
-          <button class="btn btn-gold" onclick="closeWhatsNew()">OK</button>
+        <div class="hero-scroll-hint" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Finish splash screen -->
-    <div id="tourSplash">
-      <div class="ts-title">Silk Road Calculator</div>
-      <svg id="ts-rblx" viewBox="0 0 160 242" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="ts-jgrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#7c8d45" />
-            <stop offset="100%" stop-color="#566130" />
-          </linearGradient>
-          <linearGradient id="ts-agrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#6e7d3a" />
-            <stop offset="100%" stop-color="#4e5a2a" />
-          </linearGradient>
-          <linearGradient id="ts-lgrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#2e3d16" />
-            <stop offset="100%" stop-color="#1c2a0d" />
-          </linearGradient>
-        </defs>
-        <rect class="ts-dp ts-pll" x="36" y="190" width="36" height="52" rx="2" pathLength="100" />
-        <rect class="ts-dp ts-plr" x="88" y="190" width="36" height="52" rx="2" pathLength="100" />
-        <rect class="ts-dp ts-pto" x="25" y="102" width="110" height="90" rx="4" pathLength="100" />
-        <line class="ts-jl" x1="25" y1="127" x2="135" y2="127" pathLength="100" />
-        <line class="ts-jl" x1="25" y1="151" x2="135" y2="151" pathLength="100" />
-        <line class="ts-jl" x1="25" y1="175" x2="135" y2="175" pathLength="100" />
-        <line class="ts-jl" x1="80" y1="102" x2="80" y2="192" pathLength="100" />
-        <rect class="ts-dp ts-pal" x="1" y="102" width="26" height="90" rx="4" pathLength="100" />
-        <rect class="ts-dp ts-par" x="133" y="102" width="26" height="90" rx="4" pathLength="100" />
-        <rect class="ts-dp ts-pnk" x="63" y="88" width="34" height="17" rx="2" pathLength="100" />
-        <rect class="ts-dp ts-ph" x="35" y="5" width="90" height="86" rx="5" pathLength="100" />
-        <path
-          class="ts-dp ts-pr"
-          d="M 35,39 L 35,12 Q 35,5 42,5 L 118,5 Q 125,5 125,12 L 125,39 Z"
-          pathLength="100"
-        />
-        <rect class="ts-dp ts-pel" x="52" y="44" width="13" height="15" rx="2" pathLength="100" />
-        <rect class="ts-dp ts-per" x="95" y="44" width="13" height="15" rx="2" pathLength="100" />
-        <path class="ts-dp ts-psm" d="M 52,66 Q 80,84 108,66" pathLength="100" />
-      </svg>
-      <div class="ts-bar-label">Loading</div>
-      <div class="ts-bar-track"><div class="ts-bar-fill"></div></div>
-      <div class="ts-fb-hint">Found a bug or have a suggestion? Hit ✉ Feedback after loading!</div>
-    </div>
-
-    <!-- Silk Road walker -->
-    <div id="walkerBar">
-      <div id="walkerGroup">
-        <div id="wkCamelWrap">
-          <!-- Camel (follows behind) -->
-          <svg
-            id="walkerCamel"
-            viewBox="0 0 140 100"
-            xmlns="http://www.w3.org/2000/svg"
-            width="95"
-            height="68"
-          >
-            <rect x="15" y="35" width="80" height="37" rx="4" fill="#c8a050" />
-            <rect x="38" y="14" width="42" height="26" rx="10" fill="#b89040" />
-            <rect x="87" y="20" width="15" height="26" rx="3" fill="#c8a050" />
-            <rect x="92" y="6" width="32" height="20" rx="3" fill="#c8a050" />
-            <rect x="95" y="2" width="8" height="8" rx="3" fill="#b89040" />
-            <rect x="104" y="9" width="6" height="6" rx="1" fill="#1a0e00" />
-            <rect x="120" y="19" width="5" height="4" rx="1" fill="#8b6020" />
-            <rect x="10" y="40" width="8" height="14" rx="2" fill="#b89040" />
-            <rect class="wk-cl-a" x="78" y="69" width="13" height="28" rx="2" fill="#b89040" />
-            <rect class="wk-cl-b" x="62" y="69" width="13" height="28" rx="2" fill="#b89040" />
-            <rect class="wk-cl-b" x="32" y="69" width="13" height="28" rx="2" fill="#b89040" />
-            <rect class="wk-cl-a" x="16" y="69" width="13" height="28" rx="2" fill="#b89040" />
-          </svg>
+      <!-- ── STATS STRIP ─────────────────────────────────────────────────── -->
+      <section class="stats-strip">
+        <div class="stats-inner">
+          <div class="stat-item">
+            <span class="stat-val">6</span>
+            <span class="stat-label">Cities</span>
+          </div>
+          <div class="stat-div"></div>
+          <div class="stat-item">
+            <span class="stat-val" id="statRouteCount">—</span>
+            <span class="stat-label">Trade Routes</span>
+          </div>
+          <div class="stat-div"></div>
+          <div class="stat-item">
+            <span class="stat-val">20+</span>
+            <span class="stat-label">Goods</span>
+          </div>
+          <div class="stat-div"></div>
+          <div class="stat-item">
+            <span class="stat-val">Free</span>
+            <span class="stat-label">Always</span>
+          </div>
         </div>
-        <div id="wkCharWrap">
-          <!-- Merchant (leads) -->
-          <svg
-            id="walkerChar"
-            viewBox="0 0 70 110"
-            xmlns="http://www.w3.org/2000/svg"
-            width="42"
-            height="66"
-          >
-            <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060" />
-            <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07" />
-            <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
-            <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
-            <rect x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00" />
-            <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060" />
-            <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c" />
-            <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-            <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-            <g id="wkCharArmL">
-              <rect x="2" y="46" width="10" height="26" rx="3" fill="#5e6c34" />
-              <rect x="0" y="68" width="14" height="12" rx="3" fill="#c09060" />
-            </g>
-            <g id="wkCharArmR">
-              <rect x="58" y="46" width="10" height="18" rx="3" fill="#5e6c34" />
-              <g id="wkCharForeArmR">
-                <rect x="58" y="62" width="10" height="14" rx="3" fill="#5e6c34" />
-                <rect x="56" y="73" width="14" height="11" rx="3" fill="#c09060" />
-              </g>
-            </g>
-            <rect id="wkCharLegL" x="14" y="80" width="16" height="30" rx="2" fill="#253012" />
-            <rect id="wkCharLegR" x="40" y="80" width="16" height="30" rx="2" fill="#253012" />
-          </svg>
-        </div>
-        <!-- Camel head peeking from left edge (variant 2) -->
-        <div id="wkPeekHead">
-          <svg viewBox="87 0 53 46" xmlns="http://www.w3.org/2000/svg" width="53" height="46">
-            <rect x="87" y="20" width="15" height="26" rx="3" fill="#c8a050" />
-            <rect x="92" y="6" width="32" height="20" rx="3" fill="#c8a050" />
-            <rect x="95" y="2" width="8" height="8" rx="3" fill="#b89040" />
-            <rect x="104" y="9" width="6" height="6" rx="1" fill="#1a0e00" />
-            <rect x="120" y="19" width="5" height="4" rx="1" fill="#8b6020" />
-          </svg>
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Feedback: merchant peeking from corner -->
-    <div id="feedbackContainer">
-      <!-- Corner peek button -->
-      <button id="feedbackBtn" type="button" aria-label="Open feedback">
-        <div id="fbPeekBubble">
-          <span class="fbpb-title">Got feedback?</span>
-          <span class="fbpb-sub">Bugs · Suggestions · Praise</span>
-        </div>
-        <svg
-          id="fbPeekChar"
-          viewBox="0 0 70 110"
-          xmlns="http://www.w3.org/2000/svg"
-          width="60"
-          height="93"
-          aria-hidden="true"
-        >
-          <g transform="translate(70,0) scale(-1,1)">
-            <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060" />
-            <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07" />
-            <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
-            <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401" />
-            <rect x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00" />
-            <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060" />
-            <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c" />
-            <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-            <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1" />
-            <g id="fbArmL">
-              <rect x="2" y="46" width="10" height="26" rx="3" fill="#5e6c34" />
-              <rect x="0" y="68" width="14" height="12" rx="3" fill="#c09060" />
-            </g>
-            <g id="fbArmR">
-              <rect x="58" y="46" width="10" height="26" rx="3" fill="#5e6c34" />
-              <rect x="56" y="68" width="14" height="12" rx="3" fill="#c09060" />
-            </g>
-            <rect id="fbLegR" x="14" y="82" width="16" height="20" rx="2" fill="#253012" />
-            <rect id="fbLegL" x="40" y="82" width="16" height="20" rx="2" fill="#253012" />
-          </g>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Feedback modal -->
-    <div id="feedbackModal" role="dialog" aria-modal="true" aria-label="Send feedback">
-      <div id="feedbackModalBox">
-        <!-- Merchant peeking over top of modal -->
-        <div class="fb-char-topper" aria-hidden="true">
-          <svg
-            viewBox="0 0 280 106"
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <!-- Body/chest — bottom edge aligns with form border -->
-            <rect x="88" y="75" width="104" height="17" rx="3" fill="#6b7a3c" />
-            <!-- Arm sleeves -->
-            <rect x="66" y="70" width="14" height="24" rx="4" fill="#5e6c34" />
-            <rect x="200" y="70" width="14" height="24" rx="4" fill="#5e6c34" />
-            <!-- Neck -->
-            <rect x="127" y="64" width="26" height="14" rx="2" fill="#c09060" />
-            <!-- Head -->
-            <rect x="102" y="4" width="76" height="64" rx="8" fill="#c09060" />
-            <!-- Hair -->
-            <path d="M102,26 L102,9 Q102,4 110,4 L168,4 Q178,4 178,9 L178,26 Z" fill="#3b1c07" />
-            <!-- Eyes -->
-            <rect x="116" y="32" width="13" height="12" rx="2" fill="#0c0401" />
-            <rect x="151" y="32" width="13" height="12" rx="2" fill="#0c0401" />
-            <!-- Smile -->
-            <rect x="120" y="54" width="40" height="6" rx="3" fill="#1a0a00" />
-            <!-- Hands gripping form border -->
-            <rect x="63" y="88" width="19" height="14" rx="4" fill="#c09060" />
-            <rect x="198" y="88" width="19" height="14" rx="4" fill="#c09060" />
-          </svg>
-        </div>
-
-        <!-- Form body -->
-        <div class="fb-bubble-body">
-          <button id="closeBtn" class="fb-close" type="button" aria-label="Close">✕</button>
-          <h3 class="fb-title">
-            <span class="fb-title-glyph" aria-hidden="true">✦</span>
-            Send Feedback
-          </h3>
-
-          <form id="feedbackForm">
-            <div class="fb-type-row" role="radiogroup" aria-label="Feedback type">
-              <label class="fb-type">
-                <input type="radio" name="fbType" value="feedback" checked />
-                <span class="fb-type-glyph" aria-hidden="true">✦</span>
-                <span class="fb-type-name">Feedback</span>
-              </label>
-              <label class="fb-type">
-                <input type="radio" name="fbType" value="suggestion" />
-                <span class="fb-type-glyph" aria-hidden="true">✧</span>
-                <span class="fb-type-name">Suggestion</span>
-              </label>
-              <label class="fb-type">
-                <input type="radio" name="fbType" value="bug" />
-                <span class="fb-type-glyph" aria-hidden="true">⚠</span>
-                <span class="fb-type-name">Bug</span>
-              </label>
+      <!-- ── ABOUT ───────────────────────────────────────────────────────── -->
+      <section class="home-section about-section">
+        <div class="page-content">
+          <div class="section-label" style="margin-bottom:32px">About SilkRoadCalc</div>
+          <div class="about-grid">
+            <div class="about-text">
+              <h2>Built for serious merchants</h2>
+              <p>SilkRoadCalc is a free, community-driven trading calculator built specifically for Silk Road Trading Simulator. Enter your character's setup once — culture, religion, faith level, language, animals, gamepasses, and faction ranks — and instantly see every route ranked by profit per minute.</p>
+              <p style="margin-top:14px">No spreadsheets. No guesswork. Just the optimal route for your exact loadout.</p>
+              <div class="about-credits">
+                <div class="credit-row">
+                  <span class="credit-label">Created by</span>
+                  <span class="credit-val">Anonymous</span>
+                </div>
+                <div class="credit-row">
+                  <span class="credit-label">Lead Analyst</span>
+                  <span class="credit-val">KuglerKnight</span>
+                </div>
+                <div class="credit-row">
+                  <span class="credit-label">Original Idea</span>
+                  <span class="credit-val">Ming</span>
+                </div>
+                <div class="credit-row">
+                  <span class="credit-label">Design Vision</span>
+                  <span class="credit-val">Sensitive Young Man</span>
+                </div>
+              </div>
             </div>
-
-            <label class="fb-field-label" for="username"
-              >Username <span class="fb-opt">(optional)</span></label
-            >
-            <input
-              type="text"
-              id="username"
-              placeholder="Your Discord username, in case I need to reach you"
-              maxlength="32"
-            />
-
-            <label class="fb-field-label" for="message">Message</label>
-            <textarea
-              id="message"
-              rows="5"
-              placeholder="Tell us what's on your mind…"
-              required
-            ></textarea>
-
-            <button type="submit" id="sendBtn" class="btn btn-gold fb-submit">Send Feedback</button>
-          </form>
-
-          <p id="status" class="fb-status"></p>
+            <div class="about-links">
+              <a href="https://discord.gg/dEsV8QPqSU" class="about-link-card" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
+                <div>
+                  <div class="alc-title">Official Discord</div>
+                  <div class="alc-sub">Join the community</div>
+                </div>
+                <svg class="alc-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 10h14M10 3l7 7-7 7"/></svg>
+              </a>
+              <a href="https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki" class="about-link-card" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3zm0 4.5L17 8v3.5c0 3.5-2.3 6.7-5 7.8-2.7-1.1-5-4.3-5-7.8V8l5-1.5z"/></svg>
+                <div>
+                  <div class="alc-title">Fandom Wiki</div>
+                  <div class="alc-sub">Game reference &amp; guides</div>
+                </div>
+                <svg class="alc-arrow" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 10h14M10 3l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
         </div>
+      </section>
+
+      <!-- ── FEATURES ────────────────────────────────────────────────────── -->
+      <section class="home-section features-section">
+        <div class="page-content">
+          <div class="section-label" style="margin-bottom:32px">Features</div>
+          <div class="features-grid">
+
+            <a href="/frontend/routes/routes.html" class="feature-card card card-corner">
+              <div class="fc-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 12h8a4 4 0 0 0 4-4M7 12h8a4 4 0 0 1 4 4"/></svg>
+              </div>
+              <div class="fc-title">Trade Routes</div>
+              <div class="fc-desc">Full route table ranked by profit per minute. Filter by city, sort by any metric, expand for return cargo analysis.</div>
+              <div class="fc-cta">Open Routes →</div>
+            </a>
+
+            <a href="/frontend/routes/routes.html" class="feature-card card card-corner">
+              <div class="fc-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2v20M2 12h20M6 6l12 12M18 6 6 18"/></svg>
+              </div>
+              <div class="fc-title">Profit Optimization</div>
+              <div class="fc-desc">Accounts for culture, religion, faith level, language skill, animal bonuses, gamepasses, and faction ranks.</div>
+              <div class="fc-cta">Calculate Now →</div>
+            </a>
+
+            <a href="/frontend/planner/planner.html" class="feature-card card card-corner">
+              <div class="fc-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              </div>
+              <div class="fc-title">Courier Planner</div>
+              <div class="fc-desc">Plan multi-stop courier quests. Select cargo, choose cities, and get estimated profit and travel time.</div>
+              <div class="fc-cta">Plan Route →</div>
+            </a>
+
+            <a href="/frontend/forum/forum.html" class="feature-card card card-corner">
+              <div class="fc-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div class="fc-title">Community Forum</div>
+              <div class="fc-desc">Discuss routes, report bugs, and give feedback. Private ticket system for direct communication.</div>
+              <div class="fc-cta">Visit Forum →</div>
+            </a>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ── HOW TO USE ──────────────────────────────────────────────────── -->
+      <section class="home-section howto-section">
+        <div class="page-content">
+          <div class="section-label" style="margin-bottom:32px">How To Use</div>
+          <div class="howto-grid">
+            <div class="howto-step card">
+              <div class="hs-number">01</div>
+              <div class="hs-title">Set Up Your Character</div>
+              <div class="hs-desc">Open the Routes page. In the sidebar, set your culture, religion, faith level, language skill, animals, gamepasses, and faction ranks.</div>
+            </div>
+            <div class="howto-arrow" aria-hidden="true">→</div>
+            <div class="howto-step card">
+              <div class="hs-number">02</div>
+              <div class="hs-title">Browse Routes</div>
+              <div class="hs-desc">The table instantly recalculates and ranks every route by profit per minute for your exact setup. Use filters to narrow down by city or good.</div>
+            </div>
+            <div class="howto-arrow" aria-hidden="true">→</div>
+            <div class="howto-step card">
+              <div class="hs-number">03</div>
+              <div class="hs-title">Trade &amp; Profit</div>
+              <div class="hs-desc">Follow the top route. Check the Best Loop card for optimal round trips. Use the Courier Planner for multi-city quest chains.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CHANGELOG ───────────────────────────────────────────────────── -->
+      <section class="home-section changelog-section">
+        <div class="page-content">
+          <div class="section-label" style="margin-bottom:32px">Latest Updates</div>
+          <div id="homeChangelog" class="changelog-list">
+            <div class="cl-loading">Loading updates…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── DISCORD CTA ─────────────────────────────────────────────────── -->
+      <section class="discord-cta-section">
+        <div class="page-content">
+          <div class="discord-cta-card card card-gold">
+            <div class="dcc-content">
+              <div class="dcc-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
+              </div>
+              <div>
+                <h3 class="dcc-title">Join the Community</h3>
+                <p class="dcc-sub">Get updates, share routes, discuss strategies, and report issues directly with the team.</p>
+              </div>
+            </div>
+            <a href="https://discord.gg/dEsV8QPqSU" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Join Discord</a>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- end .page-wrap -->
+
+    <!-- ── FOOTER ──────────────────────────────────────────────────────── -->
+    <footer id="footer">
+      <div class="footer-inner">
+        <span class="footer-brand">SilkRoadCalc.eu</span>
+        <div class="footer-links">
+          <a href="/frontend/routes/routes.html">Routes</a>
+          <a href="/frontend/planner/planner.html">Planner</a>
+          <a href="/frontend/forum/forum.html">Forum</a>
+          <a href="/frontend/settings/settings.html">Settings</a>
+          <a href="https://discord.gg/dEsV8QPqSU" target="_blank" rel="noopener"><span class="nav-auth-label">Login with Discord</span></a>
+          <a href="https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki" target="_blank" rel="noopener">Wiki</a>
+        </div>
+        <span class="footer-copy">Not affiliated with Roblox or Silk Road Trading Simulator.</span>
       </div>
+    </footer>
+
+    <!-- ── MAINTENANCE OVERLAY ─────────────────────────────────────────── -->
+    <div id="maintenanceOverlay">
+      <img src="/frontend/assets/images/icon.png" alt="" width="48" height="48" style="opacity:0.5;margin-bottom:8px" />
+      <h2>Under Maintenance</h2>
+      <p id="maintenanceMsg">SilkRoadCalc is currently undergoing maintenance. Check back shortly.</p>
     </div>
 
-    <script defer src="./frontend/assets/js/main-utils.js"></script>
-    <script defer src="./frontend/assets/js/main-engine.js"></script>
-    <script defer src="./frontend/assets/js/script.js"></script>
-    <script defer src="./frontend/assets/js/main-overlays.js"></script>
+    <script src="./frontend/shared/nav.js" defer></script>
+    <script src="./frontend/home/home.js" defer></script>
   </body>
 </html>

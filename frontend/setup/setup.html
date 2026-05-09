@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Character Setup | Silk Road Trading Calculator</title>
+    <meta name="description" content="Configure your character setup for Silk Road Trading Calculator — culture, religion, language, storage, gamepasses and faction ranks." />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://silkroadcalc.eu/frontend/setup/setup.html" />
+    <meta name="theme-color" content="#291610" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/frontend/assets/images/icon.png" />
+    <link rel="stylesheet" href="../shared/base.css" />
+    <link rel="stylesheet" href="../settings/settings.css" />
+    <link rel="stylesheet" href="./setup.css" />
+  </head>
+  <body>
+    <div class="fx-shimmer" aria-hidden="true"></div>
+
+    <nav id="topnav">
+      <div class="nav-inner">
+        <a class="nav-logo" href="/index.html">
+          <img src="/frontend/assets/images/icon.png" alt="SilkRoadCalc" width="28" height="28" />
+          <span>SilkRoadCalc</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+          <a href="/index.html"    class="nav-link" data-page="home">Home</a>
+          <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
+          <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
+          <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
+          <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
+          <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
+        </div>
+        <div class="nav-actions">
+          <a href="/api/auth/discord" class="nav-discord">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
+            <span class="nav-auth-label">Login with Discord</span>
+          </a>
+        </div>
+        <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="nav-mobile-panel" id="navMobilePanel">
+        <a href="/index.html"    class="nav-link" data-page="home">Home</a>
+        <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
+        <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
+        <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
+        <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
+        <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
+        <a href="/api/auth/discord" class="nav-discord"><span class="nav-auth-label">Login with Discord</span></a>
+      </div>
+    </nav>
+
+    <div class="page-wrap">
+      <div class="page-content">
+
+        <div class="settings-header">
+          <h1>Character Setup</h1>
+          <p>Saved automatically to your browser. Applies to Routes and Courier Planner.</p>
+        </div>
+
+        <div class="settings-grid">
+
+          <!-- Identity -->
+          <section class="scard card">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Identity
+            </div>
+            <div class="scard-desc">Your culture and religion affect buy/sell price bonuses in each city.</div>
+            <div class="scard-body">
+              <div class="srow">
+                <label for="setupCulture">Culture</label>
+                <select id="setupCulture" class="sselect">
+                  <option value="Byzantine">Byzantine</option>
+                  <option value="Syriac">Syriac</option>
+                  <option value="Persian">Persian</option>
+                </select>
+              </div>
+              <div class="srow">
+                <label for="setupReligion">Religion</label>
+                <select id="setupReligion" class="sselect">
+                  <option value="Christianity">Christianity</option>
+                  <option value="Judaism">Judaism</option>
+                  <option value="Zoroastrianism">Zoroastrianism</option>
+                </select>
+              </div>
+              <div class="srow">
+                <label for="setupFaith">Faith Level</label>
+                <select id="setupFaith" class="sselect">
+                  <option value="0">None</option>
+                  <option value="1">Level 1</option>
+                  <option value="2">Level 2</option>
+                  <option value="3">Level 3</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Language & Storage -->
+          <section class="scard card">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Language & Storage
+            </div>
+            <div class="scard-desc">Language skill at the sell city and how much cargo you can carry.</div>
+            <div class="scard-body">
+              <div class="srow">
+                <label for="setupLang">Language at Sell City</label>
+                <select id="setupLang" class="sselect">
+                  <option value="1">Broken (−3%)</option>
+                  <option value="2" selected>Proficient (0%)</option>
+                  <option value="3">Fluent / Native (+3%)</option>
+                </select>
+              </div>
+              <div class="srow">
+                <label for="setupBackpack">Storage</label>
+                <select id="setupBackpack" class="sselect">
+                  <option value="None">None (3 slots)</option>
+                  <option value="SmallSatchel">Small Satchel (5)</option>
+                  <option value="LargeSatchel">Large Satchel (7)</option>
+                  <option value="BasketBackpack">Basket Backpack (9)</option>
+                  <option value="FramePack">Frame Pack (9)</option>
+                </select>
+              </div>
+              <label class="stoggle">
+                <span class="stoggle-label">Extra Storage Gamepass</span>
+                <span class="stoggle-sub">Permanently adds +1 cargo slot</span>
+                <input type="checkbox" id="setupExtraStorage" />
+                <span class="stoggle-track"></span>
+              </label>
+            </div>
+          </section>
+
+          <!-- Gamepasses -->
+          <section class="scard card">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Gamepasses
+            </div>
+            <div class="scard-desc">Purchased Roblox gamepasses that affect your speed and carrying capacity.</div>
+            <div class="scard-body">
+              <label class="stoggle">
+                <span class="stoggle-label">Auto-Walk Speed Boost</span>
+                <span class="stoggle-sub">+4 to base walkspeed</span>
+                <input type="checkbox" id="setupAutoWalk" />
+                <span class="stoggle-track"></span>
+              </label>
+              <label class="stoggle">
+                <span class="stoggle-label">Caravan Slot Gamepass</span>
+                <span class="stoggle-sub">+1 animal slot (max 5 at Rank 8)</span>
+                <input type="checkbox" id="setupCaravan" />
+                <span class="stoggle-track"></span>
+              </label>
+            </div>
+          </section>
+
+          <!-- Faction Ranks -->
+          <section class="scard card">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Faction Ranks
+            </div>
+            <div class="scard-desc">Rank 8 in either faction grants an extra animal slot.</div>
+            <div class="scard-body">
+              <div class="srow">
+                <label for="setupByzantine">Byzantine Rank</label>
+                <select id="setupByzantine" class="sselect">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                  <option value="7">7</option><option value="8">8</option>
+                </select>
+              </div>
+              <div class="srow">
+                <label for="setupSassanid">Sassanid Rank</label>
+                <select id="setupSassanid" class="sselect">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                  <option value="7">7</option><option value="8">8</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Animal Slots -->
+          <section class="scard card scard-full">
+            <div class="scard-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span id="setupAnimalSlotsTitle">Animal Slots (3)</span>
+            </div>
+            <div class="scard-desc">Animals carried with you — each adds speed and extra cargo slots (with saddlebags).</div>
+            <div class="scard-body setup-animal-grid" id="setupAnimalSlots"></div>
+          </section>
+
+        </div>
+
+        <div class="setup-stats">
+          <div class="setup-stat"><span class="ss-label">Walkspeed</span><b id="statSetupSpeed">16.00</b></div>
+          <div class="setup-stat"><span class="ss-label">Auto-Walk</span><b id="statSetupAuto">+0</b></div>
+          <div class="setup-stat"><span class="ss-label">Animal Bonus</span><b id="statSetupAnimal">+0</b></div>
+          <div class="setup-stat highlight"><span class="ss-label">Cargo Slots</span><b id="statSetupSlots">3</b></div>
+        </div>
+
+        <div class="setup-save-bar">
+          <span id="setupStatus" class="setup-status"></span>
+          <a href="/frontend/routes/routes.html" class="btn">Go to Routes →</a>
+        </div>
+
+      </div>
+    </div>
+
+    <footer id="footer">
+      <div class="footer-inner">
+        <span class="footer-brand">SilkRoadCalc.eu</span>
+        <div class="footer-links">
+          <a href="/frontend/routes/routes.html">Routes</a>
+          <a href="/frontend/planner/planner.html">Planner</a>
+          <a href="/frontend/forum/forum.html">Forum</a>
+          <a href="/frontend/setup/setup.html">Setup</a>
+          <a href="/frontend/settings/settings.html">Settings</a>
+        </div>
+        <span class="footer-copy">Not affiliated with Roblox or Silk Road Trading Simulator.</span>
+      </div>
+    </footer>
+
+    <div id="maintenanceOverlay">
+      <img src="/frontend/assets/images/icon.png" alt="" width="48" height="48" style="opacity:0.5;margin-bottom:8px" />
+      <h2>Under Maintenance</h2>
+      <p id="maintenanceMsg">SilkRoadCalc is currently undergoing maintenance.</p>
+    </div>
+
+    <script defer src="../shared/nav.js"></script>
+    <script defer src="../shared/overlays.js"></script>
+    <script defer src="./setup.js"></script>
+  </body>
+</html>
