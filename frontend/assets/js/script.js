@@ -300,7 +300,7 @@ function badge(city) {
       const lvlLabel = EVENT_LEVELS[ev.level]?.label[ev.type] || `L${ev.level}`;
       const remaining = fmtRemaining(ev.remainingMs);
       const dirCls = def.dir < 0 ? 'event-tag dir-down' : 'event-tag';
-      const title = `${def.label} (${lvlLabel}) — ${def.desc}. ${remaining} remaining.`;
+      const title = `${def.label} (${lvlLabel}): ${def.desc}. ${remaining} remaining.`;
       tag = `<span class="${dirCls}" title="${title}">${def.glyph}</span>`;
     }
   }
@@ -990,7 +990,7 @@ function refreshSetupDropdowns() {
   ['loadSetupSelect', 'clearSetupSelect'].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const placeholder = id === 'loadSetupSelect' ? '— choose setup —' : '— choose setup —';
+    const placeholder = id === 'loadSetupSelect' ? 'Choose setup' : 'Choose setup';
     el.innerHTML =
       `<option value="">${placeholder}</option>` +
       names.map((n) => `<option value="${n}">${n}</option>`).join('');
@@ -1361,7 +1361,7 @@ function renderCourierUI(out, data) {
   function legCard(leg, num) {
     let cargoHtml;
     if (leg.avail === 0) {
-      cargoHtml = `<div class="trip-leg-hint">Slots full — packages only</div>`;
+      cargoHtml = `<div class="trip-leg-hint">Slots full, packages only</div>`;
     } else if (!leg.cargo) {
       cargoHtml = `<div class="trip-leg-hint">Nothing profitable to carry</div>`;
     } else {
@@ -1458,7 +1458,7 @@ function renderCourierUI(out, data) {
     </div>`
       : mustReturn && returnLegs.length > 0
         ? ''
-        : `<div class="courier-complete-msg">✦ Journey complete — all packages delivered.</div>`;
+        : `<div class="courier-complete-msg">✦ Journey complete. All packages delivered.</div>`;
 
   out.innerHTML = `
     <div class="trip-card" style="margin-top:16px">
@@ -2174,7 +2174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const payload = {
       embeds: [
         {
-          title: meta.title + ' — silkroadcalc.eu',
+          title: meta.title + ' | silkroadcalc.eu',
           color: meta.color,
           timestamp: new Date().toISOString(),
           fields: [
@@ -2199,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.ok) {
-        setStatus('Thank you — sent!', 'ok');
+        setStatus('Thank you, sent!', 'ok');
         form.reset();
         applyType(); // restore default placeholder/submit copy
         setTimeout(() => {

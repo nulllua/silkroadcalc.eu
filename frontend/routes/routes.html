@@ -129,7 +129,7 @@
           <div id="locationBar">
             <span class="tlabel">I'm in:</span>
             <select id="currentCity" onchange="onCurrentCityChange()">
-              <option value="">— Not set —</option>
+              <option value="">Not set</option>
               <option value="Antioch">Antioch</option>
               <option value="Tyre">Tyre</option>
               <option value="Damascus">Damascus</option>
@@ -139,7 +139,7 @@
             </select>
             <span class="tlabel">Sell in:</span>
             <select id="sellInCity" onchange="onSellCityChange()">
-              <option value="">— Any city —</option>
+              <option value="">Any city</option>
               <option value="Antioch">Antioch</option>
               <option value="Tyre">Tyre</option>
               <option value="Damascus">Damascus</option>
@@ -235,14 +235,14 @@
             <div class="setup-block">
               <div class="setup-label">Load setup</div>
               <div class="setup-row">
-                <select id="loadSetupSelect"><option value="">— choose setup —</option></select>
+                <select id="loadSetupSelect"><option value="">Choose setup</option></select>
                 <button class="btn" onclick="loadNamedState()">Load</button>
               </div>
             </div>
             <div class="setup-block">
               <div class="setup-label">Delete setup</div>
               <div class="setup-row">
-                <select id="clearSetupSelect"><option value="">— choose setup —</option></select>
+                <select id="clearSetupSelect"><option value="">Choose setup</option></select>
                 <button class="btn btn-red" onclick="clearNamedState()">Delete</button>
               </div>
             </div>

@@ -189,7 +189,7 @@
       if (cat === state.cat) { state.page = 1; loadPosts(); }
       loadCounts();
     } catch (_) {
-      submitBtn.textContent = 'Error — retry';
+      submitBtn.textContent = 'Error, retry';
     } finally {
       submitBtn.disabled = false;
       if (submitBtn.textContent === 'Posting…') submitBtn.textContent = 'Post';

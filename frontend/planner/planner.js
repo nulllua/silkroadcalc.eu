@@ -195,7 +195,7 @@
   function legHTML(leg, num) {
     var cargoHtml;
     if (leg.avail === 0) {
-      cargoHtml = '<div class="pr-leg-hint">Slots full — packages only</div>';
+      cargoHtml = '<div class="pr-leg-hint">Slots full, packages only</div>';
     } else if (!leg.cargo) {
       cargoHtml = '<div class="pr-leg-hint">Nothing profitable to carry</div>';
     } else {
