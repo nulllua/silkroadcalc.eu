@@ -22,8 +22,9 @@
       var res  = await fetch(API + '/api/notices');
       if (!res.ok) return;
       var data = await res.json();
-      var text = Array.isArray(data) ? (data[0] && data[0].message) : data.text;
-      if (!text) return;
+      var notice = Array.isArray(data) ? data[0] : data;
+      if (!notice || !notice.active || !notice.message) return;
+      var text = notice.message;
       var bar = document.getElementById('noticeBar');
       if (!bar) return;
       var txt = bar.querySelector('.notice-text') || bar;

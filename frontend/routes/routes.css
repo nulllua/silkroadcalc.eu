@@ -192,4 +192,15 @@ body::before { content: none; }
 @media (max-width: 540px) {
   :root { --nav-h: 50px; }
   .nav-logo span { display: none; }
+
+  #eventToolbar {
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow-x: visible;
+    gap: 5px;
+    padding: 8px 10px;
+  }
+  #eventToolbar .tlabel { width: 100%; margin-bottom: 2px; }
+  #eventToolbar select  { flex: 1 1 calc(50% - 5px); min-width: 0; }
+  .evq-btn, .evq-btn-clear { flex: 1 1 calc(50% - 5px); }
 }
