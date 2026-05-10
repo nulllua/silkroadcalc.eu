@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 const GOODS = [
   { name: 'Barley', base_price: 10, type: 'Agricultural', hop_pct: 0.5 },
-  { name: 'Wheat', base_price: 10, type: 'Agricultural', hop_pct: 0.5 },
+  { name: 'Wheat', base_price: 10, type: 'Agricultural', hop_pct: 0.45 },
   { name: 'Olive Oil', base_price: 20, type: 'Agricultural', hop_pct: 0.3 },
   { name: 'Dried Fish', base_price: 100, type: 'Agricultural', hop_pct: 0.09 },
   { name: 'Earthenware', base_price: 10, type: 'Household', hop_pct: 0.5 },
@@ -195,7 +195,7 @@ const CULTURES = [
 ];
 const RELIGIONS = ['Christianity', 'Judaism', 'Zoroastrianism'];
 const RELIGION_PERKS = [
-    {
+  {
     religion: 'Zoroastrianism',
     min_level: 1,
     perk_type: 'byzantine_penalty',

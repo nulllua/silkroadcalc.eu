@@ -1620,7 +1620,7 @@ function buildPriceBreakdown(route, kind) {
   );
   const relMod = calculateReligionModifier(good, city, ps.religion, ps.religionLevel);
   const repMod = kind === 'buy' ? calculateRepDiscount(city, ps) : 0;
-  const importCost = kind === 'buy' ? calculateImportCost(good, city) : 0;
+  const importCost = kind === 'buy' ? Math.round(calculateDistanceValue(good, city)) : 0;
   const importHops = kind === 'buy' ? getMinHopsFromProducers(good, city) : 0;
   const distHops = kind === 'sell' ? getMinHopsFromProducers(good, route.sellCity) : 0;
   const distBonus = kind === 'sell' ? Math.floor(good.base * distHops * good.hopPct) : 0;
@@ -1676,7 +1676,7 @@ function buildPriceBreakdown(route, kind) {
       `<div class="bk-row"><span>${def.glyph} Event: ${def.label} (${lvlLabel})</span><b class="${evDelta > 0 ? 'profit' : 'loss'}">${sign}$${Math.abs(Math.round(evDelta))}</b></div>`
     );
   }
-  if (!importCost && !cityMod && !langMod && !relMod && !repMod && !distMod && !evDelta)
+  if (!importCost && !cityMod && !langMod && !relMod && !repMod && !distBonus && !evDelta)
     lines.push(`<div class="bk-row"><span>No modifiers apply</span><b>-</b></div>`);
   const finalPrice = kind === 'buy' ? route.buyPrice : route.sellPrice;
   lines.push(`<div class="bk-row total"><span>Final</span><b>$${finalPrice}</b></div>`);
