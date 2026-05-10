@@ -733,6 +733,12 @@ function tickEventFloater() {
   }
 }
 
+function fireEventNotif(title, body) {
+  if (localStorage.getItem('silkroad_notif_events') !== '1') return;
+  if (Notification.permission !== 'granted') return;
+  new Notification(title, { body, icon: '/frontend/assets/images/favicon-32.png' });
+}
+
 // Tick: refresh timers + auto-clear expired events
 setInterval(() => {
   if (!Object.keys(eventState).length) {
@@ -742,13 +748,23 @@ setInterval(() => {
     return;
   }
   let anyExpired = false;
+  const expiredCities = [];
   for (const city of Object.keys(eventState)) {
     const ev = eventState[city];
     const remaining = (ev.durationMs || EVENT_DURATION_MS) - (Date.now() - ev.startTime);
     if (remaining <= 0) {
+      expiredCities.push({ city, ev });
       delete eventState[city];
       anyExpired = true;
       continue;
+    }
+    if (remaining <= 5 * 60 * 1000 && !ev.notified5min) {
+      ev.notified5min = true;
+      fireEventNotif(
+        `${city} event ending soon`,
+        `${EVENTS[ev.type]?.label || ev.type} ends in under 5 minutes`
+      );
+      saveEventState();
     }
     const tEl = document.getElementById('evt-' + city);
     if (tEl) tEl.textContent = fmtRemaining(remaining);
@@ -762,6 +778,8 @@ setInterval(() => {
       card.classList.toggle('is-low', remaining <= 5 * 60 * 1000);
     }
   }
+  for (const { city, ev } of expiredCities)
+    fireEventNotif(`${city} event ended`, `${EVENTS[ev.type]?.label || ev.type} has ended`);
   tickEventFloater();
   if (anyExpired) {
     saveEventState();
@@ -2008,22 +2026,6 @@ async function syncFromApi() {
     if (cr.ok) {
       const logs = await cr.json();
       renderAboutChangelogs(logs);
-      if (logs.length) {
-        const latest = logs[0];
-        window._wnKey = 'silkroad_whatsnew_id' + latest.id;
-        const badge = document.querySelector('#whatsNewTitle .wn-ver-badge');
-        if (badge) badge.textContent = latest.version;
-        const body = document.querySelector('#whatsNewBox .wn-body');
-        if (body && latest.entries && latest.entries.length) {
-          body.innerHTML =
-            '<ul>' +
-            latest.entries.map((e) => `<li>${escHtml(e)}</li>`).join('') +
-            '</ul>' +
-            (latest.thanks
-              ? `<div class="wn-thanks">Special thanks: ${escHtml(latest.thanks)}</div>`
-              : '');
-        }
-      }
     }
     if (nr.ok) {
       const notices = await nr.json();

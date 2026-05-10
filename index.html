@@ -640,6 +640,18 @@
       </p>
     </div>
 
+    <!-- What's New popup -->
+    <div id="whatsNewModal" role="dialog" aria-modal="true" aria-labelledby="whatsNewTitle">
+      <div id="whatsNewBox">
+        <div class="wn-title" id="whatsNewTitle">What's New <span class="wn-ver-badge"></span></div>
+        <div class="wn-body"></div>
+        <div class="wn-footer">
+          <label class="wn-dont-label"><input type="checkbox" id="whatsNewDontShow" /> Don't show again until next update</label>
+          <button class="btn btn-gold" onclick="closeWhatsNew()">OK</button>
+        </div>
+      </div>
+    </div>
+
     <script src="./frontend/shared/nav.js" defer></script>
     <script src="./frontend/home/home.js" defer></script>
   </body>

@@ -88,11 +88,50 @@
     } catch (_) { el.textContent = '100+'; }
   }
 
+  /* ── What's New popup ─────────────────────────────────────────────────── */
+  window.closeWhatsNew = function () {
+    var modal = document.getElementById('whatsNewModal');
+    var cb = document.getElementById('whatsNewDontShow');
+    if (cb && cb.checked) localStorage.setItem(window._wnKey || 'silkroad_whatsnew', '1');
+    if (!modal) return;
+    modal.classList.remove('is-visible');
+    setTimeout(function () { modal.style.display = 'none'; }, 350);
+  };
+
+  async function loadWhatsNew() {
+    try {
+      var res = await fetch(API + '/api/changelogs');
+      if (!res.ok) return;
+      var logs = await res.json();
+      if (!logs.length) return;
+      var latest = logs[0];
+      window._wnKey = 'silkroad_whatsnew_id' + latest.id;
+      if (localStorage.getItem(window._wnKey) === '1') return;
+      var badge = document.querySelector('#whatsNewTitle .wn-ver-badge');
+      if (badge) badge.textContent = latest.version;
+      var body = document.querySelector('#whatsNewBox .wn-body');
+      if (body && latest.entries && latest.entries.length) {
+        body.innerHTML =
+          '<ul>' +
+          latest.entries.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') +
+          '</ul>' +
+          (latest.thanks ? '<div class="wn-thanks">Special thanks: ' + esc(latest.thanks) + '</div>' : '');
+      }
+      var modal = document.getElementById('whatsNewModal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { modal.classList.add('is-visible'); });
+      });
+    } catch (_) {}
+  }
+
   /* ── Init ─────────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     checkMaintenance();
     loadChangelog();
     loadNotice();
     loadRouteCount();
+    loadWhatsNew();
   });
 })();

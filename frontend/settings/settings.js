@@ -4,13 +4,12 @@
   var KEYS = {
     compact: 'silkroad_compact',
     webhook: 'silkroad_webhook',
-    notifPrices: 'silkroad_notif_prices',
     notifEvents: 'silkroad_notif_events',
   };
 
   function load() {
-    var ids = ['settingCompact', 'notifPrices', 'notifEvents'];
-    var keys = [KEYS.compact, KEYS.notifPrices, KEYS.notifEvents];
+    var ids = ['settingCompact', 'notifEvents'];
+    var keys = [KEYS.compact, KEYS.notifEvents];
     ids.forEach(function (id, i) {
       var el = document.getElementById(id);
       if (el) el.checked = localStorage.getItem(keys[i]) === '1';
@@ -30,7 +29,6 @@
   function bind() {
     var pairs = [
       ['settingCompact', KEYS.compact],
-      ['notifPrices',    KEYS.notifPrices],
       ['notifEvents',    KEYS.notifEvents],
     ];
     pairs.forEach(function (pair) {
@@ -38,6 +36,8 @@
       if (!el) return;
       el.addEventListener('change', function () {
         localStorage.setItem(pair[1], el.checked ? '1' : '0');
+        if (pair[0] === 'notifEvents' && el.checked && Notification.permission !== 'granted')
+          Notification.requestPermission();
       });
     });
 

@@ -1,32 +1,6 @@
 // Overlay, onboarding, and walker animation controllers.
 // Loaded after script.js because it depends on runtime setup above.
 
-/* Whats New popup */
-(function(){
-  var DEFAULT_KEY = 'silkroad_whatsnew_v17';
-
-  function getKey() { return window._wnKey || DEFAULT_KEY; }
-
-  window.showWhatsNew = function(){
-    if (localStorage.getItem(getKey()) === '1') return;
-    var modal = document.getElementById('whatsNewModal');
-    if (!modal) return;
-    modal.style.display = 'flex';
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){ modal.classList.add('is-visible'); });
-    });
-  };
-
-  window.closeWhatsNew = function(){
-    var modal = document.getElementById('whatsNewModal');
-    var cb    = document.getElementById('whatsNewDontShow');
-    if (cb && cb.checked) localStorage.setItem(getKey(), '1');
-    if (!modal) return;
-    modal.classList.remove('is-visible');
-    setTimeout(function(){ modal.style.display = 'none'; }, 380);
-  };
-})();
-
 /* Onboarding tour */
 (function(){
   const TOUR_OFF_KEY  = 'silkroad_tour_off';
@@ -497,7 +471,6 @@
     localStorage.setItem(TOUR_SEEN_KEY, '1');
     tcWave();
     setTimeout(tcHide, 1900);
-    setTimeout(function(){ if (window.showWhatsNew) window.showWhatsNew(); }, 2300);
   };
 
   window.tourGo = function(dir){ go(dir); };
@@ -872,8 +845,6 @@
     if (!off && !seen) {
       setTimeout(function(){ window.startTour(); }, 800);
     } else {
-      // No tour - show What's New after loading screen fully hides (5400ms fade start + 750ms fade)
-      setTimeout(function(){ if (window.showWhatsNew) window.showWhatsNew(); }, 6200);
     }
   });
 })();
