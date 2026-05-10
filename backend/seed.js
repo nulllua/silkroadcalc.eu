@@ -3,11 +3,11 @@ const { pool, initSchema } = require('./db');
 const bcrypt = require('bcrypt');
 
 const GOODS = [
-  { name: 'Barley', base_price: 10, type: 'Agricultural', hop_pct: 0.5 },
+  { name: 'Barley', base_price: 10, type: 'Agricultural', hop_pct: 0.45 },
   { name: 'Wheat', base_price: 10, type: 'Agricultural', hop_pct: 0.45 },
   { name: 'Olive Oil', base_price: 20, type: 'Agricultural', hop_pct: 0.3 },
   { name: 'Dried Fish', base_price: 100, type: 'Agricultural', hop_pct: 0.09 },
-  { name: 'Earthenware', base_price: 10, type: 'Household', hop_pct: 0.5 },
+  { name: 'Earthenware', base_price: 10, type: 'Household', hop_pct: 0.45 },
   { name: 'Glassware', base_price: 20, type: 'Household', hop_pct: 0.3 },
   { name: 'Iron Ingot', base_price: 35, type: 'Metal', hop_pct: 0.2 },
   { name: 'Copper Ingot', base_price: 130, type: 'Metal', hop_pct: 10 / 130 },
@@ -15,7 +15,7 @@ const GOODS = [
   { name: 'Coriander', base_price: 80, type: 'Spices', hop_pct: 0.1 },
   { name: 'Sesame', base_price: 100, type: 'Spices', hop_pct: 0.09 },
   { name: 'Saffron', base_price: 200, type: 'Spices', hop_pct: 0.07 },
-  { name: 'Linen', base_price: 10, type: 'Textile', hop_pct: 0.5 },
+  { name: 'Linen', base_price: 10, type: 'Textile', hop_pct: 0.45 },
   { name: 'Cotton Yarn', base_price: 20, type: 'Textile', hop_pct: 0.3 },
   { name: 'Leather', base_price: 35, type: 'Textile', hop_pct: 0.2 },
   { name: 'Wool', base_price: 35, type: 'Textile', hop_pct: 0.2 },
@@ -281,7 +281,7 @@ const EVENT_LEVELS = [
     level: 1,
     pct: 0.05,
     base_bonus: 3,
-    label: 'Small',
+    label: 'Minor',
   },
   {
     event_name: 'Festival',
@@ -445,10 +445,17 @@ const HISTORICAL_CHANGELOGS = [
   },
 ];
 
-async function ins(table, fields, vals) {
+async function ins(table, fields, vals, upsertOn) {
   const cols = fields.join(',');
   const pls = fields.map((_, i) => `$${i + 1}`).join(',');
-  await pool.query(`INSERT INTO ${table} (${cols}) VALUES (${pls}) ON CONFLICT DO NOTHING`, vals);
+  let conflict = 'ON CONFLICT DO NOTHING';
+  if (upsertOn) {
+    const cc = Array.isArray(upsertOn) ? upsertOn : [upsertOn];
+    const updateCols = fields.filter(f => !cc.includes(f));
+    if (updateCols.length)
+      conflict = `ON CONFLICT (${cc.join(',')}) DO UPDATE SET ${updateCols.map(f => `${f}=EXCLUDED.${f}`).join(',')}`;
+  }
+  await pool.query(`INSERT INTO ${table} (${cols}) VALUES (${pls}) ${conflict}`, vals);
 }
 
 async function seed() {
@@ -459,29 +466,31 @@ async function seed() {
     await ins(
       'goods',
       ['name', 'base_price', 'type', 'hop_pct'],
-      [g.name, g.base_price, g.type, g.hop_pct]
+      [g.name, g.base_price, g.type, g.hop_pct],
+      'name'
     );
 
   console.log('Travel times...');
   for (const from of Object.keys(TRAVEL_TIMES_RAW))
     for (const [to, mins] of Object.entries(TRAVEL_TIMES_RAW[from]))
-      await ins('travel_times', ['from_city', 'to_city', 'minutes'], [from, to, mins]);
+      await ins('travel_times', ['from_city', 'to_city', 'minutes'], [from, to, mins], ['from_city', 'to_city']);
 
   console.log('Languages...');
   for (const l of LANGUAGES) await ins('languages', ['name'], [l]);
 
   console.log('Cultures...');
   for (const c of CULTURES)
-    await ins('cultures', ['name', 'native_language'], [c.name, c.native_language]);
+    await ins('cultures', ['name', 'native_language'], [c.name, c.native_language], 'name');
 
   console.log('Traits...');
   for (const t of TRAITS)
-    await ins('city_traits', ['name', 'description'], [t.name, t.description]);
+    await ins('city_traits', ['name', 'description'], [t.name, t.description], 'name');
 
   console.log('Trait effects...');
+  await pool.query('DELETE FROM trait_effects');
   for (const e of TRAIT_EFFECTS)
     await pool.query(
-      `INSERT INTO trait_effects (trait_name,kind,bonus,cond_type,cond_value) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
+      `INSERT INTO trait_effects (trait_name,kind,bonus,cond_type,cond_value) VALUES ($1,$2,$3,$4,$5)`,
       [e.trait_name, e.kind, e.bonus, e.cond_type, e.cond_value]
     );
 
@@ -490,7 +499,8 @@ async function seed() {
     await ins(
       'cities',
       ['name', 'culture', 'language', 'has_fire_temple'],
-      [c.name, c.culture, c.language, c.has_fire_temple]
+      [c.name, c.culture, c.language, c.has_fire_temple],
+      'name'
     );
     for (const t of c.traits)
       await ins('city_city_traits', ['city_name', 'trait_name'], [c.name, t]);
@@ -499,9 +509,10 @@ async function seed() {
 
   console.log('Religions...');
   for (const r of RELIGIONS) await ins('religions', ['name'], [r]);
+  await pool.query('DELETE FROM religion_perks');
   for (const p of RELIGION_PERKS)
     await pool.query(
-      `INSERT INTO religion_perks (religion,min_level,perk_type,multiplier,description) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
+      `INSERT INTO religion_perks (religion,min_level,perk_type,multiplier,description) VALUES ($1,$2,$3,$4,$5)`,
       [p.religion, p.min_level, p.perk_type, p.multiplier, p.description]
     );
 
@@ -510,11 +521,12 @@ async function seed() {
     await ins(
       'event_types',
       ['name', 'glyph', 'dir', 'good_types', 'good_names', 'description'],
-      [e.name, e.glyph, e.dir, e.good_types, e.good_names, e.description]
+      [e.name, e.glyph, e.dir, e.good_types, e.good_names, e.description],
+      'name'
     );
   for (const l of EVENT_LEVELS)
     await pool.query(
-      `INSERT INTO event_levels (event_name,level,pct,base_bonus,label) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (event_name,level) DO NOTHING`,
+      `INSERT INTO event_levels (event_name,level,pct,base_bonus,label) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (event_name,level) DO UPDATE SET pct=EXCLUDED.pct,base_bonus=EXCLUDED.base_bonus,label=EXCLUDED.label`,
       [l.event_name, l.level, l.pct, l.base_bonus, l.label]
     );
 
