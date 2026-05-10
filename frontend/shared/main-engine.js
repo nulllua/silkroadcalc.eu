@@ -218,58 +218,16 @@ function calculateDistanceValue(good, city) {
 }
 
 let TRAIT_EFFECTS = [
-  { trait_name: 'Port', kind: null, bonus: 0.05, cond_type: null, cond_value: null },
-  { trait_name: 'Capital', kind: null, bonus: 0.05, cond_type: 'good_type', cond_value: 'Luxury' },
-  {
-    trait_name: 'Desert',
-    kind: 'sell',
-    bonus: 0.05,
-    cond_type: 'good_type_food',
-    cond_value: 'Agricultural',
-  },
-  { trait_name: 'Frontier', kind: null, bonus: 0.05, cond_type: 'good_name', cond_value: 'Tools' },
-  {
-    trait_name: 'Frontier',
-    kind: null,
-    bonus: 0.05,
-    cond_type: 'good_name',
-    cond_value: 'Weapons',
-  },
-  {
-    trait_name: 'Earthquake Prone',
-    kind: null,
-    bonus: 0.05,
-    cond_type: 'good_name',
-    cond_value: 'Tools',
-  },
-  {
-    trait_name: 'Earthquake Prone',
-    kind: null,
-    bonus: 0.05,
-    cond_type: 'good_name',
-    cond_value: 'Weapons',
-  },
-  {
-    trait_name: 'Cosmopolitan',
-    kind: null,
-    bonus: 0.05,
-    cond_type: 'culture_mismatch',
-    cond_value: null,
-  },
-  {
-    trait_name: 'Pentarchy',
-    kind: null,
-    bonus: 0.05,
-    cond_type: 'religion',
-    cond_value: 'Christianity',
-  },
-  {
-    trait_name: 'Homogenous',
-    kind: null,
-    bonus: -0.05,
-    cond_type: 'culture_mismatch',
-    cond_value: null,
-  },
+  { trait_name: 'Port',             kind: null,   bonus:  0.05, cond_type: null,              cond_value: null           },
+  { trait_name: 'Capital',          kind: null,   bonus:  0.1,  cond_type: 'good_type',        cond_value: 'Luxury'       },
+  { trait_name: 'Desert',           kind: 'sell', bonus:  0.1,  cond_type: 'good_type_food',   cond_value: 'Agricultural' },
+  { trait_name: 'Frontier',         kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Tools'        },
+  { trait_name: 'Frontier',         kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Weapons'      },
+  { trait_name: 'Earthquake Prone', kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Tools'        },
+  { trait_name: 'Earthquake Prone', kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Weapons'      },
+  { trait_name: 'Cosmopolitan',     kind: null,   bonus:  0.1,  cond_type: 'culture_mismatch', cond_value: null           },
+  { trait_name: 'Pentarchy',        kind: null,   bonus:  0.1,  cond_type: 'religion',         cond_value: 'Christianity' },
+  { trait_name: 'Homogenous',       kind: null,   bonus: -0.1,  cond_type: 'culture_mismatch', cond_value: null           },
 ];
 let RELIGION_PERKS = [
   { religion: 'Christianity', min_level: 3, perk_type: 'reduce_negative', multiplier: 0.5 },
@@ -381,21 +339,9 @@ let EVENTS = {
   },
 };
 let EVENT_LEVELS = {
-  1: {
-    pct: 0.025,
-    base: 3,
-    label: { Conflict: 'Small', Festival: 'Small', Drought: 'Small', Harvest: 'Good' },
-  },
-  2: {
-    pct: 0.05,
-    base: 5,
-    label: { Conflict: 'Local', Festival: 'Local', Drought: 'Moderate', Harvest: 'Plentiful' },
-  },
-  3: {
-    pct: 0.1,
-    base: 8,
-    label: { Conflict: 'Major', Festival: 'Major', Drought: 'Severe', Harvest: 'Abundant' },
-  },
+  1: { pct: 0.05,  base: 3, label: { Conflict: 'Small', Festival: 'Small',  Drought: 'Small',    Harvest: 'Good'      } },
+  2: { pct: 0.1,   base: 5, label: { Conflict: 'Local', Festival: 'Local',  Drought: 'Moderate', Harvest: 'Plentiful' } },
+  3: { pct: 0.15,  base: 8, label: { Conflict: 'Major', Festival: 'Major',  Drought: 'Severe',   Harvest: 'Abundant'  } },
 };
 const EVENT_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
