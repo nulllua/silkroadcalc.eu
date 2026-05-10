@@ -153,9 +153,11 @@ async function loadData() {
   }
   if (tr.ok) {
     const times = await tr.json();
-    el('travel-body').innerHTML = times.map(t =>
-      `<tr><td>${escHtml(t.from_city)}</td><td>${escHtml(t.to_city)}</td><td>${t.minutes}</td></tr>`
-    ).join('') || '<tr><td colspan="3" class="dim">None</td></tr>';
+    const rows = [];
+    for (const [from, tos] of Object.entries(times))
+      for (const [to, mins] of Object.entries(tos))
+        rows.push(`<tr><td>${escHtml(from)}</td><td>${escHtml(to)}</td><td>${mins}</td></tr>`);
+    el('travel-body').innerHTML = rows.join('') || '<tr><td colspan="3" class="dim">None</td></tr>';
   }
   if (er.ok) {
     const events = await er.json();
