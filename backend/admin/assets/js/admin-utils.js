@@ -5,25 +5,7 @@ function token() {
   return localStorage.getItem("admin_token");
 }
 
-window.ADMIN_CTX = window.ADMIN_CTX || {
-  role: null,
-  username: "",
-  isLocked: true,
-};
-
 async function api(path, opts = {}) {
-  const method = String(opts.method || "GET").toUpperCase();
-  const isWrite = method !== "GET";
-  const isPermissionRequest = path === "/api/admin/permission-requests";
-  if (
-    isWrite &&
-    window.ADMIN_CTX.role === "helper" &&
-    window.ADMIN_CTX.isLocked &&
-    !isPermissionRequest
-  ) {
-    throw new Error("Panel is locked by owner");
-  }
-
   return fetch(path, {
     ...opts,
     headers: {

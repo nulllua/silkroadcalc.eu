@@ -134,6 +134,49 @@ async function saveNotice() {
   }
 }
 
+async function loadData() {
+  const [gr, cr, tr, er, rr, lr] = await Promise.all([
+    api('/api/goods'), api('/api/cities'), api('/api/travel-times'),
+    api('/api/events'), api('/api/religions'), api('/api/languages'),
+  ]);
+  if (gr.ok) {
+    const goods = await gr.json();
+    el('goods-body').innerHTML = goods.map(g =>
+      `<tr><td class="hl">${escHtml(g.name)}</td><td>${g.base_price}</td><td>${escHtml(g.type)}</td><td>${g.hop_pct}</td></tr>`
+    ).join('') || '<tr><td colspan="4" class="dim">None</td></tr>';
+  }
+  if (cr.ok) {
+    const cities = await cr.json();
+    el('cities-body').innerHTML = cities.map(c =>
+      `<tr><td class="hl">${escHtml(c.name)}</td><td>${escHtml(c.culture)}</td><td>${escHtml(c.language)}</td><td>${c.has_fire_temple ? 'Yes' : 'No'}</td><td>${(c.traits||[]).map(escHtml).join(', ')||'—'}</td><td>${(c.produced||[]).map(escHtml).join(', ')||'—'}</td></tr>`
+    ).join('') || '<tr><td colspan="6" class="dim">None</td></tr>';
+  }
+  if (tr.ok) {
+    const times = await tr.json();
+    el('travel-body').innerHTML = times.map(t =>
+      `<tr><td>${escHtml(t.from_city)}</td><td>${escHtml(t.to_city)}</td><td>${t.minutes}</td></tr>`
+    ).join('') || '<tr><td colspan="3" class="dim">None</td></tr>';
+  }
+  if (er.ok) {
+    const events = await er.json();
+    el('events-body').innerHTML = events.map(e =>
+      `<tr><td class="hl">${escHtml(e.name)}</td><td>${escHtml(e.glyph)}</td><td>${e.dir > 0 ? '+1' : '-1'}</td><td>${(e.good_types||[]).map(escHtml).join(', ')||'—'}</td><td>${(e.good_names||[]).map(escHtml).join(', ')||'—'}</td></tr>`
+    ).join('') || '<tr><td colspan="5" class="dim">None</td></tr>';
+  }
+  if (rr.ok) {
+    const religions = await rr.json();
+    el('religions-body').innerHTML = religions.map(r =>
+      `<tr><td class="hl">${escHtml(r.name)}</td></tr>`
+    ).join('') || '<tr><td class="dim">None</td></tr>';
+  }
+  if (lr.ok) {
+    const languages = await lr.json();
+    el('languages-body').innerHTML = languages.map(l =>
+      `<tr><td class="hl">${escHtml(l.name)}</td></tr>`
+    ).join('') || '<tr><td class="dim">None</td></tr>';
+  }
+}
+
 async function clearNotice() {
   const res = await api('/api/admin/notices/disable', { method: 'POST' });
   ss('notice-ss', res.ok, res.ok ? '✓ Notice OFF' : 'Error');

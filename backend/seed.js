@@ -57,7 +57,7 @@ const CITIES = [
     culture: 'Syriac',
     language: 'Aramaic',
     has_fire_temple: false,
-    traits: ['Desert', 'Cosmopolitan'],
+    traits: ['Desert'],
     produced: ['Iron Ingot', 'Copper Ingot', 'Weapons', 'Tools', 'Earthenware', 'Sesame'],
   },
   {
@@ -65,7 +65,7 @@ const CITIES = [
     culture: 'Syriac',
     language: 'Aramaic',
     has_fire_temple: false,
-    traits: ['Frontier'],
+    traits: ['Frontier', 'Cosmopolitan'],
     produced: ['Linen', 'Wool', 'Cotton Yarn', 'Wheat', 'Barley', 'Leather'],
   },
   {
