@@ -3,6 +3,32 @@
 
   /* ── State ────────────────────────────────────────────────────────────── */
   var _data = null;
+  var PLANNER_KEY = 'srtc-planner';
+
+  function saveInputs() {
+    localStorage.setItem(PLANNER_KEY, JSON.stringify({
+      start:      $id('plannerStart')?.value      || '',
+      shortOn:    !!$id('plannerShortCheck')?.checked,
+      shortDest:  $id('plannerShortDest')?.value  || '',
+      longOn:     !!$id('plannerLongCheck')?.checked,
+      longDest:   $id('plannerLongDest')?.value   || '',
+      mustReturn: !!$id('plannerReturn')?.checked,
+    }));
+  }
+
+  function restoreInputs() {
+    try {
+      var s = JSON.parse(localStorage.getItem(PLANNER_KEY) || 'null');
+      if (!s) return false;
+      if ($id('plannerStart'))      $id('plannerStart').value       = s.start;
+      if ($id('plannerShortCheck')) $id('plannerShortCheck').checked = !!s.shortOn;
+      if ($id('plannerShortDest'))  { $id('plannerShortDest').value = s.shortDest; $id('plannerShortDest').disabled = !s.shortOn; }
+      if ($id('plannerLongCheck'))  $id('plannerLongCheck').checked  = !!s.longOn;
+      if ($id('plannerLongDest'))   { $id('plannerLongDest').value  = s.longDest;  $id('plannerLongDest').disabled  = !s.longOn; }
+      if ($id('plannerReturn'))     $id('plannerReturn').checked     = !!s.mustReturn;
+      return !!(s.start && (s.shortOn || s.longOn));
+    } catch (_) { return false; }
+  }
 
   /* ── DOM helpers ──────────────────────────────────────────────────────── */
   function $id(id) { return document.getElementById(id); }
@@ -184,6 +210,7 @@
               outTradeProfit: outTradeProfit, pkgProfit: pkgProfit, retTradeProfit: retTradeProfit,
               totalProfit: totalProfit, deliveryMap: deliveryMap, totalSlots: totalSlots,
               mustReturn: mustReturn, ps: ps };
+    saveInputs();
     render(out, _data);
   }
 
@@ -279,10 +306,30 @@
     bind('plannerLongCheck',  'plannerLongDest');
   }
 
+  function clearPlanner() {
+    localStorage.removeItem(PLANNER_KEY);
+    var out = $id('plannerResult');
+    if (out) out.innerHTML = '';
+    ['plannerStart','plannerShortDest','plannerLongDest'].forEach(function(id) {
+      var el = $id(id); if (el) el.value = '';
+    });
+    ['plannerShortCheck','plannerLongCheck','plannerReturn'].forEach(function(id) {
+      var el = $id(id); if (el) el.checked = false;
+    });
+    if ($id('plannerShortDest')) $id('plannerShortDest').disabled = true;
+    if ($id('plannerLongDest'))  $id('plannerLongDest').disabled  = true;
+    _data = null;
+  }
+
   /* ── Init ─────────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
+    if (typeof loadEventState === 'function') loadEventState();
     initQuestToggles();
     var btn = $id('plannerRun');
     if (btn) btn.addEventListener('click', run);
+    var clrBtn = $id('plannerClear');
+    if (clrBtn) clrBtn.addEventListener('click', clearPlanner);
+    var hasInputs = restoreInputs();
+    if (hasInputs) run();
   });
 })();

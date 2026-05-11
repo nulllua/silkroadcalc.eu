@@ -5,11 +5,12 @@
     compact: 'silkroad_compact',
     webhook: 'silkroad_webhook',
     notifEvents: 'silkroad_notif_events',
+    notifForum:  'silkroad_notif_forum',
   };
 
   function load() {
-    var ids = ['settingCompact', 'notifEvents'];
-    var keys = [KEYS.compact, KEYS.notifEvents];
+    var ids = ['settingCompact', 'notifEvents', 'notifForum'];
+    var keys = [KEYS.compact, KEYS.notifEvents, KEYS.notifForum];
     ids.forEach(function (id, i) {
       var el = document.getElementById(id);
       if (el) el.checked = localStorage.getItem(keys[i]) === '1';
@@ -30,13 +31,14 @@
     var pairs = [
       ['settingCompact', KEYS.compact],
       ['notifEvents',    KEYS.notifEvents],
+      ['notifForum',     KEYS.notifForum],
     ];
     pairs.forEach(function (pair) {
       var el = document.getElementById(pair[0]);
       if (!el) return;
       el.addEventListener('change', function () {
         localStorage.setItem(pair[1], el.checked ? '1' : '0');
-        if (pair[0] === 'notifEvents' && el.checked && Notification.permission !== 'granted')
+        if (el.checked && (pair[0] === 'notifEvents' || pair[0] === 'notifForum') && Notification.permission !== 'granted')
           Notification.requestPermission();
       });
     });

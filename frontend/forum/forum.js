@@ -20,6 +20,117 @@
     upvotes: 0, downvotes: 0, reply_count: 0, pinned: true,
   };
 
+  var MUTED_KEY      = 'srtc-forum-muted';
+  var FOLLOWED_KEY   = 'srtc-forum-followed';
+  var LAST_SEEN_KEY  = 'srtc-forum-last-seen';
+  var LAST_CMT_KEY   = 'srtc-forum-last-comment';
+  var LAST_SCORE_KEY = 'srtc-forum-last-score';
+  var _pollTimer     = null;
+  var NOTIF_ICON     = '/frontend/assets/images/favicon-32.png';
+
+  function getMuted()    { try { return JSON.parse(localStorage.getItem(MUTED_KEY)    || '[]'); } catch(_) { return []; } }
+  function getFollowed() { try { return JSON.parse(localStorage.getItem(FOLLOWED_KEY) || '[]'); } catch(_) { return []; } }
+  function getLastCmt()  { try { return JSON.parse(localStorage.getItem(LAST_CMT_KEY) || '{}'); } catch(_) { return {}; } }
+  function getLastScore(){ try { return JSON.parse(localStorage.getItem(LAST_SCORE_KEY)|| '{}'); } catch(_) { return {}; } }
+
+  function isMuted(id)    { return getMuted().some(function(x)    { return x === String(id); }); }
+  function isFollowed(id) { return getFollowed().some(function(x) { return x.id === String(id); }); }
+
+  function toggleMuted(id) {
+    var m = getMuted(), s = String(id), idx = m.indexOf(s);
+    if (idx >= 0) m.splice(idx, 1); else m.push(s);
+    localStorage.setItem(MUTED_KEY, JSON.stringify(m));
+  }
+
+  function toggleFollowed(id, title) {
+    var list = getFollowed(), s = String(id);
+    var idx = list.findIndex(function(x) { return x.id === s; });
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push({ id: s, title: title });
+      var lc = getLastCmt();
+      if (!lc[s]) { lc[s] = new Date().toISOString(); localStorage.setItem(LAST_CMT_KEY, JSON.stringify(lc)); }
+    }
+    localStorage.setItem(FOLLOWED_KEY, JSON.stringify(list));
+  }
+
+  async function pollNewPosts() {
+    if (localStorage.getItem('silkroad_notif_forum') !== '1') return;
+    if (Notification.permission !== 'granted') return;
+    var lastSeen = localStorage.getItem(LAST_SEEN_KEY);
+    if (!lastSeen) { localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString()); return; }
+    var newest = lastSeen;
+    try {
+      var cats = ['general', 'feedback', 'bugs'];
+      for (var ci = 0; ci < cats.length; ci++) {
+        var res = await fetch(API + '/api/forum/posts?category=' + cats[ci] + '&page=1&limit=10&sort=new', { credentials: 'include' });
+        if (!res.ok) continue;
+        var posts = (await res.json()).posts || [];
+        for (var i = 0; i < posts.length; i++) {
+          var p = posts[i];
+          if (p.created_at <= lastSeen) break;
+          if (state.user && String(p.author_id) === String(state.user.id)) continue;
+          new Notification('New forum post', { body: p.title, icon: NOTIF_ICON });
+          if (p.created_at > newest) newest = p.created_at;
+        }
+      }
+      if (newest !== lastSeen) localStorage.setItem(LAST_SEEN_KEY, newest);
+    } catch(_) {}
+  }
+
+  async function pollFollowedPosts() {
+    if (Notification.permission !== 'granted') return;
+    var followed = getFollowed();
+    if (!followed.length) return;
+    var muted = getMuted();
+    var lastCmt   = getLastCmt();
+    var lastScore = getLastScore();
+    var cmtChanged = false, scoreChanged = false;
+    for (var i = 0; i < followed.length; i++) {
+      var item = followed[i], pid = item.id;
+      if (!muted.includes(pid)) {
+        try {
+          var cr = await fetch(API + '/api/forum/posts/' + pid + '/comments', { credentials: 'include' });
+          if (cr.ok) {
+            var comments = await cr.json();
+            var lastSeen = lastCmt[pid] || '';
+            var newOnes  = comments.filter(function(c) {
+              return c.created_at > lastSeen && (!state.user || String(c.author_id) !== String(state.user.id));
+            });
+            if (newOnes.length) {
+              var preview = newOnes[newOnes.length - 1].body.replace(/\n/g, ' ').substring(0, 100);
+              new Notification('New comment on "' + item.title + '"', { body: preview, icon: NOTIF_ICON });
+            }
+            if (comments.length) {
+              lastCmt[pid] = comments.reduce(function(mx, c) { return c.created_at > mx ? c.created_at : mx; }, '');
+              cmtChanged = true;
+            }
+          }
+        } catch(_) {}
+      }
+      try {
+        var pr = await fetch(API + '/api/forum/posts/' + pid, { credentials: 'include' });
+        if (pr.ok) {
+          var post  = await pr.json();
+          var score = (post.upvotes || 0) - (post.downvotes || 0);
+          if (lastScore[pid] != null && score !== lastScore[pid])
+            new Notification('Vote update on "' + item.title + '"', { body: 'Score: ' + (score >= 0 ? '+' : '') + score, icon: NOTIF_ICON });
+          lastScore[pid] = score;
+          scoreChanged = true;
+        }
+      } catch(_) {}
+    }
+    if (cmtChanged)   localStorage.setItem(LAST_CMT_KEY,    JSON.stringify(lastCmt));
+    if (scoreChanged) localStorage.setItem(LAST_SCORE_KEY,  JSON.stringify(lastScore));
+  }
+
+  function startPoll() {
+    if (_pollTimer) return;
+    pollNewPosts(); pollFollowedPosts();
+    _pollTimer = setInterval(function() { pollNewPosts(); pollFollowedPosts(); }, 60000);
+  }
+
   /* ── helpers ─────────────────────────────────────────────────────────── */
   function relTime(iso) {
     var d = new Date(iso), now = Date.now(), diff = (now - d) / 1000;
@@ -41,8 +152,17 @@
     return AVATAR_COLORS[h % AVATAR_COLORS.length];
   }
 
-  function avatar(name, size) {
+  function discordAvatarUrl(userId, hash, size) {
+    if (String(userId) === '1468949205153480725') return '/frontend/assets/images/icon.png';
+    if (!userId || !hash) return null;
+    return 'https://cdn.discordapp.com/avatars/' + userId + '/' + hash + '.png?size=' + (size || 64);
+  }
+
+  function avatar(name, size, userId, avatarHash) {
     size = size || 36;
+    var url = discordAvatarUrl(userId, avatarHash, size * 2);
+    if (url)
+      return '<img class="fpost-avatar fpost-avatar-img" src="' + url + '" width="' + size + '" height="' + size + '" alt="' + esc(name) + '" style="width:' + size + 'px;height:' + size + 'px" onerror="this.outerHTML=this.dataset.fb" data-fb=\'<div class=&quot;fpost-avatar&quot; style=&quot;background:' + avatarColor(name) + ';width:' + size + 'px;height:' + size + 'px;font-size:' + Math.round(size*0.4) + 'px;flex-shrink:0&quot;>' + esc(name.charAt(0).toUpperCase()) + '</div>\'>';
     var fs = Math.round(size * 0.4);
     return '<div class="fpost-avatar" style="background:' + avatarColor(name) + ';width:' + size + 'px;height:' + size + 'px;font-size:' + fs + 'px;flex-shrink:0">' + esc(name.charAt(0).toUpperCase()) + '</div>';
   }
@@ -100,26 +220,39 @@
   function renderPosts(posts, container) {
     var pinned = state.cat === 'general' ? renderPinnedRow() : '';
     if (!posts.length) { container.innerHTML = pinned + '<div class="fposts-empty">No posts yet. Be the first to post!</div>'; return; }
+    var muted = getMuted();
     container.innerHTML = pinned + posts.map(function (p) {
-      var score  = (p.upvotes || 0) - (p.downvotes || 0);
-      var author = p.author_name || 'Anonymous';
-      return '<div class="fpost fpost-clickable" data-id="' + esc(p.id) + '">' +
-        avatar(author, 36) +
+      var score      = (p.upvotes || 0) - (p.downvotes || 0);
+      var author     = p.author_name || 'Anonymous';
+      var pid        = esc(p.id);
+      var mutedNow   = isMuted(p.id);
+      var followedNow= isFollowed(p.id);
+      return '<div class="fpost fpost-clickable" data-id="' + pid + '">' +
+        avatar(author, 36, p.author_id, p.author_avatar) +
         '<div class="fpost-body">' +
           '<div class="fpost-title">' + esc(p.title) + '</div>' +
           '<div class="fpost-meta">' +
             '<span class="fpost-author">' + esc(author) + '</span>' +
             '<span class="fpost-sep">·</span>' +
             '<span class="fpost-time">' + relTime(p.created_at) + '</span>' +
+            (followedNow ? '<span class="fpost-followed-badge">Following</span>' : '') +
+            (mutedNow   ? '<span class="fpost-muted-badge">Muted</span>'     : '') +
           '</div>' +
         '</div>' +
         '<div class="fpost-stats">' +
           '<div class="fpost-vote">' +
-            '<button class="fpost-vote-btn" data-vote="up" data-id="' + esc(p.id) + '" aria-label="Upvote"><svg viewBox="0 0 12 8" width="9" height="7" fill="currentColor"><path d="M6 0L12 8H0z"/></svg></button>' +
+            '<button class="fpost-vote-btn" data-vote="up" data-id="' + pid + '" aria-label="Upvote"><svg viewBox="0 0 12 8" width="9" height="7" fill="currentColor"><path d="M6 0L12 8H0z"/></svg></button>' +
             '<span class="fpost-score' + (score > 0 ? ' positive' : score < 0 ? ' negative' : '') + '">' + score + '</span>' +
-            '<button class="fpost-vote-btn" data-vote="down" data-id="' + esc(p.id) + '" aria-label="Downvote"><svg viewBox="0 0 12 8" width="9" height="7" fill="currentColor"><path d="M6 8L0 0H12z"/></svg></button>' +
+            '<button class="fpost-vote-btn" data-vote="down" data-id="' + pid + '" aria-label="Downvote"><svg viewBox="0 0 12 8" width="9" height="7" fill="currentColor"><path d="M6 8L0 0H12z"/></svg></button>' +
           '</div>' +
           '<div class="fpost-replies"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 8c0 3.3-2.7 6-6 6a5.9 5.9 0 0 1-3.6-1.2L1 14l1.2-3.4A5.9 5.9 0 0 1 2 8c0-3.3 2.7-6 6-6s6 2.7 6 6z"/></svg>' + (p.reply_count || 0) + '</div>' +
+          '<div class="fpost-menu-wrap">' +
+            '<button class="fpost-menu-btn" data-menu-id="' + pid + '" aria-label="Post options">⋮</button>' +
+            '<div class="fpost-menu-dd" hidden>' +
+              '<button class="fpost-menu-item" data-follow-id="' + pid + '" data-follow-title="' + esc(p.title) + '">' + (followedNow ? 'Unfollow post' : 'Follow post') + '</button>' +
+              '<button class="fpost-menu-item" data-mute-id="' + pid + '">' + (mutedNow ? 'Unmute' : 'Mute') + ' notifications</button>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -181,7 +314,7 @@
         (canDel ? '<button class="btn pdp-del-btn" id="pdpDeletePost">Delete Post</button>' : '') +
       '</div>' +
       '<div class="pdp-post card">' +
-        '<div class="pdp-author-row">' + avatar(author, 30) +
+        '<div class="pdp-author-row">' + avatar(author, 30, post.author_id, post.author_avatar) +
           '<span class="fpost-author">' + esc(author) + '</span>' +
           '<span class="fpost-sep">·</span>' +
           '<span class="fpost-time">' + relTime(post.created_at) + '</span>' +
@@ -262,7 +395,7 @@
       var author = c.author_name || 'Anonymous';
       var canDel = state.user && (String(state.user.id) === String(c.author_id) || state.user.isAdmin);
       return '<div class="pdp-comment">' +
-        '<div class="pdp-comment-header">' + avatar(author, 24) +
+        '<div class="pdp-comment-header">' + avatar(author, 24, c.author_id, c.author_avatar) +
           '<span class="fpost-author">' + esc(author) + '</span>' +
           '<span class="fpost-time">' + relTime(c.created_at) + '</span>' +
           (canDel ? '<button class="pdp-comment-del" data-del-comment="' + esc(c.id) + '" title="Delete">✕</button>' : '') +
@@ -359,7 +492,53 @@
   });
 
   /* ── votes + post click ───────────────────────────────────────────────── */
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.fpost-menu-wrap'))
+      document.querySelectorAll('.fpost-menu-dd:not([hidden])').forEach(function (d) { d.hidden = true; });
+  });
+
   document.getElementById('forumPosts').addEventListener('click', async function (e) {
+    var menuBtn = e.target.closest('[data-menu-id]');
+    if (menuBtn) {
+      e.stopPropagation();
+      var dd = menuBtn.nextElementSibling;
+      document.querySelectorAll('.fpost-menu-dd:not([hidden])').forEach(function (d) { if (d !== dd) d.hidden = true; });
+      dd.hidden = !dd.hidden;
+      return;
+    }
+    var followBtn = e.target.closest('[data-follow-id]');
+    if (followBtn) {
+      e.stopPropagation();
+      toggleFollowed(followBtn.dataset.followId, followBtn.dataset.followTitle);
+      followBtn.textContent = isFollowed(followBtn.dataset.followId) ? 'Unfollow post' : 'Follow post';
+      followBtn.closest('.fpost-menu-dd').hidden = true;
+      var postEl2 = document.querySelector('.fpost[data-id="' + followBtn.dataset.followId + '"]');
+      var badge = postEl2 && postEl2.querySelector('.fpost-followed-badge');
+      if (isFollowed(followBtn.dataset.followId)) {
+        if (!badge && postEl2) {
+          var meta = postEl2.querySelector('.fpost-meta');
+          if (meta) { var b = document.createElement('span'); b.className = 'fpost-followed-badge'; b.textContent = 'Following'; meta.appendChild(b); }
+        }
+      } else if (badge) { badge.remove(); }
+      return;
+    }
+    var muteBtn = e.target.closest('[data-mute-id]');
+    if (muteBtn) {
+      e.stopPropagation();
+      toggleMuted(muteBtn.dataset.muteId);
+      var nowMuted = isMuted(muteBtn.dataset.muteId);
+      muteBtn.textContent = nowMuted ? 'Unmute notifications' : 'Mute notifications';
+      muteBtn.closest('.fpost-menu-dd').hidden = true;
+      var postEl3 = document.querySelector('.fpost[data-id="' + muteBtn.dataset.muteId + '"]');
+      var mutedBadge = postEl3 && postEl3.querySelector('.fpost-muted-badge');
+      if (nowMuted) {
+        if (!mutedBadge && postEl3) {
+          var meta2 = postEl3.querySelector('.fpost-meta');
+          if (meta2) { var b2 = document.createElement('span'); b2.className = 'fpost-muted-badge'; b2.textContent = 'Muted'; meta2.appendChild(b2); }
+        }
+      } else if (mutedBadge) { mutedBadge.remove(); }
+      return;
+    }
     var voteBtn = e.target.closest('[data-vote]');
     if (voteBtn) {
       e.stopPropagation();
@@ -414,6 +593,6 @@
 
   /* ── init ─────────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
-    loadUser().then(function () { loadPosts(); loadCounts(); loadChangelog(); });
+    loadUser().then(function () { loadPosts(); loadCounts(); loadChangelog(); startPoll(); });
   });
 })();

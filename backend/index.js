@@ -536,12 +536,14 @@ app.get('/api/auth/discord/callback', async (req, res) => {
   }
 });
 
-app.get('/api/auth/me', (req, res) => {
+app.get('/api/auth/me', async (req, res) => {
   const token = parseCookies(req).auth_token;
   if (!token) return res.json({});
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ id: payload.id, username: payload.username, isAdmin: isAdmin(payload.id) });
+    const { rows } = await pool.query('SELECT avatar FROM discord_users WHERE id=$1', [payload.id]);
+    const avatar = rows[0]?.avatar || null;
+    res.json({ id: payload.id, username: payload.username, isAdmin: isAdmin(payload.id), avatar });
   } catch {
     res.json({});
   }
@@ -619,8 +621,9 @@ app.get('/api/forum/posts', async (req, res) => {
     const params     = uidFilter ? [cat, limit, offset, uidFilter] : [cat, limit, offset];
     const [postsRes, countRes] = await Promise.all([
       pool.query(
-        `SELECT id, category, title, author_id, author_name, created_at, upvotes, downvotes, reply_count
-         FROM forum_posts WHERE category=$1${whereExtra} ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
+        `SELECT p.id, p.category, p.title, p.author_id, p.author_name, p.created_at, p.upvotes, p.downvotes, p.reply_count, d.avatar AS author_avatar
+         FROM forum_posts p LEFT JOIN discord_users d ON d.id::text = p.author_id::text
+         WHERE p.category=$1${whereExtra.replace(/author_id/g,'p.author_id')} ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
         params
       ),
       pool.query(`SELECT COUNT(*) FROM forum_posts WHERE category=$1${whereExtra}`,
@@ -634,7 +637,8 @@ app.get('/api/forum/posts/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const { rows } = await pool.query(
-      'SELECT id, category, title, body, author_id, author_name, created_at, upvotes, downvotes, reply_count FROM forum_posts WHERE id=$1',
+      `SELECT p.id, p.category, p.title, p.body, p.author_id, p.author_name, p.created_at, p.upvotes, p.downvotes, p.reply_count, d.avatar AS author_avatar
+       FROM forum_posts p LEFT JOIN discord_users d ON d.id::text = p.author_id::text WHERE p.id=$1`,
       [id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
@@ -655,7 +659,9 @@ app.get('/api/forum/posts/:id/comments', async (req, res) => {
   const postId = parseInt(req.params.id);
   try {
     const { rows } = await pool.query(
-      'SELECT id, author_id, author_name, body, created_at FROM forum_comments WHERE post_id=$1 ORDER BY created_at ASC',
+      `SELECT c.id, c.author_id, c.author_name, c.body, c.created_at, d.avatar AS author_avatar
+       FROM forum_comments c LEFT JOIN discord_users d ON d.id::text = c.author_id::text
+       WHERE c.post_id=$1 ORDER BY c.created_at ASC`,
       [postId]
     );
     res.json(rows);
