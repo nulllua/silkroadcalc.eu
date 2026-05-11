@@ -3,7 +3,7 @@
 
   var API = 'https://admin.silkroadcalc.eu';
   var PAGE_SIZE = 15;
-  var state = { cat: 'general', page: 1, total: 0, sort: 'new', user: null };
+  var state = { cat: 'general', page: 1, total: 0, sort: 'new', search: '', activitySort: 'new', user: null };
 
   var CAT_META = {
     general:  { title: 'General Discussion',      desc: 'General chat about routes, strategies, and the game.' },
@@ -14,7 +14,8 @@
   var PINNED_POST = {
     id: 'pinned',
     title: 'Forum Rules & Guidelines',
-    author_name: 'SilkRoadCalc',
+    author_name: 'silkroadcalc.eu',
+    author_id: 'site',
     created_at: '2025-01-01T00:00:00Z',
     body: 'Welcome to the SilkRoadCalc community forum.\n\nWHAT THIS FORUM IS FOR\n\nGeneral Discussion: Routes, trading strategies, game tips, and anything related to Silk Road Trading Simulator.\nFeedback & Suggestions: Ideas for new features, improvements to the calculator, or changes to the website.\nBug Reports: Issues, broken features, or unexpected behavior. Include steps to reproduce.\n\nRULES\n\n1. Be respectful. No harassment or hostility toward other users.\n2. Post in the correct category. Off-topic posts may be removed.\n3. Search before posting to avoid duplicate threads.\n4. For bug reports: describe the steps to reproduce the issue, what you expected, and what actually happened.\n5. No spam, self-promotion, or unrelated content.\n6. Keep posts in English so the whole community can participate.\n\nFor real-time discussion and direct access to the team, join the Discord server linked in the sidebar.',
     upvotes: 0, downvotes: 0, reply_count: 0, pinned: true,
@@ -125,10 +126,26 @@
     if (scoreChanged) localStorage.setItem(LAST_SCORE_KEY,  JSON.stringify(lastScore));
   }
 
+  async function pollNotifications() {
+    if (localStorage.getItem('silkroad_notif_replies') === '0') return;
+    if (!state.user) return;
+    if (Notification.permission !== 'granted') return;
+    try {
+      var res = await fetch(API + '/api/user/notifications', { credentials: 'include' });
+      if (!res.ok) return;
+      var notifs = await res.json();
+      if (!notifs.length) return;
+      notifs.forEach(function (n) {
+        new Notification(n.title, { body: n.body || '', icon: NOTIF_ICON });
+      });
+      fetch(API + '/api/user/notifications/read', { method: 'POST', credentials: 'include' });
+    } catch(_) {}
+  }
+
   function startPoll() {
     if (_pollTimer) return;
-    pollNewPosts(); pollFollowedPosts();
-    _pollTimer = setInterval(function() { pollNewPosts(); pollFollowedPosts(); }, 60000);
+    pollNewPosts(); pollFollowedPosts(); pollNotifications();
+    _pollTimer = setInterval(function() { pollNewPosts(); pollFollowedPosts(); pollNotifications(); }, 60000);
   }
 
   /* ── helpers ─────────────────────────────────────────────────────────── */
@@ -153,7 +170,7 @@
   }
 
   function discordAvatarUrl(userId, hash, size) {
-    if (String(userId) === '1468949205153480725') return '/frontend/assets/images/icon.png';
+    if (String(userId) === '1468949205153480725' || String(userId) === 'site') return '/frontend/assets/images/icon.png';
     if (!userId || !hash) return null;
     return 'https://cdn.discordapp.com/avatars/' + userId + '/' + hash + '.png?size=' + (size || 64);
   }
@@ -191,10 +208,9 @@
     container.innerHTML = '<div class="fposts-loading">Loading posts…</div>';
     pagEl.innerHTML = '';
     try {
-      var res = await fetch(
-        API + '/api/forum/posts?category=' + state.cat + '&page=' + state.page + '&limit=' + PAGE_SIZE + '&sort=' + state.sort,
-        { credentials: 'include' }
-      );
+      var url = API + '/api/forum/posts?category=' + state.cat + '&page=' + state.page + '&limit=' + PAGE_SIZE + '&sort=' + state.sort;
+      if (state.search) url += '&q=' + encodeURIComponent(state.search);
+      var res = await fetch(url, { credentials: 'include' });
       if (res.status === 403) { container.innerHTML = '<div class="fposts-empty">This category is private.</div>'; return; }
       if (!res.ok) throw new Error(res.status);
       var data = await res.json();
@@ -208,18 +224,24 @@
 
   function renderPinnedRow() {
     return '<div class="fpost fpost-pinned fpost-clickable" data-id="pinned">' +
-      avatar('SilkRoadCalc', 36) +
+      avatar('silkroadcalc.eu', 36, 'site', null) +
       '<div class="fpost-body">' +
         '<div class="fpost-title"><span class="fpost-pin-badge">PINNED</span>' + esc('Forum Rules & Guidelines') + '</div>' +
-        '<div class="fpost-meta"><span class="fpost-author">SilkRoadCalc</span><span class="fpost-sep">·</span><span class="fpost-time">Always here</span></div>' +
+        '<div class="fpost-meta"><span class="fpost-author">silkroadcalc.eu</span><span class="fpost-sep">·</span><span class="fpost-time">Always here</span></div>' +
       '</div>' +
       '<div class="fpost-stats"></div>' +
     '</div>';
   }
 
   function renderPosts(posts, container) {
-    var pinned = state.cat === 'general' ? renderPinnedRow() : '';
-    if (!posts.length) { container.innerHTML = pinned + '<div class="fposts-empty">No posts yet. Be the first to post!</div>'; return; }
+    var pinned = state.cat === 'general' && !state.search ? renderPinnedRow() : '';
+    if (!posts.length) {
+      var msg = state.search
+        ? 'No posts found for <b>' + esc(state.search) + '</b>.'
+        : 'No posts yet. Be the first to post!';
+      container.innerHTML = pinned + '<div class="fposts-empty">' + msg + '</div>';
+      return;
+    }
     var muted = getMuted();
     container.innerHTML = pinned + posts.map(function (p) {
       var score      = (p.upvotes || 0) - (p.downvotes || 0);
@@ -305,7 +327,7 @@
   }
 
   function renderPostDetail(panel, post, comments) {
-    var author   = post.author_name || 'SilkRoadCalc';
+    var author   = post.author_name || 'silkroadcalc.eu';
     var canDel   = !post.pinned && state.user && (String(state.user.id) === String(post.author_id) || state.user.isAdmin);
     panel.innerHTML =
       '<div class="pdp-content-wrap">' +
@@ -376,6 +398,15 @@
     }
 
     panel.addEventListener('click', async function (e) {
+      var replyBtn = e.target.closest('[data-reply-name]');
+      if (replyBtn) {
+        var ta = document.getElementById('pdpCommentText');
+        if (!ta) return;
+        ta.value = '@' + replyBtn.dataset.replyName + ' ';
+        ta.focus();
+        ta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
       var delBtn = e.target.closest('[data-del-comment]');
       if (!delBtn) return;
       if (!confirm('Delete this comment?')) return;
@@ -398,7 +429,10 @@
         '<div class="pdp-comment-header">' + avatar(author, 24, c.author_id, c.author_avatar) +
           '<span class="fpost-author">' + esc(author) + '</span>' +
           '<span class="fpost-time">' + relTime(c.created_at) + '</span>' +
-          (canDel ? '<button class="pdp-comment-del" data-del-comment="' + esc(c.id) + '" title="Delete">✕</button>' : '') +
+          '<div class="pdp-comment-actions">' +
+            (state.user ? '<button class="pdp-comment-reply" data-reply-name="' + esc(author) + '">Reply</button>' : '') +
+            (canDel ? '<button class="pdp-comment-del" data-del-comment="' + esc(c.id) + '" title="Delete">✕</button>' : '') +
+          '</div>' +
         '</div>' +
         '<div class="pdp-comment-body">' + esc(c.body).replace(/\n/g,'<br>') + '</div>' +
       '</div>';
@@ -426,17 +460,25 @@
     } catch (_) {}
   }
 
-  /* ── changelog ────────────────────────────────────────────────────────── */
-  async function loadChangelog() {
-    var el = document.getElementById('forumChangelog');
+  /* ── recent activity sidebar ─────────────────────────────────────────── */
+  async function loadRecentActivity() {
+    var el = document.getElementById('forumActivity');
     if (!el) return;
+    el.innerHTML = '<div class="frc-loading">Loading…</div>';
     try {
-      var res  = await fetch(API + '/api/changelog');
+      var res  = await fetch(API + '/api/forum/posts?category=general&page=1&limit=6&sort=' + state.activitySort);
       if (!res.ok) return;
-      var data = await res.json();
-      var entries = (data.entries || data).slice(0, 4);
-      el.innerHTML = entries.map(function (e) {
-        return '<div class="frc-entry"><div class="frc-entry-ver">' + esc(e.version || '') + '</div><div class="frc-entry-text">' + esc(e.title || e.text || '') + '</div></div>';
+      var posts = (await res.json()).posts || [];
+      if (!posts.length) { el.innerHTML = '<div class="fra-empty">No posts yet.</div>'; return; }
+      el.innerHTML = posts.map(function (p) {
+        return '<div class="fra-item" data-id="' + esc(p.id) + '">' +
+          '<div class="fra-item-title">' + esc(p.title) + '</div>' +
+          '<div class="fra-item-meta">' +
+            '<span class="fpost-author">' + esc(p.author_name || 'Anonymous') + '</span>' +
+            '<span class="fpost-sep">·</span>' +
+            '<span class="fpost-time">' + relTime(p.created_at) + '</span>' +
+          '</div>' +
+        '</div>';
       }).join('');
     } catch (_) { el.innerHTML = ''; }
   }
@@ -564,7 +606,9 @@
       if (cat === state.cat) return;
       document.querySelectorAll('.fcat').forEach(function (l) { l.classList.remove('active'); });
       this.classList.add('active');
-      state.cat = cat; state.page = 1;
+      state.cat = cat; state.page = 1; state.search = '';
+      var searchEl = document.getElementById('forumSearch');
+      if (searchEl) searchEl.value = '';
       var m = CAT_META[cat] || {};
       document.getElementById('forumCatTitle').textContent = m.title || cat;
       document.getElementById('forumCatDesc').textContent  = m.desc  || '';
@@ -592,7 +636,30 @@
   });
 
   /* ── init ─────────────────────────────────────────────────────────────── */
+  var _searchTimer = null;
+  document.getElementById('forumSearch').addEventListener('input', function () {
+    clearTimeout(_searchTimer);
+    var val = this.value.trim();
+    _searchTimer = setTimeout(function () {
+      state.search = val; state.page = 1; loadPosts();
+    }, 400);
+  });
+
+  document.querySelectorAll('.fra-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.fra-tab').forEach(function (b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      state.activitySort = this.dataset.activity;
+      loadRecentActivity();
+    });
+  });
+
+  document.getElementById('forumActivity').addEventListener('click', function (e) {
+    var item = e.target.closest('.fra-item[data-id]');
+    if (item) showPost(item.dataset.id);
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
-    loadUser().then(function () { loadPosts(); loadCounts(); loadChangelog(); startPoll(); });
+    loadUser().then(function () { loadPosts(); loadCounts(); loadRecentActivity(); startPoll(); });
   });
 })();

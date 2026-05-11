@@ -601,6 +601,7 @@ app.get('/api/forum/posts', async (req, res) => {
   const page  = Math.max(1, parseInt(req.query.page) || 1);
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 15));
   const sort  = req.query.sort;
+  const q     = String(req.query.q || '').trim().slice(0, 200);
   const offset = (page - 1) * limit;
 
   let uidFilter = null;
@@ -612,22 +613,41 @@ app.get('/api/forum/posts', async (req, res) => {
     if (!isAdmin(uid)) uidFilter = String(uid);
   }
 
-  const orderBy = sort === 'hot' ? 'upvotes - downvotes DESC, created_at DESC'
-                : sort === 'top' ? 'upvotes DESC, created_at DESC'
-                : 'created_at DESC';
+  const orderBy = sort === 'hot' ? 'p.upvotes - p.downvotes DESC, p.created_at DESC'
+                : sort === 'top' ? 'p.upvotes DESC, p.created_at DESC'
+                : 'p.created_at DESC';
 
   try {
-    const whereExtra = uidFilter ? ' AND author_id=$4' : '';
-    const params     = uidFilter ? [cat, limit, offset, uidFilter] : [cat, limit, offset];
+    const conds  = ['p.category=$1'];
+    const params = [cat];
+
+    if (uidFilter) {
+      params.push(uidFilter);
+      conds.push(`p.author_id=$${params.length}`);
+    }
+
+    if (q.startsWith('@')) {
+      const name = q.slice(1).replace(/[%_]/g, '\\$&');
+      params.push('%' + name + '%');
+      conds.push(`p.author_name ILIKE $${params.length}`);
+    } else if (q) {
+      params.push('%' + q.replace(/[%_]/g, '\\$&') + '%');
+      conds.push(`p.title ILIKE $${params.length}`);
+    }
+
+    const where      = 'WHERE ' + conds.join(' AND ');
+    const limitIdx   = params.length + 1;
+    const offsetIdx  = params.length + 2;
+    const listParams = [...params, limit, offset];
+
     const [postsRes, countRes] = await Promise.all([
       pool.query(
         `SELECT p.id, p.category, p.title, p.author_id, p.author_name, p.created_at, p.upvotes, p.downvotes, p.reply_count, d.avatar AS author_avatar
-         FROM forum_posts p LEFT JOIN discord_users d ON d.id::text = p.author_id::text
-         WHERE p.category=$1${whereExtra.replace(/author_id/g,'p.author_id')} ORDER BY ${orderBy} LIMIT $2 OFFSET $3`,
-        params
+         FROM forum_posts p LEFT JOIN discord_users d ON d.id = p.author_id
+         ${where} ORDER BY ${orderBy} LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+        listParams
       ),
-      pool.query(`SELECT COUNT(*) FROM forum_posts WHERE category=$1${whereExtra}`,
-        uidFilter ? [cat, uidFilter] : [cat]),
+      pool.query(`SELECT COUNT(*) FROM forum_posts p ${where}`, params),
     ]);
     res.json({ posts: postsRes.rows, total: parseInt(countRes.rows[0].count) });
   } catch (e) { err(res, e); }
@@ -673,11 +693,24 @@ app.post('/api/forum/posts/:id/comments', requireUserAuth, async (req, res) => {
   const body   = String(req.body.body || '').trim().slice(0, 2000);
   if (!body) return res.status(400).json({ error: 'Empty comment' });
   try {
+    const authorName = displayName(req.discordUser.id, req.discordUser.username);
     await pool.query(
       'INSERT INTO forum_comments (post_id, author_id, author_name, body) VALUES ($1,$2,$3,$4)',
-      [postId, req.discordUser.id, displayName(req.discordUser.id, req.discordUser.username), body]
+      [postId, req.discordUser.id, authorName, body]
     );
     await pool.query('UPDATE forum_posts SET reply_count = reply_count + 1 WHERE id=$1', [postId]);
+
+    const mentions = [...new Set((body.match(/@([\w.]+)/g) || []).map(m => m.slice(1).toLowerCase()))];
+    for (const name of mentions) {
+      const { rows } = await pool.query('SELECT id FROM discord_users WHERE LOWER(username)=$1', [name]);
+      for (const u of rows) {
+        if (String(u.id) === String(req.discordUser.id)) continue;
+        await pool.query(
+          `INSERT INTO user_notifications (user_id, type, title, body, post_id) VALUES ($1,'reply',$2,$3,$4)`,
+          [u.id, authorName + ' replied to you', body.slice(0, 150), postId]
+        );
+      }
+    }
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
@@ -703,6 +736,24 @@ app.delete('/api/forum/comments/:id', requireUserAuth, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden' });
     await pool.query('DELETE FROM forum_comments WHERE id=$1', [commentId]);
     await pool.query('UPDATE forum_posts SET reply_count = GREATEST(reply_count - 1, 0) WHERE id=$1', [rows[0].post_id]);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/user/notifications', requireUserAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, type, title, body, post_id, created_at FROM user_notifications
+       WHERE user_id=$1 AND read=FALSE ORDER BY created_at DESC LIMIT 20`,
+      [req.discordUser.id]
+    );
+    res.json(rows);
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/user/notifications/read', requireUserAuth, async (req, res) => {
+  try {
+    await pool.query('UPDATE user_notifications SET read=TRUE WHERE user_id=$1', [req.discordUser.id]);
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });

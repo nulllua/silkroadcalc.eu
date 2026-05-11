@@ -2,19 +2,22 @@
   'use strict';
 
   var KEYS = {
-    compact: 'silkroad_compact',
-    webhook: 'silkroad_webhook',
+    compact:     'silkroad_compact',
+    webhook:     'silkroad_webhook',
     notifEvents: 'silkroad_notif_events',
     notifForum:  'silkroad_notif_forum',
+    notifReplies:'silkroad_notif_replies',
   };
 
   function load() {
-    var ids = ['settingCompact', 'notifEvents', 'notifForum'];
+    var ids  = ['settingCompact', 'notifEvents', 'notifForum'];
     var keys = [KEYS.compact, KEYS.notifEvents, KEYS.notifForum];
     ids.forEach(function (id, i) {
       var el = document.getElementById(id);
       if (el) el.checked = localStorage.getItem(keys[i]) === '1';
     });
+    var repliesEl = document.getElementById('notifReplies');
+    if (repliesEl) repliesEl.checked = localStorage.getItem(KEYS.notifReplies) !== '0';
 
     var wu = document.getElementById('webhookUrl');
     if (!wu) return;
@@ -32,13 +35,15 @@
       ['settingCompact', KEYS.compact],
       ['notifEvents',    KEYS.notifEvents],
       ['notifForum',     KEYS.notifForum],
+      ['notifReplies',   KEYS.notifReplies],
     ];
     pairs.forEach(function (pair) {
       var el = document.getElementById(pair[0]);
       if (!el) return;
       el.addEventListener('change', function () {
         localStorage.setItem(pair[1], el.checked ? '1' : '0');
-        if (el.checked && (pair[0] === 'notifEvents' || pair[0] === 'notifForum') && Notification.permission !== 'granted')
+        var isNotif = pair[0] === 'notifEvents' || pair[0] === 'notifForum' || pair[0] === 'notifReplies';
+        if (el.checked && isNotif && Notification.permission !== 'granted')
           Notification.requestPermission();
       });
     });

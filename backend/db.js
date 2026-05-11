@@ -212,6 +212,17 @@ async function initSchema() {
       body        TEXT         NOT NULL,
       created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS user_notifications (
+      id         SERIAL       PRIMARY KEY,
+      user_id    BIGINT       NOT NULL,
+      type       VARCHAR(50)  NOT NULL DEFAULT 'reply',
+      title      VARCHAR(200) NOT NULL,
+      body       TEXT,
+      post_id    INTEGER,
+      created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      read       BOOLEAN      NOT NULL DEFAULT FALSE
+    );
   `);
   // Add id column to event_levels if upgrading from old schema
   await pool.query(`ALTER TABLE event_levels ADD COLUMN IF NOT EXISTS id SERIAL`).catch(() => {});

@@ -92,6 +92,9 @@
                 New Post
               </button>
             </div>
+            <div class="forum-search-wrap">
+              <input type="text" id="forumSearch" class="forum-search-input" placeholder="Search titles… or @username" autocomplete="off" />
+            </div>
             <div class="forum-sort-bar">
               <button class="fsort active" data-sort="new">New</button>
               <button class="fsort" data-sort="hot">Hot</button>
@@ -110,8 +113,12 @@
 
         <!-- ── RIGHT: Sidebar ────────────────────────────────────────── -->
         <aside class="forum-right">
-          <div class="section-label" style="margin-bottom:16px">Latest Updates</div>
-          <div id="forumChangelog" class="frc-list">
+          <div class="section-label" style="margin-bottom:12px">Latest Updates</div>
+          <div class="fra-tabs">
+            <button class="fra-tab active" data-activity="new">Recent</button>
+            <button class="fra-tab" data-activity="hot">Hot</button>
+          </div>
+          <div id="forumActivity" class="fra-list">
             <div class="frc-loading">Loading…</div>
           </div>
 
