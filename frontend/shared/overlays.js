@@ -51,9 +51,8 @@
 
   async function checkVersion() {
     try {
-      var res = await fetch('/version.json?t=' + Date.now());
-      if (!res.ok) return;
-      var current = (await res.json()).v;
+      var res = await fetch('/index.html', { method: 'HEAD', cache: 'no-store' });
+      var current = res.headers.get('etag') || res.headers.get('last-modified');
       if (!current) return;
       var stored = localStorage.getItem('srtc-version');
       localStorage.setItem('srtc-version', current);
