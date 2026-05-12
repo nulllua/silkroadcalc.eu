@@ -1,0 +1,23 @@
+name: Update version
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write version.json
+        run: echo "{\"v\":\"$GITHUB_SHA\"}" > version.json
+      - name: Commit and push
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add version.json
+          git diff --staged --quiet || git commit -m "chore: update version [skip ci]"
+          git push

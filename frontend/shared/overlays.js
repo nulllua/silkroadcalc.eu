@@ -33,6 +33,18 @@
     } catch (_) {}
   }
 
+  async function checkVersion() {
+    try {
+      var res = await fetch('/version.json?t=' + Date.now());
+      if (!res.ok) return;
+      var current = (await res.json()).v;
+      if (!current) return;
+      var stored = localStorage.getItem('srtc-version');
+      localStorage.setItem('srtc-version', current);
+      if (stored && stored !== current) location.reload(true);
+    } catch (_) {}
+  }
+
   async function checkBan() {
     try {
       var sid = localStorage.getItem('srtc-session-id');
@@ -48,6 +60,8 @@
     } catch (_) {}
   }
 
+  checkVersion();
+  setInterval(checkVersion, 30000);
   checkMaintenance();
   loadNotice();
   checkBan();
