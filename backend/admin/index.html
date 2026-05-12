@@ -138,6 +138,17 @@
           </div>
           <div id="ip-bans-list"><span class="dim">Loading…</span></div>
         </div>
+
+        <h2>Fingerprint Bans</h2>
+        <div class="card-box">
+          <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+            <input id="ban-fp" class="ifield" type="text" style="flex:1;min-width:220px;max-width:380px" placeholder="Fingerprint ID" />
+            <input id="ban-fp-reason" class="ifield" type="text" style="width:160px" placeholder="Reason (optional)" />
+            <button class="btn btn-del" onclick="banFp()">Ban</button>
+            <span class="ss" id="ban-fp-ss"></span>
+          </div>
+          <div id="fp-bans-list"><span class="dim">Loading…</span></div>
+        </div>
       </div>
 
       <!-- DATA (read-only) -->

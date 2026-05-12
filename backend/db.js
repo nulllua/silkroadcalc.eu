@@ -46,6 +46,12 @@ async function initSchema() {
       banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS banned_fingerprints (
+      fp_id     VARCHAR(64)  PRIMARY KEY,
+      reason    TEXT         NOT NULL DEFAULT '',
+      banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS languages (
       name VARCHAR(100) PRIMARY KEY
     );

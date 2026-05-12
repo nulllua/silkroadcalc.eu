@@ -3,6 +3,22 @@
 
   var API = 'https://admin.silkroadcalc.eu';
 
+  async function initFingerprint() {
+    if (localStorage.getItem('srtc-fp')) return;
+    try {
+      await new Promise(function (resolve) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js';
+        s.onload = resolve;
+        s.onerror = resolve;
+        document.head.appendChild(s);
+      });
+      var fp = await window.FingerprintJS.load();
+      var result = await fp.get();
+      localStorage.setItem('srtc-fp', result.visitorId);
+    } catch (_) {}
+  }
+
   async function checkMaintenance() {
     try {
       var res  = await fetch(API + '/api/maintenance');
@@ -49,10 +65,13 @@
     try {
       var sid = localStorage.getItem('srtc-session-id');
       if (!sid) return;
+      var body = { sessionId: sid };
+      var fpId = localStorage.getItem('srtc-fp');
+      if (fpId) body.fpId = fpId;
       var res = await fetch(API + '/api/session/ping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sid }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) return;
       var data = await res.json();
@@ -60,9 +79,11 @@
     } catch (_) {}
   }
 
+  initFingerprint();
   checkVersion();
   setInterval(checkVersion, 30000);
   checkMaintenance();
   loadNotice();
   checkBan();
+  setInterval(checkBan, 30000);
 })();

@@ -468,11 +468,14 @@ app.post('/api/session/ping', async (req, res) => {
     return res.status(400).json({ error: 'Invalid sessionId' });
   try {
     const ip = req.ip;
-    const [sidBan, ipBan] = await Promise.all([
+    const { fpId } = req.body;
+    const checks = [
       pool.query('SELECT 1 FROM banned_sessions WHERE session_id=$1', [sessionId]),
       pool.query('SELECT 1 FROM banned_ips WHERE ip=$1', [ip]),
-    ]);
-    if (sidBan.rows.length || ipBan.rows.length) return res.json({ ok: true, banned: true });
+      fpId ? pool.query('SELECT 1 FROM banned_fingerprints WHERE fp_id=$1', [fpId]) : Promise.resolve({ rows: [] }),
+    ];
+    const [sidBan, ipBan, fpBan] = await Promise.all(checks);
+    if (sidBan.rows.length || ipBan.rows.length || fpBan.rows.length) return res.json({ ok: true, banned: true });
     await pool.query(
       `INSERT INTO sessions (session_id, last_ping, created_at) VALUES ($1, NOW(), NOW())
        ON CONFLICT (session_id) DO UPDATE SET last_ping = NOW()`,
@@ -538,6 +541,33 @@ app.post('/api/admin/ip-bans', requireAuth, requireOwner, async (req, res) => {
 app.delete('/api/admin/ip-bans/:ip', requireAuth, requireOwner, async (req, res) => {
   try {
     await pool.query('DELETE FROM banned_ips WHERE ip=$1', [req.params.ip]);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/admin/fp-bans', requireAuth, requireOwner, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM banned_fingerprints ORDER BY banned_at DESC');
+    res.json(rows);
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/fp-bans', requireAuth, requireOwner, async (req, res) => {
+  const { fpId, reason } = req.body;
+  if (!fpId || typeof fpId !== 'string' || fpId.length > 64)
+    return res.status(400).json({ error: 'Invalid fpId' });
+  try {
+    await pool.query(
+      `INSERT INTO banned_fingerprints (fp_id, reason) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [fpId, reason || '']
+    );
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/admin/fp-bans/:fpId', requireAuth, requireOwner, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM banned_fingerprints WHERE fp_id=$1', [req.params.fpId]);
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });

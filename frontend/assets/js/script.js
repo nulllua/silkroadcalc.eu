@@ -2062,10 +2062,13 @@ function pingSession() {
     sid = crypto.randomUUID();
     lsSet('srtc-session-id', sid);
   }
+  const fpId = lsGet('srtc-fp', null);
+  const pingBody = { sessionId: sid };
+  if (fpId) pingBody.fpId = fpId;
   fetch(API_BASE + '/api/session/ping', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId: sid }),
+    body: JSON.stringify(pingBody),
   }).then(r => r.ok ? r.json() : null).then(d => {
     if (d?.banned) window.location.replace('/frontend/banned/banned.html');
   }).catch(() => {});
@@ -2202,6 +2205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Username', value: username || 'Anonymous', inline: true },
             { name: 'Session ID', value: lsGet('srtc-session-id', 'Unknown') || 'Unknown', inline: true },
             { name: 'IP Address', value: userIp, inline: true },
+            { name: 'Fingerprint', value: lsGet('srtc-fp', 'Unknown') || 'Unknown', inline: true },
             { name: 'Message', value: message },
           ],
           footer: { text: 'silkroadcalc.eu' },

@@ -1,5 +1,33 @@
 // Site + analytics feature area
 
+async function loadFpBans() {
+  const res = await api('/api/admin/fp-bans');
+  if (!res.ok) { el('fp-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
+  const bans = await res.json();
+  el('fp-bans-list').innerHTML = bans.length
+    ? bans.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e2030">
+        <code style="font-size:11px;color:#9aef9a;flex:1;word-break:break-all">${escHtml(b.fp_id)}</code>
+        <span style="font-size:11px;color:#888;white-space:nowrap">${escHtml(b.reason || '—')}</span>
+        <span style="font-size:11px;color:#555;white-space:nowrap">${new Date(b.banned_at).toLocaleDateString()}</span>
+        <button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-fp="${escHtml(b.fp_id)}" onclick="unbanFp(this.dataset.fp)">Unban</button>
+      </div>`).join('')
+    : '<span class="dim">No fingerprint bans.</span>';
+}
+
+async function banFp() {
+  const fpId = v('ban-fp');
+  const reason = v('ban-fp-reason');
+  if (!fpId) return ss('ban-fp-ss', false, 'Need fingerprint ID');
+  const res = await api('/api/admin/fp-bans', { method: 'POST', body: JSON.stringify({ fpId, reason }) });
+  ss('ban-fp-ss', res.ok);
+  if (res.ok) { el('ban-fp').value = ''; el('ban-fp-reason').value = ''; loadFpBans(); }
+}
+
+async function unbanFp(fpId) {
+  const res = await api('/api/admin/fp-bans/' + encodeURIComponent(fpId), { method: 'DELETE' });
+  if (res.ok) loadFpBans();
+}
+
 async function loadIpBans() {
   const res = await api('/api/admin/ip-bans');
   if (!res.ok) { el('ip-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
@@ -79,6 +107,7 @@ async function loadSite() {
   }
   loadBans();
   loadIpBans();
+  loadFpBans();
 }
 
 async function saveMaintenance() {
