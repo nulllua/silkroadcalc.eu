@@ -28,6 +28,7 @@ app.use(
     credentials: true,
   })
 );
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
 app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
@@ -457,11 +458,21 @@ app.get('/api/routes/count', async (_req, res) => {
   } catch (e) { err(res, e); }
 });
 
+app.get('/api/my-ip', (req, res) => {
+  res.json({ ip: req.ip });
+});
+
 app.post('/api/session/ping', async (req, res) => {
   const { sessionId } = req.body;
   if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 64)
     return res.status(400).json({ error: 'Invalid sessionId' });
   try {
+    const ip = req.ip;
+    const [sidBan, ipBan] = await Promise.all([
+      pool.query('SELECT 1 FROM banned_sessions WHERE session_id=$1', [sessionId]),
+      pool.query('SELECT 1 FROM banned_ips WHERE ip=$1', [ip]),
+    ]);
+    if (sidBan.rows.length || ipBan.rows.length) return res.json({ ok: true, banned: true });
     await pool.query(
       `INSERT INTO sessions (session_id, last_ping, created_at) VALUES ($1, NOW(), NOW())
        ON CONFLICT (session_id) DO UPDATE SET last_ping = NOW()`,
@@ -475,6 +486,60 @@ app.post('/api/session/ping', async (req, res) => {
   } catch (e) {
     err(res, e);
   }
+});
+
+app.get('/api/admin/bans', requireAuth, requireOwner, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM banned_sessions ORDER BY banned_at DESC');
+    res.json(rows);
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/bans', requireAuth, requireOwner, async (req, res) => {
+  const { sessionId, reason } = req.body;
+  if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 100)
+    return res.status(400).json({ error: 'Invalid sessionId' });
+  try {
+    await pool.query(
+      `INSERT INTO banned_sessions (session_id, reason) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [sessionId, reason || '']
+    );
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/admin/bans/:sessionId', requireAuth, requireOwner, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM banned_sessions WHERE session_id=$1', [req.params.sessionId]);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/admin/ip-bans', requireAuth, requireOwner, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM banned_ips ORDER BY banned_at DESC');
+    res.json(rows);
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/ip-bans', requireAuth, requireOwner, async (req, res) => {
+  const { ip, reason } = req.body;
+  if (!ip || typeof ip !== 'string' || ip.length > 64)
+    return res.status(400).json({ error: 'Invalid IP' });
+  try {
+    await pool.query(
+      `INSERT INTO banned_ips (ip, reason) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [ip, reason || '']
+    );
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/admin/ip-bans/:ip', requireAuth, requireOwner, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM banned_ips WHERE ip=$1', [req.params.ip]);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
 });
 
 // ── Discord OAuth (public users) ──────────────────────────────────────────────

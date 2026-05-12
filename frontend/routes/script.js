@@ -2063,6 +2063,8 @@ function pingSession() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId: sid }),
+  }).then(r => r.ok ? r.json() : null).then(d => {
+    if (d?.banned) window.location.replace('/frontend/banned/banned.html');
   }).catch(() => {});
 }
 
@@ -2178,6 +2180,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus('Sending…', 'pending');
     submitBtn.disabled = true;
 
+    let userIp = 'Unknown';
+    try { const r = await fetch(API_BASE + '/api/my-ip'); if (r.ok) userIp = (await r.json()).ip || 'Unknown'; } catch (_) {}
+
     const payload = {
       embeds: [
         {
@@ -2191,6 +2196,8 @@ document.addEventListener('DOMContentLoaded', () => {
               inline: true,
             },
             { name: 'Username', value: username || 'Anonymous', inline: true },
+            { name: 'Session ID', value: lsGet('srtc-session-id', 'Unknown') || 'Unknown', inline: true },
+            { name: 'IP Address', value: userIp, inline: true },
             { name: 'Message', value: message },
           ],
           footer: { text: 'silkroadcalc.eu' },

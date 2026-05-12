@@ -1,5 +1,61 @@
 // Site + analytics feature area
 
+async function loadIpBans() {
+  const res = await api('/api/admin/ip-bans');
+  if (!res.ok) { el('ip-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
+  const bans = await res.json();
+  el('ip-bans-list').innerHTML = bans.length
+    ? bans.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e2030">
+        <code style="font-size:11px;color:#9aef9a;flex:1">${escHtml(b.ip)}</code>
+        <span style="font-size:11px;color:#888;white-space:nowrap">${escHtml(b.reason || '—')}</span>
+        <span style="font-size:11px;color:#555;white-space:nowrap">${new Date(b.banned_at).toLocaleDateString()}</span>
+        <button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-ip="${escHtml(b.ip)}" onclick="unbanIp(this.dataset.ip)">Unban</button>
+      </div>`).join('')
+    : '<span class="dim">No IP bans.</span>';
+}
+
+async function banIp() {
+  const ip = v('ban-ip');
+  const reason = v('ban-ip-reason');
+  if (!ip) return ss('ban-ip-ss', false, 'Need IP');
+  const res = await api('/api/admin/ip-bans', { method: 'POST', body: JSON.stringify({ ip, reason }) });
+  ss('ban-ip-ss', res.ok);
+  if (res.ok) { el('ban-ip').value = ''; el('ban-ip-reason').value = ''; loadIpBans(); }
+}
+
+async function unbanIp(ip) {
+  const res = await api('/api/admin/ip-bans/' + encodeURIComponent(ip), { method: 'DELETE' });
+  if (res.ok) loadIpBans();
+}
+
+async function loadBans() {
+  const res = await api('/api/admin/bans');
+  if (!res.ok) { el('bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
+  const bans = await res.json();
+  el('bans-list').innerHTML = bans.length
+    ? bans.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e2030">
+        <code style="font-size:11px;color:#9aef9a;flex:1;word-break:break-all">${escHtml(b.session_id)}</code>
+        <span style="font-size:11px;color:#888;white-space:nowrap">${escHtml(b.reason || '—')}</span>
+        <span style="font-size:11px;color:#555;white-space:nowrap">${new Date(b.banned_at).toLocaleDateString()}</span>
+        <button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-sid="${escHtml(b.session_id)}" onclick="unbanSession(this.dataset.sid)">Unban</button>
+      </div>`).join('')
+    : '<span class="dim">No bans.</span>';
+}
+
+async function banSession() {
+  const sid = v('ban-sid');
+  const reason = v('ban-reason');
+  if (!sid) return ss('ban-ss', false, 'Need session ID');
+  const res = await api('/api/admin/bans', { method: 'POST', body: JSON.stringify({ sessionId: sid, reason }) });
+  ss('ban-ss', res.ok);
+  if (res.ok) { el('ban-sid').value = ''; el('ban-reason').value = ''; loadBans(); }
+}
+
+async function unbanSession(sid) {
+  const res = await api('/api/admin/bans/' + encodeURIComponent(sid), { method: 'DELETE' });
+  if (res.ok) loadBans();
+}
+
 async function loadSite() {
   const [mr, cr, nr] = await Promise.all([
     api('/api/maintenance'),
@@ -21,6 +77,8 @@ async function loadSite() {
       el('clear-notice-btn').style.display = notice.active ? 'inline-block' : 'none';
     }
   }
+  loadBans();
+  loadIpBans();
 }
 
 async function saveMaintenance() {

@@ -1,6 +1,7 @@
-// Main client runtime for the trading calculator.
-// Organized as: static data -> pricing engine -> UI/state -> network sync.
+// main script for the calculator, took a while to get the pricing math right -domi
+// organized as: static data -> pricing engine -> UI/state -> network sync
 
+// reads all form inputs into one clean object so every calculation works off the same snapshot -domi
 function getPlayerState() {
   return {
     culture: document.getElementById('culture').value,
@@ -20,6 +21,7 @@ function getPlayerState() {
   };
 }
 
+// updates the stat display (slots, speed, etc.) whenever the player config changes -domi
 function updateStats() {
   const ps = getPlayerState();
   const slots = calculateStorage(ps);
@@ -39,6 +41,7 @@ function updateStats() {
   document.getElementById('statAnimalBonus').textContent = animalBonus;
 }
 
+// the main refresh, regenerates every route and redraws the whole UI -domi
 function updateAll() {
   const ps = getPlayerState();
   let routes = generateRoutes(ps);
@@ -55,6 +58,7 @@ function updateAll() {
   autoSave();
 }
 
+// renders the route table with sorting, search filtering, and "current city" pinning -domi
 function renderTable() {
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   const limitEl = document.getElementById('rowLimit');
@@ -192,6 +196,7 @@ function initTableEvents() {
   });
 }
 
+// same data as the table but rendered as cards for mobile screens -domi
 function renderMobileCards(rows) {
   const container = document.getElementById('routeCards');
   if (!container) return;
@@ -290,6 +295,7 @@ function renderMobileCards(rows) {
   container.appendChild(frag);
 }
 
+// colored city badge, also shows the active event tag if one is running -domi
 function badge(city) {
   const c = CITY_BADGE_COLORS[city] || '#888';
   const ev = getActiveEvent(city);
@@ -425,6 +431,7 @@ function fmtRemaining(ms) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+// builds the events panel with city rows, event pickers and live timers -domi
 function renderEventsTab() {
   const panel = document.getElementById('eventsPanel');
   if (!panel) return;
@@ -733,7 +740,7 @@ function tickEventFloater() {
   }
 }
 
-// Tick: refresh timers + auto-clear expired events
+// ticks every second to count down event timers and clean up expired ones -domi
 setInterval(() => {
   if (!Object.keys(eventState).length) {
     // Make sure the floater is empty if all events expired between ticks
@@ -771,6 +778,7 @@ setInterval(() => {
   }
 }, 1000);
 
+// dynamically builds the animal slot rows based on caravan size -domi
 function buildAnimalSlots(count) {
   count = count || 3;
   const wrap = document.getElementById('animalSlots');
@@ -1035,7 +1043,7 @@ function clearNamedState() {
   refreshSetupDropdowns();
 }
 
-/* Best round-trip card */
+// finds and displays the single most profitable round trip from all generated routes -domi
 const LS_LOOP_COLLAPSED = 'silkroad_loop_collapsed';
 function isLoopCollapsed() {
   return lsGet(LS_LOOP_COLLAPSED, '0') === '1';
@@ -1154,7 +1162,7 @@ function onCourierQuestChange() {
   document.getElementById('courierResult').innerHTML = '';
 }
 
-// Returns ordered city array for the shortest geographic path between two cities
+// BFS to find the real travel path between two cities, needed for the courier planner -domi
 function getActualPath(from, to) {
   if (from === to) return [from];
   const visited = new Set([from]);
@@ -1172,7 +1180,7 @@ function getActualPath(from, to) {
   return [from, to];
 }
 
-// Best single good to carry from->to with given slots; null if nothing profitable
+// picks the best trade good for a courier leg given available slots -domi
 function bestGoodForLeg(from, to, ps, slots) {
   if (slots <= 0) return null;
   let best = null;
@@ -1221,6 +1229,7 @@ function confirmCourierDelivery() {
   renderCourierUI(document.getElementById('courierResult'), _courierData);
 }
 
+// the courier planner, calculates the optimal order to hit quest destinations and what to trade along the way -domi
 function runCourierPlanner() {
   const start = document.getElementById('courierStart').value;
   const mustReturn = document.getElementById('courierReturn').checked;
@@ -1471,7 +1480,7 @@ function renderCourierUI(out, data) {
     </div>`;
 }
 
-/* Optimal setup finder */
+// brute forces every culture/religion/language combo to find the best possible setup -domi
 function runOptimalFinder() {
   const out = document.getElementById('optimalResult');
   out.innerHTML = `<div class="planner-empty">Crunching combinations…</div>`;
@@ -1567,7 +1576,7 @@ function applyOptimal(culture, religion, faith, lang) {
   updateAll();
 }
 
-/* Theme system */
+// theme system, persists to localStorage so it survives page refreshes -domi
 const THEME_KEY = 'silkroad_theme';
 function applyTheme(name) {
   document.body.dataset.theme = name;
@@ -1596,7 +1605,7 @@ function loadWalker() {
   applyWalker(enabled);
 }
 
-/* Math breakdown tooltip */
+// builds the tooltip that shows exactly how a buy/sell price was calculated -domi
 function buildPriceBreakdown(route, kind) {
   const ps = getPlayerState();
   const good = GOODS.find((g) => g.name === route.good);
@@ -1711,7 +1720,7 @@ document.addEventListener('mouseout', (e) => {
   if (priceTip) priceTip.style.display = 'none';
 });
 
-/* Discord copy */
+// formats a route as a nicely formatted Discord message and copies it to clipboard -domi
 function copyRouteForDiscord(idx) {
   const r = allRoutes[idx];
   if (!r) return;
@@ -1884,6 +1893,7 @@ function renderAboutChangelogs(logs) {
     .join('');
 }
 
+// pulls live data from the backend on load, goods/cities/events/notices etc. -domi
 async function syncFromApi() {
   try {
     const ctrl = new AbortController();
@@ -2056,6 +2066,8 @@ function pingSession() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId: sid }),
+  }).then(r => r.ok ? r.json() : null).then(d => {
+    if (d?.banned) window.location.replace('/frontend/banned/banned.html');
   }).catch(() => {});
 }
 
@@ -2092,6 +2104,7 @@ const FB_META = {
   },
 };
 
+// feedback modal, sends directly to Discord webhooks so I see reports instantly -domi
 document.addEventListener('DOMContentLoaded', () => {
   initTableEvents();
   const feedbackBtn = document.getElementById('feedbackBtn');
@@ -2171,6 +2184,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus('Sending…', 'pending');
     submitBtn.disabled = true;
 
+    let userIp = 'Unknown';
+    try { const r = await fetch(API_BASE + '/api/my-ip'); if (r.ok) userIp = (await r.json()).ip || 'Unknown'; } catch (_) {}
+
     const payload = {
       embeds: [
         {
@@ -2184,6 +2200,8 @@ document.addEventListener('DOMContentLoaded', () => {
               inline: true,
             },
             { name: 'Username', value: username || 'Anonymous', inline: true },
+            { name: 'Session ID', value: lsGet('srtc-session-id', 'Unknown') || 'Unknown', inline: true },
+            { name: 'IP Address', value: userIp, inline: true },
             { name: 'Message', value: message },
           ],
           footer: { text: 'silkroadcalc.eu' },

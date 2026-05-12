@@ -116,6 +116,28 @@
           </div>
         </div>
         <div id="changelogs-list"></div>
+
+        <h2>Session Bans</h2>
+        <div class="card-box">
+          <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+            <input id="ban-sid" class="ifield" type="text" style="flex:1;min-width:220px;max-width:380px" placeholder="Session ID" />
+            <input id="ban-reason" class="ifield" type="text" style="width:160px" placeholder="Reason (optional)" />
+            <button class="btn btn-del" onclick="banSession()">Ban</button>
+            <span class="ss" id="ban-ss"></span>
+          </div>
+          <div id="bans-list"><span class="dim">Loading…</span></div>
+        </div>
+
+        <h2>IP Bans</h2>
+        <div class="card-box">
+          <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+            <input id="ban-ip" class="ifield" type="text" style="flex:1;min-width:160px;max-width:280px" placeholder="IP Address" />
+            <input id="ban-ip-reason" class="ifield" type="text" style="width:160px" placeholder="Reason (optional)" />
+            <button class="btn btn-del" onclick="banIp()">Ban</button>
+            <span class="ss" id="ban-ip-ss"></span>
+          </div>
+          <div id="ip-bans-list"><span class="dim">Loading…</span></div>
+        </div>
       </div>
 
       <!-- DATA (read-only) -->

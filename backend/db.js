@@ -34,6 +34,18 @@ async function initSchema() {
       PRIMARY KEY (date, session_id)
     );
 
+    CREATE TABLE IF NOT EXISTS banned_sessions (
+      session_id  VARCHAR(100) PRIMARY KEY,
+      reason      TEXT         NOT NULL DEFAULT '',
+      banned_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS banned_ips (
+      ip        VARCHAR(64)  PRIMARY KEY,
+      reason    TEXT         NOT NULL DEFAULT '',
+      banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS languages (
       name VARCHAR(100) PRIMARY KEY
     );

@@ -33,6 +33,22 @@
     } catch (_) {}
   }
 
+  async function checkBan() {
+    try {
+      var sid = localStorage.getItem('srtc-session-id');
+      if (!sid) return;
+      var res = await fetch(API + '/api/session/ping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sid }),
+      });
+      if (!res.ok) return;
+      var data = await res.json();
+      if (data.banned) window.location.replace('/frontend/banned/banned.html');
+    } catch (_) {}
+  }
+
   checkMaintenance();
   loadNotice();
+  checkBan();
 })();
