@@ -1,16 +1,26 @@
 // Site + analytics feature area
 
+function banMessageHtml(b) {
+  return b.feedback_message
+    ? `<pre style="flex:1;white-space:pre-wrap;word-break:break-word;background:#0f1117;border:1px solid #242735;border-radius:4px;padding:6px;margin:0;color:#bbb;font-size:11px;line-height:1.4">${escHtml(b.feedback_message)}</pre>`
+    : `<span style="flex:1;font-size:11px;color:#888">${escHtml(b.reason || 'Manual ban')}</span>`;
+}
+
+function renderBanRow(b, buttonHtml) {
+  return `<div style="padding:6px 0;border-bottom:1px solid #1e2030">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      ${banMessageHtml(b)}
+      ${buttonHtml}
+    </div>
+  </div>`;
+}
+
 async function loadFpBans() {
   const res = await api('/api/admin/fp-bans');
   if (!res.ok) { el('fp-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
   const bans = await res.json();
   el('fp-bans-list').innerHTML = bans.length
-    ? bans.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e2030">
-        <code style="font-size:11px;color:#9aef9a;flex:1;word-break:break-all">${escHtml(b.fp_id)}</code>
-        <span style="font-size:11px;color:#888;white-space:nowrap">${escHtml(b.reason || '—')}</span>
-        <span style="font-size:11px;color:#555;white-space:nowrap">${new Date(b.banned_at).toLocaleDateString()}</span>
-        <button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-fp="${escHtml(b.fp_id)}" onclick="unbanFp(this.dataset.fp)">Unban</button>
-      </div>`).join('')
+    ? bans.map(b => renderBanRow(b, `<button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-fp="${escHtml(b.fp_id)}" onclick="unbanFp(this.dataset.fp)">Unban</button>`)).join('')
     : '<span class="dim">No fingerprint bans.</span>';
 }
 
@@ -25,7 +35,7 @@ async function banFp() {
 
 async function unbanFp(fpId) {
   const res = await api('/api/admin/fp-bans/' + encodeURIComponent(fpId), { method: 'DELETE' });
-  if (res.ok) loadFpBans();
+  if (res.ok) { loadBans(); loadIpBans(); loadFpBans(); }
 }
 
 async function loadIpBans() {
@@ -33,12 +43,7 @@ async function loadIpBans() {
   if (!res.ok) { el('ip-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
   const bans = await res.json();
   el('ip-bans-list').innerHTML = bans.length
-    ? bans.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e2030">
-        <code style="font-size:11px;color:#9aef9a;flex:1">${escHtml(b.ip)}</code>
-        <span style="font-size:11px;color:#888;white-space:nowrap">${escHtml(b.reason || '—')}</span>
-        <span style="font-size:11px;color:#555;white-space:nowrap">${new Date(b.banned_at).toLocaleDateString()}</span>
-        <button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-ip="${escHtml(b.ip)}" onclick="unbanIp(this.dataset.ip)">Unban</button>
-      </div>`).join('')
+    ? bans.map(b => renderBanRow(b, `<button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-ip="${escHtml(b.ip)}" onclick="unbanIp(this.dataset.ip)">Unban</button>`)).join('')
     : '<span class="dim">No IP bans.</span>';
 }
 
@@ -53,7 +58,7 @@ async function banIp() {
 
 async function unbanIp(ip) {
   const res = await api('/api/admin/ip-bans/' + encodeURIComponent(ip), { method: 'DELETE' });
-  if (res.ok) loadIpBans();
+  if (res.ok) { loadBans(); loadIpBans(); loadFpBans(); }
 }
 
 async function loadBans() {
@@ -61,12 +66,7 @@ async function loadBans() {
   if (!res.ok) { el('bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
   const bans = await res.json();
   el('bans-list').innerHTML = bans.length
-    ? bans.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1e2030">
-        <code style="font-size:11px;color:#9aef9a;flex:1;word-break:break-all">${escHtml(b.session_id)}</code>
-        <span style="font-size:11px;color:#888;white-space:nowrap">${escHtml(b.reason || '—')}</span>
-        <span style="font-size:11px;color:#555;white-space:nowrap">${new Date(b.banned_at).toLocaleDateString()}</span>
-        <button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-sid="${escHtml(b.session_id)}" onclick="unbanSession(this.dataset.sid)">Unban</button>
-      </div>`).join('')
+    ? bans.map(b => renderBanRow(b, `<button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-sid="${escHtml(b.session_id)}" onclick="unbanSession(this.dataset.sid)">Unban</button>`)).join('')
     : '<span class="dim">No bans.</span>';
 }
 
@@ -81,7 +81,7 @@ async function banSession() {
 
 async function unbanSession(sid) {
   const res = await api('/api/admin/bans/' + encodeURIComponent(sid), { method: 'DELETE' });
-  if (res.ok) loadBans();
+  if (res.ok) { loadBans(); loadIpBans(); loadFpBans(); }
 }
 
 async function loadSite() {

@@ -37,19 +37,28 @@ async function initSchema() {
     CREATE TABLE IF NOT EXISTS banned_sessions (
       session_id  VARCHAR(100) PRIMARY KEY,
       reason      TEXT         NOT NULL DEFAULT '',
-      banned_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      banned_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      banned_until TIMESTAMPTZ,
+      feedback_message TEXT,
+      ban_group_id TEXT
     );
 
     CREATE TABLE IF NOT EXISTS banned_ips (
       ip        VARCHAR(64)  PRIMARY KEY,
       reason    TEXT         NOT NULL DEFAULT '',
-      banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      banned_until TIMESTAMPTZ,
+      feedback_message TEXT,
+      ban_group_id TEXT
     );
 
     CREATE TABLE IF NOT EXISTS banned_fingerprints (
       fp_id     VARCHAR(64)  PRIMARY KEY,
       reason    TEXT         NOT NULL DEFAULT '',
-      banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+      banned_until TIMESTAMPTZ,
+      feedback_message TEXT,
+      ban_group_id TEXT
     );
 
     CREATE TABLE IF NOT EXISTS languages (
@@ -244,6 +253,15 @@ async function initSchema() {
   `);
   // Add id column to event_levels if upgrading from old schema
   await pool.query(`ALTER TABLE event_levels ADD COLUMN IF NOT EXISTS id SERIAL`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_sessions ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_ips ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_fingerprints ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_sessions ADD COLUMN IF NOT EXISTS feedback_message TEXT`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_ips ADD COLUMN IF NOT EXISTS feedback_message TEXT`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_fingerprints ADD COLUMN IF NOT EXISTS feedback_message TEXT`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_sessions ADD COLUMN IF NOT EXISTS ban_group_id TEXT`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_ips ADD COLUMN IF NOT EXISTS ban_group_id TEXT`).catch(() => {});
+  await pool.query(`ALTER TABLE banned_fingerprints ADD COLUMN IF NOT EXISTS ban_group_id TEXT`).catch(() => {});
 
   await pool.query(
     `INSERT INTO admin_lock_state (id, is_locked, changed_at)

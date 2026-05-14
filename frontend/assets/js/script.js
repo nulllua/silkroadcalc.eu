@@ -2056,12 +2056,17 @@ async function syncFromApi() {
   } catch (_) {}
 }
 
-function pingSession() {
+function getSessionId() {
   let sid = lsGet('srtc-session-id', null);
   if (!sid) {
     sid = crypto.randomUUID();
     lsSet('srtc-session-id', sid);
   }
+  return sid;
+}
+
+function pingSession() {
+  const sid = getSessionId();
   const fpId = lsGet('srtc-fp', null);
   const pingBody = { sessionId: sid };
   if (fpId) pingBody.fpId = fpId;
@@ -2106,6 +2111,21 @@ const FB_META = {
     submit: 'Send Bug Report',
   },
 };
+
+function isTrollFeedbackMessage(message) {
+  const text = String(message || '').trim();
+  if (text.length < 24) return false;
+  const compact = text.replace(/\s/g, '');
+  if (!compact) return false;
+  const letters = (text.match(/[A-Za-z]/g) || []).length;
+  const symbols = (text.match(/[^A-Za-z0-9\s]/g) || []).length;
+  const lines = text.split(/\r?\n/).filter(Boolean).length;
+  return (
+    (text.length >= 40 && letters < 3 && symbols / compact.length > 0.6) ||
+    (text.length >= 80 && letters / compact.length < 0.05) ||
+    (lines >= 4 && letters < 5 && symbols > 20)
+  );
+}
 
 // feedback modal, sends directly to Discord webhooks so I see reports instantly -domi
 document.addEventListener('DOMContentLoaded', () => {
@@ -2184,11 +2204,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = messageEl.value.trim();
     if (!message) return;
 
+    if (isTrollFeedbackMessage(message)) {
+      await fetch(API_BASE + '/api/feedback/abuse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: getSessionId(),
+          fpId: lsGet('srtc-fp', null),
+          type,
+          message,
+        }),
+      }).catch(() => {});
+      window.location.replace('/frontend/banned/banned.html');
+      return;
+    }
+
     setStatus('Sending…', 'pending');
     submitBtn.disabled = true;
-
-    let userIp = 'Unknown';
-    try { const r = await fetch(API_BASE + '/api/my-ip'); if (r.ok) userIp = (await r.json()).ip || 'Unknown'; } catch (_) {}
 
     const payload = {
       embeds: [
@@ -2203,9 +2235,6 @@ document.addEventListener('DOMContentLoaded', () => {
               inline: true,
             },
             { name: 'Username', value: username || 'Anonymous', inline: true },
-            { name: 'Session ID', value: lsGet('srtc-session-id', 'Unknown') || 'Unknown', inline: true },
-            { name: 'IP Address', value: userIp, inline: true },
-            { name: 'Fingerprint', value: lsGet('srtc-fp', 'Unknown') || 'Unknown', inline: true },
             { name: 'Message', value: message },
           ],
           footer: { text: 'silkroadcalc.eu' },

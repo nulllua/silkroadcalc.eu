@@ -21,6 +21,7 @@
       .wrap { max-width: 480px; }
       h1 { font-size: 22px; color: #c04040; letter-spacing: .15em; margin-bottom: 20px; }
       p { font-size: 14px; line-height: 1.8; color: #888; margin-bottom: 8px; }
+      .timer { color: #f0d080; font-size: 16px; margin: 18px 0 4px; }
       .contact { font-size: 13px; color: #f0d080; margin-top: 24px; }
       .footer { font-size: 11px; color: #333; margin-top: 40px; letter-spacing: .1em; text-transform: uppercase; }
     </style>
@@ -29,11 +30,54 @@
     <div class="wrap">
       <h1>⛔ You Have Been Banned</h1>
       <p>You may no longer use this website.</p>
+      <p class="timer" id="banTimer"></p>
       <p class="contact">
         If you believe this is a mistake, contact us on Discord:
         <strong style="color:#fff">@nulllua</strong>
       </p>
       <div class="footer">silkroadcalc.eu</div>
     </div>
+    <script>
+      const API = 'https://admin.silkroadcalc.eu';
+      const timer = document.getElementById('banTimer');
+      function getSessionId() {
+        let sid = localStorage.getItem('srtc-session-id');
+        if (!sid) {
+          sid = crypto.randomUUID();
+          localStorage.setItem('srtc-session-id', sid);
+        }
+        return sid;
+      }
+      function fmt(ms) {
+        const s = Math.max(0, Math.floor(ms / 1000));
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        return `${h}h ${String(m).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`;
+      }
+      async function loadBan() {
+        const body = { sessionId: getSessionId() };
+        const fpId = localStorage.getItem('srtc-fp');
+        if (fpId) body.fpId = fpId;
+        const res = await fetch(API + '/api/session/ping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = res.ok ? await res.json() : null;
+        if (!data?.banned) return location.replace('/');
+        if (!data.bannedUntil) {
+          timer.textContent = 'This ban is permanent.';
+          return;
+        }
+        const until = new Date(data.bannedUntil).getTime();
+        setInterval(() => {
+          const left = until - Date.now();
+          if (left <= 0) return location.replace('/');
+          timer.textContent = 'Expires in ' + fmt(left);
+        }, 1000);
+      }
+      loadBan().catch(() => { timer.textContent = 'Unable to load ban timer.'; });
+    </script>
   </body>
 </html>

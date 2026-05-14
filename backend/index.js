@@ -462,6 +462,53 @@ app.get('/api/my-ip', (req, res) => {
   res.json({ ip: req.ip });
 });
 
+function isTrollFeedbackMessage(message) {
+  const text = String(message || '').trim();
+  if (text.length < 24) return false;
+  const compact = text.replace(/\s/g, '');
+  if (!compact) return false;
+  const letters = (text.match(/[A-Za-z]/g) || []).length;
+  const symbols = (text.match(/[^A-Za-z0-9\s]/g) || []).length;
+  const lines = text.split(/\r?\n/).filter(Boolean).length;
+  return (
+    (text.length >= 40 && letters < 3 && symbols / compact.length > 0.6) ||
+    (text.length >= 80 && letters / compact.length < 0.05) ||
+    (lines >= 4 && letters < 5 && symbols > 20)
+  );
+}
+
+app.post('/api/feedback/abuse', async (req, res) => {
+  const { sessionId, fpId, message } = req.body;
+  if (!isTrollFeedbackMessage(message)) return res.status(400).json({ error: 'Invalid abuse report' });
+  if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 100)
+    return res.status(400).json({ error: 'Invalid sessionId' });
+  try {
+    const reason = 'Automated feedback spam ban';
+    const feedbackMessage = String(message || '').slice(0, 2000);
+    const banGroupId = `feedback:${sessionId}`;
+    await Promise.all([
+      pool.query(
+        `INSERT INTO banned_sessions (session_id, reason, banned_until, feedback_message, ban_group_id) VALUES ($1, $2, NOW() + INTERVAL '24 hours', $3, $4)
+         ON CONFLICT (session_id) DO UPDATE SET reason=$2, banned_at=NOW(), banned_until=NOW() + INTERVAL '24 hours', feedback_message=$3, ban_group_id=$4`,
+        [sessionId, reason, feedbackMessage, banGroupId]
+      ),
+      pool.query(
+        `INSERT INTO banned_ips (ip, reason, banned_until, feedback_message, ban_group_id) VALUES ($1, $2, NOW() + INTERVAL '24 hours', $3, $4)
+         ON CONFLICT (ip) DO UPDATE SET reason=$2, banned_at=NOW(), banned_until=NOW() + INTERVAL '24 hours', feedback_message=$3, ban_group_id=$4`,
+        [req.ip, reason, feedbackMessage, banGroupId]
+      ),
+      fpId && typeof fpId === 'string' && fpId.length <= 64
+        ? pool.query(
+            `INSERT INTO banned_fingerprints (fp_id, reason, banned_until, feedback_message, ban_group_id) VALUES ($1, $2, NOW() + INTERVAL '24 hours', $3, $4)
+             ON CONFLICT (fp_id) DO UPDATE SET reason=$2, banned_at=NOW(), banned_until=NOW() + INTERVAL '24 hours', feedback_message=$3, ban_group_id=$4`,
+            [fpId, reason, feedbackMessage, banGroupId]
+          )
+        : Promise.resolve(),
+    ]);
+    res.json({ ok: true, banned: true });
+  } catch (e) { err(res, e); }
+});
+
 app.post('/api/session/ping', async (req, res) => {
   const { sessionId } = req.body;
   if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 64)
@@ -470,12 +517,16 @@ app.post('/api/session/ping', async (req, res) => {
     const ip = req.ip;
     const { fpId } = req.body;
     const checks = [
-      pool.query('SELECT 1 FROM banned_sessions WHERE session_id=$1', [sessionId]),
-      pool.query('SELECT 1 FROM banned_ips WHERE ip=$1', [ip]),
-      fpId ? pool.query('SELECT 1 FROM banned_fingerprints WHERE fp_id=$1', [fpId]) : Promise.resolve({ rows: [] }),
+      pool.query('SELECT banned_until FROM banned_sessions WHERE session_id=$1 AND (banned_until IS NULL OR banned_until > NOW())', [sessionId]),
+      pool.query('SELECT banned_until FROM banned_ips WHERE ip=$1 AND (banned_until IS NULL OR banned_until > NOW())', [ip]),
+      fpId ? pool.query('SELECT banned_until FROM banned_fingerprints WHERE fp_id=$1 AND (banned_until IS NULL OR banned_until > NOW())', [fpId]) : Promise.resolve({ rows: [] }),
     ];
     const [sidBan, ipBan, fpBan] = await Promise.all(checks);
-    if (sidBan.rows.length || ipBan.rows.length || fpBan.rows.length) return res.json({ ok: true, banned: true });
+    if (sidBan.rows.length || ipBan.rows.length || fpBan.rows.length) {
+      const untils = [...sidBan.rows, ...ipBan.rows, ...fpBan.rows].map(r => r.banned_until).filter(Boolean);
+      const bannedUntil = untils.length ? new Date(Math.min(...untils.map(d => new Date(d).getTime()))) : null;
+      return res.json({ ok: true, banned: true, bannedUntil });
+    }
     await pool.query(
       `INSERT INTO sessions (session_id, last_ping, created_at) VALUES ($1, NOW(), NOW())
        ON CONFLICT (session_id) DO UPDATE SET last_ping = NOW()`,
@@ -511,9 +562,23 @@ app.post('/api/admin/bans', requireAuth, requireOwner, async (req, res) => {
   } catch (e) { err(res, e); }
 });
 
+async function deleteLinkedBan(table, idColumn, idValue) {
+  const { rows } = await pool.query(`SELECT ban_group_id FROM ${table} WHERE ${idColumn}=$1`, [idValue]);
+  const groupId = rows[0]?.ban_group_id;
+  if (groupId) {
+    await Promise.all([
+      pool.query('DELETE FROM banned_sessions WHERE ban_group_id=$1', [groupId]),
+      pool.query('DELETE FROM banned_ips WHERE ban_group_id=$1', [groupId]),
+      pool.query('DELETE FROM banned_fingerprints WHERE ban_group_id=$1', [groupId]),
+    ]);
+    return;
+  }
+  await pool.query(`DELETE FROM ${table} WHERE ${idColumn}=$1`, [idValue]);
+}
+
 app.delete('/api/admin/bans/:sessionId', requireAuth, requireOwner, async (req, res) => {
   try {
-    await pool.query('DELETE FROM banned_sessions WHERE session_id=$1', [req.params.sessionId]);
+    await deleteLinkedBan('banned_sessions', 'session_id', req.params.sessionId);
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
@@ -540,7 +605,7 @@ app.post('/api/admin/ip-bans', requireAuth, requireOwner, async (req, res) => {
 
 app.delete('/api/admin/ip-bans/:ip', requireAuth, requireOwner, async (req, res) => {
   try {
-    await pool.query('DELETE FROM banned_ips WHERE ip=$1', [req.params.ip]);
+    await deleteLinkedBan('banned_ips', 'ip', req.params.ip);
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
@@ -567,7 +632,7 @@ app.post('/api/admin/fp-bans', requireAuth, requireOwner, async (req, res) => {
 
 app.delete('/api/admin/fp-bans/:fpId', requireAuth, requireOwner, async (req, res) => {
   try {
-    await pool.query('DELETE FROM banned_fingerprints WHERE fp_id=$1', [req.params.fpId]);
+    await deleteLinkedBan('banned_fingerprints', 'fp_id', req.params.fpId);
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
