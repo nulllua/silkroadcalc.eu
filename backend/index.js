@@ -1823,52 +1823,154 @@ app.delete(
   }
 );
 
-// ── Projects ──────────────────────────────────────────────────────────────────
+// ── Sections (Projects tab) ───────────────────────────────────────────────────
 
-app.get('/api/admin/projects', requireAuth, async (_req, res) => {
+async function logActivity(actor, action) {
+  await pool.query('INSERT INTO project_activity (actor, action) VALUES ($1,$2)', [actor, action]);
+}
+
+app.get('/api/admin/sections', requireAuth, async (_req, res) => {
   try {
-    const { rows } = await pool.query('SELECT data FROM projects_state WHERE id=1');
-    res.json(rows[0]?.data || { projects: [], activeProjectId: null });
-  } catch (e) {
-    err(res, e);
-  }
+    const { rows: sections } = await pool.query('SELECT * FROM project_sections ORDER BY position, id');
+    const { rows: todos }    = await pool.query('SELECT * FROM section_todos ORDER BY created_at');
+    const { rows: comments } = await pool.query('SELECT * FROM section_comments ORDER BY created_at');
+    res.json(sections.map(s => ({
+      ...s,
+      todos:    todos.filter(t => t.section_id === s.id),
+      comments: comments.filter(c => c.section_id === s.id),
+    })));
+  } catch (e) { err(res, e); }
 });
 
-app.put('/api/admin/projects', requireAuth, async (req, res) => {
-  const data = req.body;
-  if (!Array.isArray(data.projects))
-    return res.status(400).json({ error: 'Invalid data' });
+app.post('/api/admin/sections', requireAuth, async (req, res) => {
+  const { title, description } = req.body;
+  if (!title) return res.status(400).json({ error: 'Missing title' });
+  const actor = req.adminUser.username;
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO project_sections (title, description, created_by) VALUES ($1,$2,$3) RETURNING *',
+      [title, description || '', actor]
+    );
+    await logActivity(actor, `added section "${title}"`);
+    res.json(rows[0]);
+  } catch (e) { err(res, e); }
+});
+
+app.patch('/api/admin/sections/:id', requireAuth, async (req, res) => {
+  const { title, description } = req.body;
+  const actor = req.adminUser.username;
   try {
     await pool.query(
-      `INSERT INTO projects_state (id, data) VALUES (1, $1) ON CONFLICT (id) DO UPDATE SET data=$1`,
-      [JSON.stringify(data)]
+      'UPDATE project_sections SET title=COALESCE($1,title), description=COALESCE($2,description) WHERE id=$3',
+      [title ?? null, description ?? null, req.params.id]
     );
+    await logActivity(actor, 'edited a section');
     res.json({ ok: true });
-  } catch (e) {
-    err(res, e);
-  }
+  } catch (e) { err(res, e); }
 });
 
-app.get('/api/github/latest', requireAuth, async (req, res) => {
+app.delete('/api/admin/sections/:id', requireAuth, async (req, res) => {
+  const actor = req.adminUser.username;
+  try {
+    const { rows } = await pool.query('SELECT title FROM project_sections WHERE id=$1', [req.params.id]);
+    await pool.query('DELETE FROM project_sections WHERE id=$1', [req.params.id]);
+    if (rows[0]) await logActivity(actor, `deleted section "${rows[0].title}"`);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/sections/:id/todos', requireAuth, async (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: 'Missing text' });
+  const actor = req.adminUser.username;
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO section_todos (section_id, text, created_by) VALUES ($1,$2,$3) RETURNING *',
+      [req.params.id, text, actor]
+    );
+    const { rows: sec } = await pool.query('SELECT title FROM project_sections WHERE id=$1', [req.params.id]);
+    await logActivity(actor, `added todo "${text}" to "${sec[0]?.title || ''}"`);
+    res.json(rows[0]);
+  } catch (e) { err(res, e); }
+});
+
+app.patch('/api/admin/todos/:id', requireAuth, async (req, res) => {
+  const { done, text } = req.body;
+  const actor = req.adminUser.username;
+  try {
+    const { rows } = await pool.query(
+      `UPDATE section_todos SET
+        done=COALESCE($1,done),
+        done_by=CASE WHEN $1 IS NOT NULL THEN $2 ELSE done_by END,
+        text=COALESCE($3,text)
+       WHERE id=$4 RETURNING *`,
+      [done ?? null, actor, text ?? null, req.params.id]
+    );
+    if (done !== undefined)
+      await logActivity(actor, done ? `marked done: "${rows[0]?.text}"` : `unmarked: "${rows[0]?.text}"`);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/admin/todos/:id', requireAuth, async (req, res) => {
+  const actor = req.adminUser.username;
+  try {
+    const { rows } = await pool.query('SELECT text FROM section_todos WHERE id=$1', [req.params.id]);
+    await pool.query('DELETE FROM section_todos WHERE id=$1', [req.params.id]);
+    if (rows[0]) await logActivity(actor, `removed todo "${rows[0].text}"`);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/sections/:id/comments', requireAuth, async (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: 'Missing text' });
+  const actor = req.adminUser.username;
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO section_comments (section_id, text, created_by) VALUES ($1,$2,$3) RETURNING *',
+      [req.params.id, text, actor]
+    );
+    const { rows: sec } = await pool.query('SELECT title FROM project_sections WHERE id=$1', [req.params.id]);
+    await logActivity(actor, `commented on "${sec[0]?.title || ''}"`);
+    res.json(rows[0]);
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/admin/comments/:id', requireAuth, async (req, res) => {
+  const actor = req.adminUser.username;
+  try {
+    await pool.query('DELETE FROM section_comments WHERE id=$1', [req.params.id]);
+    await logActivity(actor, 'deleted a comment');
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/admin/activity', requireAuth, async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM project_activity ORDER BY created_at DESC LIMIT 50');
+    res.json(rows);
+  } catch (e) { err(res, e); }
+});
+
+app.get('/api/github/commits', requireAuth, async (req, res) => {
   const repo = req.query.repo;
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo || ''))
     return res.status(400).json({ error: 'Invalid repo' });
-  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'projects-manager' };
+  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'silkroad-admin' };
   if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   try {
-    const r = await fetchImpl(`https://api.github.com/repos/${repo}/commits?per_page=1`, { headers });
-    if (!r.ok) return res.status(r.status).json({ error: r.status === 403 ? 'GitHub rate limit reached.' : 'Commit unavailable.' });
-    const [latest] = await r.json();
-    res.json({
-      sha:     latest.sha.slice(0, 7),
-      message: latest.commit.message.split('\n')[0],
-      author:  latest.commit.author?.name || 'Unknown',
-      date:    latest.commit.author?.date || '',
-      url:     latest.html_url,
-    });
-  } catch (e) {
-    err(res, e);
-  }
+    const r = await fetchImpl(`https://api.github.com/repos/${repo}/commits?per_page=10`, { headers });
+    if (!r.ok) return res.status(r.status).json({ error: r.status === 403 ? 'GitHub rate limit reached.' : 'Commits unavailable.' });
+    const commits = await r.json();
+    res.json(commits.map(c => ({
+      sha:     c.sha.slice(0, 7),
+      message: c.commit.message.split('\n')[0],
+      author:  c.commit.author?.name || 'Unknown',
+      date:    c.commit.author?.date || '',
+      url:     c.html_url,
+    })));
+  } catch (e) { err(res, e); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

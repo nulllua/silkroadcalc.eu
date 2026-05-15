@@ -290,3 +290,167 @@ async function loadData() {
   }
 }
 
+// ── Projects tab ──────────────────────────────────────────────────────────────
+
+function timeAgo(dateStr) {
+  const sec = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (sec < 60) return sec + 's ago';
+  if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+  return Math.floor(sec / 86400) + 'd ago';
+}
+
+async function loadProjects() {
+  loadCommits();
+  loadActivity();
+  loadSections();
+}
+
+async function loadCommits() {
+  const r = await api('/api/github/commits?repo=nulllua/silkroadcalc.eu');
+  const container = el('proj-commits');
+  if (!r.ok) { container.innerHTML = '<span class="dim">Could not load commits.</span>'; return; }
+  const commits = await r.json();
+  container.innerHTML = commits.map(c => `
+    <div class="proj-commit">
+      <div class="proj-commit-msg">${escHtml(c.message)}</div>
+      <div class="proj-commit-meta">
+        <a href="${escHtml(c.url)}" target="_blank" class="proj-commit-sha">${escHtml(c.sha)}</a>
+        · ${escHtml(c.author)} · ${timeAgo(c.date)}
+      </div>
+    </div>
+  `).join('') || '<span class="dim">No commits.</span>';
+}
+
+async function loadActivity() {
+  const r = await api('/api/admin/activity');
+  const container = el('proj-activity');
+  if (!r.ok) { container.innerHTML = '<span class="dim">Could not load.</span>'; return; }
+  const rows = await r.json();
+  container.innerHTML = rows.map(a => `
+    <div class="proj-act-row">
+      <span class="proj-act-actor">${escHtml(a.actor)}</span>
+      ${escHtml(a.action)}
+      <span class="proj-act-time">${timeAgo(a.created_at)}</span>
+    </div>
+  `).join('') || '<span class="dim">No activity yet.</span>';
+}
+
+async function loadSections() {
+  const r = await api('/api/admin/sections');
+  const container = el('proj-sections');
+  if (!r.ok) { container.innerHTML = '<span class="dim">Could not load sections.</span>'; return; }
+  const sections = await r.json();
+  if (!sections.length) {
+    container.innerHTML = '<span class="dim">No sections yet.</span>';
+    return;
+  }
+  container.innerHTML = sections.map(s => renderSection(s)).join('');
+}
+
+function renderSection(s) {
+  const todosHtml = s.todos.map(t => `
+    <div class="proj-todo">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${t.id}, this.checked)" />
+      <div style="flex:1">
+        <div class="proj-todo-text${t.done ? ' done' : ''}">${escHtml(t.text)}</div>
+        <div class="proj-todo-meta">by ${escHtml(t.created_by)}${t.done_by ? ' · done by ' + escHtml(t.done_by) : ''}</div>
+      </div>
+      <button class="proj-icon-btn del" onclick="deleteTodo(${t.id})" title="Remove">×</button>
+    </div>
+  `).join('');
+
+  const commentsHtml = s.comments.map(c => `
+    <div class="proj-comment">
+      <span class="proj-comment-author">${escHtml(c.created_by)}</span>
+      <span class="proj-comment-text">${escHtml(c.text)}</span>
+      <button class="proj-icon-btn del" onclick="deleteComment(${c.id})" title="Remove">×</button>
+    </div>
+  `).join('');
+
+  return `
+    <div class="proj-section" id="section-${s.id}">
+      <div class="proj-section-head">
+        <div style="flex:1">
+          <div class="proj-section-title">${escHtml(s.title)}</div>
+          ${s.description ? `<div class="proj-section-desc">${escHtml(s.description)}</div>` : ''}
+          <div class="proj-section-meta">added by ${escHtml(s.created_by)} · ${timeAgo(s.created_at)}</div>
+        </div>
+        <button class="btn btn-del mini-btn" onclick="deleteSection(${s.id})">Delete</button>
+      </div>
+      <div class="proj-section-body">
+        <div class="proj-todos">
+          ${todosHtml || '<div class="dim" style="font-size:12px;padding:4px 0">No todos yet.</div>'}
+        </div>
+        <div class="proj-add-row">
+          <input class="ifield" id="todo-input-${s.id}" placeholder="Add todo..." onkeydown="if(event.key==='Enter')addTodo(${s.id})" />
+          <button class="btn btn-add mini-btn" onclick="addTodo(${s.id})">Add</button>
+        </div>
+        <div class="proj-comments">
+          ${commentsHtml}
+          <div class="proj-add-row" style="margin-top:${s.comments.length ? '8px' : '0'}">
+            <textarea class="tfield" id="comment-input-${s.id}" rows="2" placeholder="Add comment..." style="margin-bottom:0"></textarea>
+            <button class="btn btn-add mini-btn" onclick="addComment(${s.id})" style="align-self:flex-end">Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openNewSection() {
+  el('proj-new-section').style.display = 'block';
+  el('ns-title').focus();
+}
+
+function closeNewSection() {
+  el('proj-new-section').style.display = 'none';
+  el('ns-title').value = '';
+  el('ns-desc').value = '';
+}
+
+async function createSection() {
+  const title = v('ns-title');
+  const description = v('ns-desc');
+  if (!title) { flash(el('ns-title'), false); return; }
+  const r = await api('/api/admin/sections', { method: 'POST', body: JSON.stringify({ title, description }) });
+  if (r.ok) { closeNewSection(); loadSections(); loadActivity(); }
+}
+
+async function deleteSection(id) {
+  if (!confirm('Delete this section and all its todos/comments?')) return;
+  await api('/api/admin/sections/' + id, { method: 'DELETE' });
+  loadSections(); loadActivity();
+}
+
+async function addTodo(sectionId) {
+  const inp = el('todo-input-' + sectionId);
+  const text = inp.value.trim();
+  if (!text) { flash(inp, false); return; }
+  const r = await api('/api/admin/sections/' + sectionId + '/todos', { method: 'POST', body: JSON.stringify({ text }) });
+  if (r.ok) { inp.value = ''; loadSections(); loadActivity(); }
+}
+
+async function toggleTodo(id, done) {
+  await api('/api/admin/todos/' + id, { method: 'PATCH', body: JSON.stringify({ done }) });
+  loadSections(); loadActivity();
+}
+
+async function deleteTodo(id) {
+  await api('/api/admin/todos/' + id, { method: 'DELETE' });
+  loadSections(); loadActivity();
+}
+
+async function addComment(sectionId) {
+  const inp = el('comment-input-' + sectionId);
+  const text = inp.value.trim();
+  if (!text) { flash(inp, false); return; }
+  const r = await api('/api/admin/sections/' + sectionId + '/comments', { method: 'POST', body: JSON.stringify({ text }) });
+  if (r.ok) { inp.value = ''; loadSections(); loadActivity(); }
+}
+
+async function deleteComment(id) {
+  await api('/api/admin/comments/' + id, { method: 'DELETE' });
+  loadSections(); loadActivity();
+}
+

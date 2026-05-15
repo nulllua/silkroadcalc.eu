@@ -275,15 +275,37 @@ async function initSchema() {
   );
 
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS projects_state (
-      id   INTEGER PRIMARY KEY DEFAULT 1,
-      data JSONB   NOT NULL DEFAULT '{"projects":[],"activeProjectId":null}'
+    CREATE TABLE IF NOT EXISTS project_sections (
+      id          SERIAL PRIMARY KEY,
+      title       TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      position    INT  NOT NULL DEFAULT 0,
+      created_by  TEXT NOT NULL DEFAULT '',
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS section_todos (
+      id          SERIAL PRIMARY KEY,
+      section_id  INT  NOT NULL REFERENCES project_sections(id) ON DELETE CASCADE,
+      text        TEXT NOT NULL,
+      done        BOOL NOT NULL DEFAULT false,
+      done_by     TEXT,
+      created_by  TEXT NOT NULL DEFAULT '',
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS section_comments (
+      id          SERIAL PRIMARY KEY,
+      section_id  INT  NOT NULL REFERENCES project_sections(id) ON DELETE CASCADE,
+      text        TEXT NOT NULL,
+      created_by  TEXT NOT NULL DEFAULT '',
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS project_activity (
+      id         SERIAL PRIMARY KEY,
+      actor      TEXT NOT NULL,
+      action     TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
-  await pool.query(
-    `INSERT INTO projects_state (id, data) VALUES (1, '{"projects":[],"activeProjectId":null}')
-     ON CONFLICT (id) DO NOTHING`
-  );
 }
 
 module.exports = { pool, initSchema };
