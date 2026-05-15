@@ -254,7 +254,7 @@
     },
     {
       title:'Site settings',
-      text:'<p>Low-gold reminder, saved setups, and display options are on the <strong>Settings</strong> page (top navigation).</p>',
+      text:'<p>Saved setups and display options are on the <strong>Settings</strong> page (top navigation).</p>',
       target:'a.nav-link[data-page="settings"]',
       side:'bottom',
       tab:'routes',

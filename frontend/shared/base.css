@@ -209,6 +209,12 @@ select option { background: var(--bg-inset); color: var(--text); }
   -webkit-backdrop-filter: blur(12px);
 }
 
+#topnav .nav-logo span,
+#topnav .nav-link,
+#topnav .nav-discord {
+  font-family: 'Inter', 'DM Sans', system-ui, sans-serif !important;
+}
+
 .nav-inner {
   max-width: 1400px;
   margin: 0 auto;
@@ -439,40 +445,6 @@ select option { background: var(--bg-inset); color: var(--text); }
   margin: 0 auto;
   padding: 32px 20px 48px;
 }
-
-/* ─── NOTICE BAR ─────────────────────────────────────────────────────────── */
-#noticeBar {
-  position: fixed;
-  top: var(--nav-h);
-  left: 0; right: 0;
-  z-index: 900;
-  background: #13161c;
-  border-bottom: 1px solid #2a4058;
-  padding: 8px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-family: 'Cinzel', serif;
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--gold);
-  text-align: center;
-  display: none;
-}
-#noticeBar.visible { display: flex; }
-#noticeBar .notice-close {
-  position: absolute;
-  right: 16px;
-  background: none;
-  border: none;
-  color: var(--gold-dim);
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  padding: 0;
-}
-#noticeBar .notice-close:hover { color: var(--gold); }
 
 /* ─── MAINTENANCE OVERLAY ────────────────────────────────────────────────── */
 #maintenanceOverlay {

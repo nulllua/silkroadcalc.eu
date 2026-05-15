@@ -1147,9 +1147,11 @@ function clearNamedState() {
 /* Best round-trip card */
 const LS_LOOP_COLLAPSED = 'silkroad_loop_collapsed';
 function isLoopCollapsed() {
+  if (window.matchMedia('(max-width: 900px)').matches) return false;
   return lsGet(LS_LOOP_COLLAPSED, '0') === '1';
 }
 function toggleLoopCollapsed() {
+  if (window.matchMedia('(max-width: 900px)').matches) return;
   const next = !isLoopCollapsed();
   lsSet(LS_LOOP_COLLAPSED, next ? '1' : '0');
   renderBestLoop();
@@ -1184,8 +1186,9 @@ function renderBestLoop() {
     return;
   }
   const collapsed = isLoopCollapsed();
+  const canCollapse = !window.matchMedia('(max-width: 900px)').matches;
   const { out, back, totalProfit, totalTime, ppm } = best;
-  const headChevron = '<span class="rct-chevron" aria-hidden="true"></span>';
+  const headChevron = canCollapse ? '<span class="rct-chevron" aria-hidden="true"></span>' : '';
   const headBtnCls =
     'loop-head loop-head-inline loop-head-toggle' +
     (collapsed ? ' loop-head-collapsed is-collapsed' : '');
@@ -1205,7 +1208,7 @@ function renderBestLoop() {
     return;
   }
   card.innerHTML = `
-    <button type="button" class="${headBtnCls}" onclick="toggleLoopCollapsed()" title="Collapse" aria-expanded="true">
+    <button type="button" class="${headBtnCls}" ${canCollapse ? 'onclick="toggleLoopCollapsed()" title="Collapse" aria-expanded="true"' : 'aria-expanded="true"'}>
       <span class="loop-crown" aria-hidden="true">⚜</span>
       <span class="loop-title">Best loop</span>
       <span class="loop-ppm">+$${ppm}<span class="loop-unit">/min</span></span>
@@ -1822,6 +1825,7 @@ refreshSetupDropdowns();
 updateAll();
 
 const API_BASE = 'https://admin.silkroadcalc.eu';
+const IS_LOCAL_DEV = ['localhost', '127.0.0.1'].includes(location.hostname);
 
 function renderAboutChangelogs(logs) {
   const wrap = document.getElementById('aboutChangelogList');
@@ -1853,12 +1857,11 @@ async function syncFromApi() {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 5000);
-    const [gr, tr, mr, cr, nr, citr, evr, tefr, rpr] = await Promise.all([
+    const [gr, tr, mr, cr, citr, evr, tefr, rpr] = await Promise.all([
       fetch(API_BASE + '/api/goods', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/travel-times', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/maintenance', { signal: ctrl.signal, credentials: 'include' }),
       fetch(API_BASE + '/api/changelogs', { signal: ctrl.signal }),
-      fetch(API_BASE + '/api/notices', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/cities', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/events', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/trait-effects', { signal: ctrl.signal }),
@@ -1958,6 +1961,7 @@ async function syncFromApi() {
     if (changed) updateAll();
     if (mr.ok) {
       const m = await mr.json();
+      if (IS_LOCAL_DEV) m.active = false;
       const ov = document.getElementById('maintOverlay');
       if (ov) {
         ov.style.display = m.active ? 'flex' : 'none';
@@ -1976,29 +1980,6 @@ async function syncFromApi() {
     if (cr.ok) {
       const logs = await cr.json();
       renderAboutChangelogs(logs);
-    }
-    if (nr.ok) {
-      const notices = await nr.json();
-      const noticeBar = document.getElementById('noticeBar');
-      if (noticeBar) {
-        if (notices.length && notices[0].active) {
-          noticeBar.style.display = 'flex';
-          const noticeText = document.getElementById('noticeText');
-          if (noticeText) noticeText.textContent = notices[0].message;
-          const level = notices[0].level || 'info';
-          const colors = {
-            info: { bg: '#122038', border: '#2a5ca8', text: '#ddd' },
-            warning: { bg: '#13284a', border: '#3d8eff', text: '#9dc4ff' },
-            error: { bg: '#3a1722', border: '#b91c1c', text: '#ff9999' },
-          };
-          const c = colors[level] || colors.info;
-          noticeBar.style.background = c.bg;
-          noticeBar.style.borderBottomColor = c.border;
-          noticeBar.style.color = c.text;
-        } else {
-          noticeBar.style.display = 'none';
-        }
-      }
     }
   } catch (_) {}
 }
@@ -2158,6 +2139,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const username = document.getElementById('username').value.trim();
     const message = messageEl.value.trim();
+    if (!username) {
+      setStatus('Username is required.', 'err');
+      return;
+    }
     if (!message) return;
 
     if (isTrollFeedbackMessage(message)) {

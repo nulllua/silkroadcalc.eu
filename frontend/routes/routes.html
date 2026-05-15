@@ -101,34 +101,6 @@
             <div id="routeControlsBody" class="route-controls-body">
               <div id="routesFilterRow" class="routes-filter-row">
                 <input type="text" id="searchInput" placeholder="Filter…" oninput="onSearchInput()" />
-              </div>
-              <div class="routes-imin-row" role="group" aria-label="Location filters">
-                <div class="imin-field">
-                  <label class="imin-label" for="currentCity">I'm in</label>
-                  <select id="currentCity" onchange="onCurrentCityChange()">
-                    <option value="">Not set</option>
-                    <option value="Antioch">Antioch</option>
-                    <option value="Tyre">Tyre</option>
-                    <option value="Damascus">Damascus</option>
-                    <option value="Palmyra">Palmyra</option>
-                    <option value="Ctesiphon">Ctesiphon</option>
-                    <option value="Ecbatana">Ecbatana</option>
-                  </select>
-                </div>
-                <div class="imin-field">
-                  <label class="imin-label" for="sellInCity">Selling in</label>
-                  <select id="sellInCity" onchange="onSellCityChange()">
-                    <option value="">Any city</option>
-                    <option value="Antioch">Antioch</option>
-                    <option value="Tyre">Tyre</option>
-                    <option value="Damascus">Damascus</option>
-                    <option value="Palmyra">Palmyra</option>
-                    <option value="Ctesiphon">Ctesiphon</option>
-                    <option value="Ecbatana">Ecbatana</option>
-                  </select>
-                </div>
-              </div>
-              <div class="routes-toolbar-row">
                 <div id="toolbar">
                   <span class="tlabel">Sort</span>
                   <select id="sortBy" onchange="onSortByChange()">
@@ -166,7 +138,31 @@
                   />
                 </div>
               </div>
-              <div class="routes-events-row">
+              <div class="routes-imin-row" role="group" aria-label="Location filters">
+                <div class="imin-field">
+                  <label class="imin-label" for="currentCity">I'm in</label>
+                  <select id="currentCity" onchange="onCurrentCityChange()">
+                    <option value="">Not set</option>
+                    <option value="Antioch">Antioch</option>
+                    <option value="Tyre">Tyre</option>
+                    <option value="Damascus">Damascus</option>
+                    <option value="Palmyra">Palmyra</option>
+                    <option value="Ctesiphon">Ctesiphon</option>
+                    <option value="Ecbatana">Ecbatana</option>
+                  </select>
+                </div>
+                <div class="imin-field">
+                  <label class="imin-label" for="sellInCity">Selling in</label>
+                  <select id="sellInCity" onchange="onSellCityChange()">
+                    <option value="">Any city</option>
+                    <option value="Antioch">Antioch</option>
+                    <option value="Tyre">Tyre</option>
+                    <option value="Damascus">Damascus</option>
+                    <option value="Palmyra">Palmyra</option>
+                    <option value="Ctesiphon">Ctesiphon</option>
+                    <option value="Ecbatana">Ecbatana</option>
+                  </select>
+                </div>
                 <div id="eventToolbar">
                   <span class="tlabel">Event</span>
                   <select id="evqCity">
@@ -248,18 +244,6 @@
       </main>
     </div>
 
-    <footer id="footer">
-      <div class="footer-inner">
-        <span class="footer-brand">SilkRoadCalc.eu</span>
-        <div class="footer-links">
-          <a href="https://discord.gg/dEsV8QPqSU" target="_blank" rel="noopener">Discord</a>
-          <a href="https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki" target="_blank" rel="noopener">Wiki</a>
-          <a href="/frontend/settings/settings.html">Settings</a>
-        </div>
-        <span class="footer-copy">Not affiliated with Roblox or Silk Road Trading Simulator.</span>
-      </div>
-    </footer>
-
     <!-- Active event timers -->
     <div id="eventFloater" aria-live="polite"></div>
 
@@ -284,11 +268,6 @@
         <rect id="tcLegL" x="14" y="80" width="16" height="30" rx="2" fill="#253012" />
         <rect id="tcLegR" x="40" y="80" width="16" height="30" rx="2" fill="#253012" />
       </svg>
-    </div>
-
-    <!-- Notice Bar -->
-    <div id="noticeBar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(18,32,56,0.85);border-bottom:2px solid #2a5ca8;padding:14px 20px;font-size:16px;font-weight:bold;color:#ddd;font-family:Georgia,serif;align-items:center;justify-content:center">
-      <span id="noticeText"></span>
     </div>
 
     <!-- Maintenance overlay -->
@@ -332,8 +311,8 @@
               <label class="fb-type"><input type="radio" name="fbType" value="suggestion" /><span class="fb-type-glyph" aria-hidden="true">✧</span><span class="fb-type-name">Suggestion</span></label>
               <label class="fb-type"><input type="radio" name="fbType" value="bug" /><span class="fb-type-glyph" aria-hidden="true">⚠</span><span class="fb-type-name">Bug</span></label>
             </div>
-            <label class="fb-field-label" for="username">Username <span class="fb-opt">(optional)</span></label>
-            <input type="text" id="username" placeholder="Your Discord username, in case I need to reach you" maxlength="32" />
+            <label class="fb-field-label" for="username">Username</label>
+            <input type="text" id="username" placeholder="Your Discord username" maxlength="32" required />
             <label class="fb-field-label" for="message">Message</label>
             <textarea id="message" rows="5" placeholder="Tell us what's on your mind…" required></textarea>
             <button type="submit" id="sendBtn" class="btn btn-gold fb-submit">Send Feedback</button>

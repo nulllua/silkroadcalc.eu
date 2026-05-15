@@ -547,6 +547,11 @@ app.post('/api/session/ping', async (req, res) => {
       `INSERT INTO daily_sessions (date, session_id) VALUES (CURRENT_DATE, $1) ON CONFLICT DO NOTHING`,
       [sessionId]
     );
+    await pool.query(
+      `INSERT INTO daily_online_peaks (date, peak_online)
+       SELECT CURRENT_DATE, COUNT(*)::int FROM sessions WHERE last_ping > NOW() - INTERVAL '5 minutes'
+       ON CONFLICT (date) DO UPDATE SET peak_online = GREATEST(daily_online_peaks.peak_online, EXCLUDED.peak_online)`
+    );
     res.json({ ok: true });
   } catch (e) {
     err(res, e);
@@ -1188,7 +1193,12 @@ app.get('/api/analytics', requireAuth, async (_req, res) => {
       pool.query(`SELECT COUNT(*) FROM sessions WHERE last_ping > NOW() - INTERVAL '5 minutes'`),
       pool.query(`SELECT COUNT(*) FROM daily_sessions WHERE date = CURRENT_DATE`),
       pool.query(
-        `SELECT date, COUNT(*) AS visits FROM daily_sessions WHERE date >= CURRENT_DATE - INTERVAL '6 days' GROUP BY date ORDER BY date`
+        `SELECT d.date, COUNT(*) AS visits, COALESCE(p.peak_online, 0) AS peak_online
+         FROM daily_sessions d
+         LEFT JOIN daily_online_peaks p ON p.date = d.date
+         WHERE d.date >= CURRENT_DATE - INTERVAL '6 days'
+         GROUP BY d.date, p.peak_online
+         ORDER BY d.date`
       ),
     ]);
     res.json({
@@ -1197,6 +1207,7 @@ app.get('/api/analytics', requireAuth, async (_req, res) => {
       last7Days: c.rows.map((r) => ({
         date: r.date,
         visits: parseInt(r.visits),
+        peakOnline: parseInt(r.peak_online),
       })),
     });
   } catch (e) {

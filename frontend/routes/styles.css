@@ -545,6 +545,11 @@ th:not(:last-child){border-right:1px solid var(--gold-deep)}
 th:hover{background:#10141c;color:var(--gold-light)}
 th.sort-asc::after{content:" ▲";color:var(--gold-light);font-size:9px}
 th.sort-desc::after{content:" ▼";color:var(--gold-light);font-size:9px}
+th.featured.sort-asc::after,
+th.featured.sort-desc::after{margin-left:5px}
+th.featured:hover{background:#1f1108}
+th.featured.sort-asc:hover::after{content:" ▲";position:static;background:transparent;border:0;padding:0;box-shadow:none}
+th.featured.sort-desc:hover::after{content:" ▼";position:static;background:transparent;border:0;padding:0;box-shadow:none}
 
 td{
   border-bottom:1px solid #2a1810;
@@ -600,7 +605,7 @@ th.featured{
 th.featured::before{
   content:"✮";
   position:absolute;
-  top:2px;left:50%;
+  top:2px;left:calc(50% + 12px);
   transform:translateX(-50%);
   font-size:8px;
   color:var(--gold);
@@ -615,7 +620,7 @@ td.featured{
   letter-spacing:.3px;
   color:var(--gold-light);
 }
-tbody tr:hover td.featured{background:rgba(61,142,255,.13) !important}
+tbody tr:hover td.featured{background:rgba(61,142,255,.07) !important}
 td.featured.profit{color:var(--green);text-shadow:0 0 10px rgba(180,204,98,.25)}
 td.featured.loss{color:var(--red);text-shadow:0 0 10px rgba(217,107,90,.25)}
 .no-rows{text-align:center;padding:48px;color:var(--cream-dim);font-family:'Cinzel',serif;font-weight:600;font-size:13px;letter-spacing:3px}
@@ -2861,19 +2866,33 @@ body.no-walker #walkerBar{display:none !important}
 /* Feedback launcher */
 #feedbackContainer{
   position:fixed;
-  left:12px;
-  bottom:12px;
+  top:16px;
+  right:24px;
   z-index:10000;
+}
+body tbody tr:hover td.featured{background:rgba(61,142,255,.08) !important}
+@media (max-width:900px){
+  #feedbackContainer{
+    top:7px;
+    right:72px;
+  }
+  .feedback-fab-mini{
+    min-height:36px;
+    padding:8px 12px;
+    font-size:9px;
+    letter-spacing:1.8px;
+  }
 }
 .feedback-fab-mini{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:5px 10px;
+  min-height:28px;
+  padding:6px 14px;
   font-family:'Cinzel',serif;
-  font-size:9px;
+  font-size:10px;
   font-weight:600;
-  letter-spacing:1.8px;
+  letter-spacing:2px;
   text-transform:uppercase;
   color:var(--gold-light);
   background:rgba(26,14,8,.94);
@@ -3068,14 +3087,14 @@ body.no-walker #walkerBar{display:none !important}
   padding:7px 10px;
   font-size:12px;
   margin:0;
-  background:#1a1008;
+  background:#090d14;
   color:var(--cream);
 }
 #feedbackForm textarea{
   font-family:'Cormorant Garamond',serif;
   font-size:13px;
   line-height:1.45;
-  background:#1a1008;
+  background:#090d14;
   color:var(--cream);
   resize:vertical;
   min-height:80px;
@@ -3083,8 +3102,12 @@ body.no-walker #walkerBar{display:none !important}
 }
 
 .fb-submit{
-  width:100%;
+  display:block;
+  width:fit-content;
+  min-width:30px;
   margin-top:10px;
+  margin-left:auto;
+  margin-right:auto;
   padding:8px 14px;
   font-size:10px;
   letter-spacing:2.5px;

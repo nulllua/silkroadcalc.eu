@@ -2,13 +2,18 @@
 
 function banMessageHtml(b) {
   return b.feedback_message
-    ? `<pre style="flex:1;white-space:pre-wrap;word-break:break-word;background:#0f1117;border:1px solid #242735;border-radius:4px;padding:6px;margin:0;color:#bbb;font-size:11px;line-height:1.4">${escHtml(b.feedback_message)}</pre>`
-    : `<span style="flex:1;font-size:11px;color:#888">${escHtml(b.reason || 'Manual ban')}</span>`;
+    ? `<pre class="ban-msg">${escHtml(b.feedback_message)}</pre>`
+    : `<span class="ban-msg ban-reason">${escHtml(b.reason || 'Manual ban')}</span>`;
 }
 
-function renderBanRow(b, buttonHtml) {
-  return `<div style="padding:6px 0;border-bottom:1px solid #1e2030">
-    <div style="display:flex;align-items:flex-start;gap:10px">
+function banDate(b) {
+  return b.banned_at ? new Date(b.banned_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown time';
+}
+
+function renderBanRow(b, buttonHtml, target) {
+  return `<div class="ban-row">
+    <div class="ban-meta">${banDate(b)} · ${escHtml(target)}</div>
+    <div class="ban-body">
       ${banMessageHtml(b)}
       ${buttonHtml}
     </div>
@@ -17,11 +22,8 @@ function renderBanRow(b, buttonHtml) {
 
 async function loadFpBans() {
   const res = await api('/api/admin/fp-bans');
-  if (!res.ok) { el('fp-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
-  const bans = await res.json();
-  el('fp-bans-list').innerHTML = bans.length
-    ? bans.map(b => renderBanRow(b, `<button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-fp="${escHtml(b.fp_id)}" onclick="unbanFp(this.dataset.fp)">Unban</button>`)).join('')
-    : '<span class="dim">No fingerprint bans.</span>';
+  if (!res.ok) return [];
+  return (await res.json()).map(b => ({ ...b, _kind: 'Fingerprint', _id: b.fp_id, _unban: 'unbanFp' }));
 }
 
 async function banFp() {
@@ -40,11 +42,8 @@ async function unbanFp(fpId) {
 
 async function loadIpBans() {
   const res = await api('/api/admin/ip-bans');
-  if (!res.ok) { el('ip-bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
-  const bans = await res.json();
-  el('ip-bans-list').innerHTML = bans.length
-    ? bans.map(b => renderBanRow(b, `<button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-ip="${escHtml(b.ip)}" onclick="unbanIp(this.dataset.ip)">Unban</button>`)).join('')
-    : '<span class="dim">No IP bans.</span>';
+  if (!res.ok) return [];
+  return (await res.json()).map(b => ({ ...b, _kind: 'IP', _id: b.ip, _unban: 'unbanIp' }));
 }
 
 async function banIp() {
@@ -64,9 +63,15 @@ async function unbanIp(ip) {
 async function loadBans() {
   const res = await api('/api/admin/bans');
   if (!res.ok) { el('bans-list').innerHTML = '<span class="dim">No access.</span>'; return; }
-  const bans = await res.json();
+  const sessionBans = (await res.json()).map(b => ({ ...b, _kind: 'Session', _id: b.session_id, _unban: 'unbanSession' }));
+  const bans = [...sessionBans, ...(await loadIpBans()), ...(await loadFpBans())]
+    .sort((a, b) => new Date(b.banned_at || 0) - new Date(a.banned_at || 0));
   el('bans-list').innerHTML = bans.length
-    ? bans.map(b => renderBanRow(b, `<button class="btn btn-del" style="padding:2px 8px;font-size:11px" data-sid="${escHtml(b.session_id)}" onclick="unbanSession(this.dataset.sid)">Unban</button>`)).join('')
+    ? bans.map(b => renderBanRow(
+        b,
+        `<button class="btn btn-del mini-btn" data-id="${escHtml(b._id)}" onclick="${b._unban}(this.dataset.id)">Unban</button>`,
+        `${b._kind}: ${b._id}`
+      )).join('')
     : '<span class="dim">No bans.</span>';
 }
 
@@ -85,29 +90,13 @@ async function unbanSession(sid) {
 }
 
 async function loadSite() {
-  const [mr, cr, nr] = await Promise.all([
-    api('/api/maintenance'),
-    api('/api/changelogs'),
-    api('/api/notices'),
-  ]);
+  const mr = await api('/api/maintenance');
   if (mr.ok) {
     const m = await mr.json();
     el('maint-active').checked = !!m.active;
     el('maint-msg').value = m.message || '';
   }
-  if (cr.ok) renderChangelogs(await cr.json());
-  if (nr.ok) {
-    const notices = await nr.json();
-    if (notices.length) {
-      const notice = notices[0];
-      el('notice-msg').value = notice.message || '';
-      el('notice-level').value = notice.level || 'info';
-      el('clear-notice-btn').style.display = notice.active ? 'inline-block' : 'none';
-    }
-  }
   loadBans();
-  loadIpBans();
-  loadFpBans();
 }
 
 async function saveMaintenance() {
@@ -150,6 +139,11 @@ function renderChangelogs(logs) {
       .join('') || '<span class="dim">No changelog entries yet.</span>';
 }
 
+async function loadChangelog() {
+  const res = await api('/api/changelogs');
+  if (res.ok) renderChangelogs(await res.json());
+}
+
 async function addChangelog() {
   const version = v('cl-ver'),
     thanks = v('cl-thanks');
@@ -167,7 +161,7 @@ async function addChangelog() {
   if (res.ok) {
     ['cl-ver', 'cl-date', 'cl-thanks'].forEach((i) => (el(i).value = ''));
     el('cl-entries').value = '';
-    loadSite();
+    loadChangelog();
   }
 }
 
@@ -189,7 +183,7 @@ async function saveChangelog(btn) {
 async function delChangelog(btn) {
   if (!confirm('Delete this changelog entry?')) return;
   const res = await api('/api/admin/changelogs/' + btn.dataset.id, { method: 'DELETE' });
-  if (res.ok) loadSite();
+  if (res.ok) loadChangelog();
 }
 
 async function loadAnalytics() {
@@ -201,76 +195,98 @@ async function loadAnalytics() {
   el('week-body').innerHTML = d.last7Days
     .map(
       (r) =>
-        `<tr><td>${new Date(r.date).toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}</td><td>${r.visits}</td></tr>`
+        `<tr><td>${new Date(r.date).toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}</td><td>${r.visits}</td><td>${r.peakOnline || '—'}</td></tr>`
     )
     .join('');
 }
 
-async function saveNotice() {
-  const message = el('notice-msg').value.trim();
-  const level = el('notice-level').value;
-  if (!message) return ss('notice-ss', false, 'Need message');
-  const res = await api('/api/admin/notices', {
-    method: 'POST',
-    body: JSON.stringify({ active: true, message, level }),
-  });
-  ss('notice-ss', res.ok, res.ok ? '✓ Notice ON' : 'Error');
-  if (res.ok) {
-    el('clear-notice-btn').style.display = 'inline-block';
-    loadSite();
-  }
-}
-
 async function loadData() {
-  const [gr, cr, tr, er, rr, lr] = await Promise.all([
-    api('/api/goods'), api('/api/cities'), api('/api/travel-times'),
-    api('/api/events'), api('/api/religions'), api('/api/languages'),
+  const [gr, er, tefr, rpr] = await Promise.all([
+    api('/api/goods'),
+    api('/api/events'),
+    api('/api/trait-effects'),
+    api('/api/religion-perks'),
   ]);
+
   if (gr.ok) {
     const goods = await gr.json();
-    el('goods-body').innerHTML = goods.map(g =>
-      `<tr><td class="hl">${escHtml(g.name)}</td><td>${g.base_price}</td><td>${escHtml(g.type)}</td><td>${g.hop_pct}</td></tr>`
+    const hopBonus = (base, pct, hops) => Math.round(base * (Math.pow(1 + pct, hops) - 1));
+    el('data-goods-body').innerHTML = goods.map(g =>
+      `<tr>
+        <td class="hl">${escHtml(g.name)}</td>
+        <td>$${g.base_price}</td>
+        <td>${escHtml(g.type)}</td>
+        <td>${(g.hop_pct * 100).toFixed(2)}%</td>
+        <td style="color:var(--green)">+$${hopBonus(g.base_price, g.hop_pct, 1)}</td>
+        <td style="color:var(--green)">+$${hopBonus(g.base_price, g.hop_pct, 2)}</td>
+        <td style="color:var(--green)">+$${hopBonus(g.base_price, g.hop_pct, 3)}</td>
+      </tr>`
+    ).join('') || '<tr><td colspan="7" class="dim">None</td></tr>';
+  }
+
+  if (tefr.ok) {
+    const effects = await tefr.json();
+    const condFmt = (t, v) => {
+      if (!t) return '<span class="dim">Any good</span>';
+      if (t === 'good_type') return `Type: ${escHtml(v)}`;
+      if (t === 'good_type_food') return `Type: Food (Agricultural)`;
+      if (t === 'good_name') return `Good: ${escHtml(v)}`;
+      if (t === 'culture_mismatch') return `Culture mismatch`;
+      if (t === 'religion') return `Player religion: ${escHtml(v)}`;
+      return escHtml(t);
+    };
+    el('data-traits-body').innerHTML = effects.map(e =>
+      `<tr>
+        <td class="hl">${escHtml(e.trait_name)}</td>
+        <td>${escHtml(e.kind || 'both')}</td>
+        <td style="color:${e.bonus >= 0 ? 'var(--green)' : 'var(--red)'}">${e.bonus >= 0 ? '+' : ''}${(e.bonus * 100).toFixed(1)}%</td>
+        <td>${condFmt(e.cond_type, e.cond_value)}</td>
+      </tr>`
     ).join('') || '<tr><td colspan="4" class="dim">None</td></tr>';
   }
-  if (cr.ok) {
-    const cities = await cr.json();
-    el('cities-body').innerHTML = cities.map(c =>
-      `<tr><td class="hl">${escHtml(c.name)}</td><td>${escHtml(c.culture)}</td><td>${escHtml(c.language)}</td><td>${c.has_fire_temple ? 'Yes' : 'No'}</td><td>${(c.traits||[]).map(escHtml).join(', ')||'—'}</td><td>${(c.produced||[]).map(escHtml).join(', ')||'—'}</td></tr>`
-    ).join('') || '<tr><td colspan="6" class="dim">None</td></tr>';
-  }
-  if (tr.ok) {
-    const times = await tr.json();
-    const rows = [];
-    for (const [from, tos] of Object.entries(times))
-      for (const [to, mins] of Object.entries(tos))
-        rows.push(`<tr><td>${escHtml(from)}</td><td>${escHtml(to)}</td><td>${mins}</td></tr>`);
-    el('travel-body').innerHTML = rows.join('') || '<tr><td colspan="3" class="dim">None</td></tr>';
-  }
+
   if (er.ok) {
     const events = await er.json();
-    el('events-body').innerHTML = events.map(e =>
-      `<tr><td class="hl">${escHtml(e.name)}</td><td>${escHtml(e.glyph)}</td><td>${e.dir > 0 ? '+1' : '-1'}</td><td>${(e.good_types||[]).map(escHtml).join(', ')||'—'}</td><td>${(e.good_names||[]).map(escHtml).join(', ')||'—'}</td></tr>`
+    const lvlFmt = (lvls, n) => {
+      const l = lvls.find(x => x.level === n);
+      if (!l) return '<span class="dim">—</span>';
+      return `base +$${l.base_bonus}, ×${(l.pct * 100).toFixed(1)}%`;
+    };
+    el('data-events-body').innerHTML = events.map(e => {
+      const lvls = e.levels || [];
+      const typesStr = (e.good_types || []).join(', ') || '—';
+      const goodsStr = (e.good_names || []).join(', ') || '—';
+      return `<tr>
+        <td class="hl">${escHtml(e.name)}</td>
+        <td>${escHtml(e.glyph)}</td>
+        <td style="color:${e.dir > 0 ? 'var(--green)' : 'var(--red)'}">${e.dir > 0 ? '+1 (raises)' : '−1 (lowers)'}</td>
+        <td>${escHtml(typesStr)}</td>
+        <td>${escHtml(goodsStr)}</td>
+        <td>${lvlFmt(lvls, 1)}</td>
+        <td>${lvlFmt(lvls, 2)}</td>
+        <td>${lvlFmt(lvls, 3)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="8" class="dim">None</td></tr>';
+  }
+
+  if (rpr.ok) {
+    const perks = await rpr.json();
+    const perkDesc = (type, mult) => {
+      if (type === 'reduce_negative') return `Negative city mod × ${mult} (reduced penalty)`;
+      if (type === 'amplify_negative') return `Negative city mod × ${mult} (amplified penalty)`;
+      if (type === 'amplify_positive') return `Positive city mod × ${mult} (amplified bonus)`;
+      if (type === 'byzantine_penalty') return `Negative city mod in Byzantine city × ${mult}`;
+      return escHtml(type);
+    };
+    el('data-perks-body').innerHTML = perks.map(p =>
+      `<tr>
+        <td class="hl">${escHtml(p.religion)}</td>
+        <td>${p.min_level}</td>
+        <td>${escHtml(p.perk_type)}</td>
+        <td>${p.multiplier}×</td>
+        <td class="dim">${perkDesc(p.perk_type, p.multiplier)}</td>
+      </tr>`
     ).join('') || '<tr><td colspan="5" class="dim">None</td></tr>';
-  }
-  if (rr.ok) {
-    const religions = await rr.json();
-    el('religions-body').innerHTML = religions.map(r =>
-      `<tr><td class="hl">${escHtml(r.name)}</td></tr>`
-    ).join('') || '<tr><td class="dim">None</td></tr>';
-  }
-  if (lr.ok) {
-    const languages = await lr.json();
-    el('languages-body').innerHTML = languages.map(l =>
-      `<tr><td class="hl">${escHtml(l.name)}</td></tr>`
-    ).join('') || '<tr><td class="dim">None</td></tr>';
   }
 }
 
-async function clearNotice() {
-  const res = await api('/api/admin/notices/disable', { method: 'POST' });
-  ss('notice-ss', res.ok, res.ok ? '✓ Notice OFF' : 'Error');
-  if (res.ok) {
-    el('clear-notice-btn').style.display = 'none';
-    loadSite();
-  }
-}

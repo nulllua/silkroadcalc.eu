@@ -4,7 +4,6 @@
   var KEYS = {
     compact: 'silkroad_compact',
     notifEvents: 'silkroad_notif_events',
-    lowBudget: 'silkroad_routes_low_budget',
   };
   var SETUPS_KEY = 'silkroad_setups';
   var LS_KEY = 'silkroad_v1';
@@ -86,8 +85,8 @@
   }
 
   function load() {
-    var ids = ['settingCompact', 'notifEvents', 'lowBudgetMode'];
-    var keys = [KEYS.compact, KEYS.notifEvents, KEYS.lowBudget];
+    var ids = ['settingCompact', 'notifEvents'];
+    var keys = [KEYS.compact, KEYS.notifEvents];
     ids.forEach(function (id, i) {
       var el = document.getElementById(id);
       if (el) el.checked = localStorage.getItem(keys[i]) === '1';
@@ -99,7 +98,6 @@
     var pairs = [
       ['settingCompact', KEYS.compact],
       ['notifEvents', KEYS.notifEvents],
-      ['lowBudgetMode', KEYS.lowBudget],
     ];
     pairs.forEach(function (pair) {
       var el = document.getElementById(pair[0]);

@@ -2,6 +2,7 @@
   'use strict';
 
   var API = 'https://admin.silkroadcalc.eu';
+  var isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
 
   async function initFingerprint() {
     if (localStorage.getItem('srtc-fp')) return;
@@ -21,6 +22,11 @@
 
   async function checkMaintenance() {
     try {
+      if (isLocal) {
+        var localOv = document.getElementById('maintenanceOverlay');
+        if (localOv) localOv.style.cssText = 'display:none!important';
+        return;
+      }
       var res  = await fetch(API + '/api/maintenance', { credentials: 'include' });
       if (!res.ok) return;
       var data = await res.json();
@@ -44,23 +50,6 @@
           ov.style.cssText = 'display:flex!important';
         }
       }
-    } catch (_) {}
-  }
-
-  async function loadNotice() {
-    try {
-      var res  = await fetch(API + '/api/notices');
-      if (!res.ok) return;
-      var data = await res.json();
-      var notice = Array.isArray(data) ? data[0] : data;
-      if (!notice || !notice.active || !notice.message) return;
-      var text = notice.message;
-      var bar = document.getElementById('noticeBar');
-      if (!bar) return;
-      var txt = document.getElementById('noticeText') || bar.querySelector('.notice-text');
-      if (txt) txt.textContent = text;
-      else bar.textContent = text;
-      bar.style.cssText = 'display:flex!important';
     } catch (_) {}
   }
 
@@ -97,7 +86,6 @@
   checkVersion();
   setInterval(checkVersion, 30000);
   checkMaintenance();
-  loadNotice();
   checkBan();
   setInterval(checkBan, 30000);
 })();

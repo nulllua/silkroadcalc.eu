@@ -114,8 +114,9 @@
   letter-spacing: 0.5px;
 }
 
-.ps-actions { margin-top: 4px; border-top: 1px solid rgba(231,200,133,0.1); padding-top: 16px; }
+.ps-actions { margin-top: 4px; border-top: 1px solid rgba(231,200,133,0.1); padding-top: 22px; }
 .ps-run { width: 100%; justify-content: center; padding: 11px; font-size: 11px; }
+.ps-clear { display: block; margin: 14px auto 0; }
 
 /* ─── MAIN / RESULTS ─────────────────────────────────────────────────────── */
 .planner-main { min-width: 0; }

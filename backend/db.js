@@ -34,6 +34,11 @@ async function initSchema() {
       PRIMARY KEY (date, session_id)
     );
 
+    CREATE TABLE IF NOT EXISTS daily_online_peaks (
+      date        DATE         PRIMARY KEY DEFAULT CURRENT_DATE,
+      peak_online INTEGER      NOT NULL DEFAULT 0
+    );
+
     CREATE TABLE IF NOT EXISTS banned_sessions (
       session_id  VARCHAR(100) PRIMARY KEY,
       reason      TEXT         NOT NULL DEFAULT '',
