@@ -15,6 +15,7 @@
   var charWrap  = document.getElementById('wkCharWrap');
   var camelWrap = document.getElementById('wkCamelWrap');
   var peekHead  = document.getElementById('wkPeekHead');
+  if (!charWrap || !camelWrap) return;
 
   function teleport(el, x){
     el.style.transition = 'none';
