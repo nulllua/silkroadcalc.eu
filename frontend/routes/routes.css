@@ -206,6 +206,42 @@ body::before { content: none; }
   padding: 5px 10px !important;
   font-size: 12px !important;
 }
+.routes-imin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  padding: 8px 20px 10px;
+  border-bottom: 1px solid rgba(231, 200, 133, 0.08);
+}
+.imin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.imin-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dark, #1f5cc4);
+  white-space: nowrap;
+}
+.routes-imin-row select {
+  min-width: 140px;
+  max-width: 100%;
+  width: auto;
+  padding: 5px 26px 5px 8px !important;
+  font-size: 12px !important;
+}
+body .routes-imin-row {
+  border-bottom-color: #2a3445;
+}
+body .imin-label {
+  color: var(--cream-dim, #9aa0a8);
+}
 .routes-toolbar-row {
   display: flex;
   align-items: flex-start;
@@ -498,6 +534,14 @@ body #routeControls .routes-best-loop-row #bestLoopCard {
 @media (max-width: 768px) {
   .routes-filter-row {
     padding: 8px 12px 6px !important;
+  }
+  .routes-imin-row {
+    padding: 8px 12px 10px;
+    gap: 12px 16px;
+  }
+  .routes-imin-row .imin-field {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 120px;
   }
   .routes-toolbar-row {
     flex-direction: column;

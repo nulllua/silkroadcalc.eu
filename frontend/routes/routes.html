@@ -73,24 +73,6 @@
       <select id="sassanidRank"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
       <span id="animalSlotsTitle"></span><div id="animalSlots"></div>
       <b id="statBaseSpeed"></b><b id="statAutoBonus"></b><b id="statAnimalBonus"></b><b id="statSpeed"></b><b id="statSlots"></b>
-      <select id="currentCity" onchange="onCurrentCityChange()">
-        <option value="">Not set</option>
-        <option value="Antioch">Antioch</option>
-        <option value="Tyre">Tyre</option>
-        <option value="Damascus">Damascus</option>
-        <option value="Palmyra">Palmyra</option>
-        <option value="Ctesiphon">Ctesiphon</option>
-        <option value="Ecbatana">Ecbatana</option>
-      </select>
-      <select id="sellInCity" onchange="onSellCityChange()">
-        <option value="">Any city</option>
-        <option value="Antioch">Antioch</option>
-        <option value="Tyre">Tyre</option>
-        <option value="Damascus">Damascus</option>
-        <option value="Palmyra">Palmyra</option>
-        <option value="Ctesiphon">Ctesiphon</option>
-        <option value="Ecbatana">Ecbatana</option>
-      </select>
     </div>
 
     <div id="app">
@@ -119,6 +101,32 @@
             <div id="routeControlsBody" class="route-controls-body">
               <div id="routesFilterRow" class="routes-filter-row">
                 <input type="text" id="searchInput" placeholder="Filter…" oninput="onSearchInput()" />
+              </div>
+              <div class="routes-imin-row" role="group" aria-label="Location filters">
+                <div class="imin-field">
+                  <label class="imin-label" for="currentCity">I'm in</label>
+                  <select id="currentCity" onchange="onCurrentCityChange()">
+                    <option value="">Not set</option>
+                    <option value="Antioch">Antioch</option>
+                    <option value="Tyre">Tyre</option>
+                    <option value="Damascus">Damascus</option>
+                    <option value="Palmyra">Palmyra</option>
+                    <option value="Ctesiphon">Ctesiphon</option>
+                    <option value="Ecbatana">Ecbatana</option>
+                  </select>
+                </div>
+                <div class="imin-field">
+                  <label class="imin-label" for="sellInCity">Selling in</label>
+                  <select id="sellInCity" onchange="onSellCityChange()">
+                    <option value="">Any city</option>
+                    <option value="Antioch">Antioch</option>
+                    <option value="Tyre">Tyre</option>
+                    <option value="Damascus">Damascus</option>
+                    <option value="Palmyra">Palmyra</option>
+                    <option value="Ctesiphon">Ctesiphon</option>
+                    <option value="Ecbatana">Ecbatana</option>
+                  </select>
+                </div>
               </div>
               <div class="routes-toolbar-row">
                 <div id="toolbar">
