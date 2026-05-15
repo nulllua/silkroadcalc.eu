@@ -1823,6 +1823,54 @@ app.delete(
   }
 );
 
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+app.get('/api/admin/projects', requireAuth, async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT data FROM projects_state WHERE id=1');
+    res.json(rows[0]?.data || { projects: [], activeProjectId: null });
+  } catch (e) {
+    err(res, e);
+  }
+});
+
+app.put('/api/admin/projects', requireAuth, async (req, res) => {
+  const data = req.body;
+  if (!Array.isArray(data.projects))
+    return res.status(400).json({ error: 'Invalid data' });
+  try {
+    await pool.query(
+      `INSERT INTO projects_state (id, data) VALUES (1, $1) ON CONFLICT (id) DO UPDATE SET data=$1`,
+      [JSON.stringify(data)]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    err(res, e);
+  }
+});
+
+app.get('/api/github/latest', requireAuth, async (req, res) => {
+  const repo = req.query.repo;
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo || ''))
+    return res.status(400).json({ error: 'Invalid repo' });
+  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'projects-manager' };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  try {
+    const r = await fetchImpl(`https://api.github.com/repos/${repo}/commits?per_page=1`, { headers });
+    if (!r.ok) return res.status(r.status).json({ error: r.status === 403 ? 'GitHub rate limit reached.' : 'Commit unavailable.' });
+    const [latest] = await r.json();
+    res.json({
+      sha:     latest.sha.slice(0, 7),
+      message: latest.commit.message.split('\n')[0],
+      author:  latest.commit.author?.name || 'Unknown',
+      date:    latest.commit.author?.date || '',
+      url:     latest.html_url,
+    });
+  } catch (e) {
+    err(res, e);
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 initSchema()

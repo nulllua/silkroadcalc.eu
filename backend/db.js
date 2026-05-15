@@ -273,6 +273,17 @@ async function initSchema() {
      VALUES (1, true, NOW())
      ON CONFLICT (id) DO NOTHING`
   );
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS projects_state (
+      id   INTEGER PRIMARY KEY DEFAULT 1,
+      data JSONB   NOT NULL DEFAULT '{"projects":[],"activeProjectId":null}'
+    )
+  `);
+  await pool.query(
+    `INSERT INTO projects_state (id, data) VALUES (1, '{"projects":[],"activeProjectId":null}')
+     ON CONFLICT (id) DO NOTHING`
+  );
 }
 
 module.exports = { pool, initSchema };

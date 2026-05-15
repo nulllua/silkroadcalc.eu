@@ -1,11 +1,11 @@
-# silkroadcalc.eu — Codebase Reference
+# silkroadcalc.eu - Codebase Reference
 
 ## Architecture
 
 Two-domain setup:
 
-- **Frontend:** `https://silkroadcalc.eu` — GitHub Pages, fully static HTML/CSS/JS
-- **Backend:** `https://admin.silkroadcalc.eu` — Railway, Express + PostgreSQL
+- **Frontend:** `https://silkroadcalc.eu` - GitHub Pages, fully static HTML/CSS/JS
+- **Backend:** `https://admin.silkroadcalc.eu` - Railway, Express + PostgreSQL
 
 Frontend calls the backend API for all game data. The admin panel lives at `https://admin.silkroadcalc.eu/admin`.
 
@@ -21,12 +21,17 @@ silkroadcalc.eu/
 │
 ├── frontend/
 │   ├── shared/                       Loaded by every page
-│   │   ├── main-engine.js            Core pricing engine (see below)
-│   │   ├── main-utils.js             Shared UI utilities
 │   │   ├── setup-sync.js             Fetches API data + overwrites engine globals
 │   │   ├── overlays.js               Maintenance banner + notice bar
 │   │   ├── nav.js                    Navigation, mobile menu, auth button
 │   │   └── base.css                  Base styles shared across pages
+│   │
+│   ├── assets/
+│   │   ├── js/
+│   │   │   ├── main-engine.js        Core pricing engine (see below)
+│   │   │   └── main-utils.js         Shared UI utilities
+│   │   ├── icons/                    Good + city icons
+│   │   └── images/                   Favicon, OG image, etc.
 │   │
 │   ├── routes/                       Route calculator (primary page)
 │   │   ├── routes.html
@@ -41,10 +46,6 @@ silkroadcalc.eu/
 │   │   └── planner.css
 │   │
 │   ├── setup/                        Character setup wizard
-│   │   ├── home.js
-│   │   └── home.css
-│   │
-│   ├── setup/                        Character setup wizard
 │   │   ├── setup.html
 │   │   ├── setup.js
 │   │   └── setup.css
@@ -54,9 +55,9 @@ silkroadcalc.eu/
 │   │   ├── settings.js
 │   │   └── settings.css
 │   │
-│   └── assets/
-│       ├── icons/                    Good + city icons
-│       └── images/                   Favicon, OG image, etc.
+│   └── updates/                      Changelog / updates page
+│       ├── updates.html
+│       └── updates.css
 │
 └── backend/
     ├── index.js                      Express API server (~1600 lines)
@@ -76,59 +77,59 @@ silkroadcalc.eu/
 
 ---
 
-## Core Pricing Engine — `frontend/shared/main-engine.js`
+## Core Pricing Engine - `frontend/assets/js/main-engine.js`
 
-All price calculations live here. Values are hardcoded as fallbacks but overwritten at runtime by `syncFromApi()` in `setup-sync.js`.
+All price calculations live here. Dynamic data (GOODS, CITIES, TRAVEL_TIMES, TRAIT_EFFECTS, RELIGION_PERKS, EVENTS) starts as empty defaults and is overwritten at runtime by `syncFromApi()` in `routes/script.js` or `syncData()` in `planner/planner.js`.
 
 | What | Line |
 |------|------|
-| `CITY_NEIGHBORS` — adjacency map for hop routing | 5 |
-| `CITIES` — traits, culture, language, produced goods | 14 |
-| `GOODS` — base prices and hop% per good | 70 |
-| `TRAIT_EFFECTS` — city trait modifier rules | 220 |
-| `RELIGION_PERKS` — religion bonus/penalty rules | 232 |
-| `EVENTS` — event type definitions | 307 |
-| `EVENT_LEVELS` — event impact levels 1–3 | 341 |
-| `rebuildRouteCaches()` — precomputes hop distances + producer lookups | 156 |
-| `getMinHopsFromProducers()` — min hops from any producer city | 195 |
-| `calculateDistanceValue()` — exponential distance price modifier | 211 |
-| `calculateCityModifier()` — city trait effects on buy/sell price | 239 |
-| `calculateLanguageModifier()` — language skill modifier | 265 |
-| `calculateReligionModifier()` — religion bonus calculations | 281 |
-| `calculateRepDiscount()` — reputation rank discount | 422 |
-| `calculateBuyPrice()` — full buy price with all modifiers | 429 |
-| `calculateSellPrice()` — full sell price with all modifiers | 466 |
-| `generateRoutes()` — generates all profitable route combinations | 497 |
-| `enrichRoutes()` — adds profit/time per trip to routes | 567 |
+| `CITY_NEIGHBORS` - adjacency map for hop routing | 5 |
+| `CITIES` - traits, culture, language, produced goods | 14 |
+| `GOODS` - base prices and hop% per good | 70 |
+| `TRAIT_EFFECTS` - city trait modifier rules | 220 |
+| `RELIGION_PERKS` - religion bonus/penalty rules | 232 |
+| `EVENTS` - event type definitions | 307 |
+| `EVENT_LEVELS` - event impact levels 1-3 | 341 |
+| `rebuildRouteCaches()` - precomputes hop distances + producer lookups | 156 |
+| `getMinHopsFromProducers()` - min hops from any producer city | 195 |
+| `calculateDistanceValue()` - exponential distance price modifier | 211 |
+| `calculateCityModifier()` - city trait effects on buy/sell price | 239 |
+| `calculateLanguageModifier()` - language skill modifier | 265 |
+| `calculateReligionModifier()` - religion bonus calculations | 281 |
+| `calculateRepDiscount()` - reputation rank discount | 422 |
+| `calculateBuyPrice()` - full buy price with all modifiers | 429 |
+| `calculateSellPrice()` - full sell price with all modifiers | 466 |
+| `generateRoutes()` - generates all profitable route combinations | 497 |
+| `enrichRoutes()` - adds profit/time per trip to routes | 567 |
 
 ### Price Formula
 
 **Buy:** `round(base + base*(pow(1+hopPct, hops)-1) + floor(base*|mod|)*sign + eventDelta)`
 **Sell:** `round(base + base*(pow(1+hopPct, hops)-1) + floor(base*|mod|)*sign + eventDelta)`
 
-For buy: positive city modifier → negative adjustment (cheaper). For sell: positive modifier → positive adjustment (more profit). Modifiers below `$1` floor to zero.
+For buy: positive city modifier means negative adjustment (cheaper). For sell: positive modifier means positive adjustment (more profit). Modifiers below `$1` floor to zero.
 
 ---
 
-## Routes Page — `frontend/routes/script.js`
+## Routes Page - `frontend/routes/script.js`
 
 | What | Line |
 |------|------|
-| `getPlayerState()` — reads character setup from UI/localStorage | 4 |
-| `updateAll()` — triggers full recalculation + render | 42 |
-| `renderTable()` — main routes table rendering | 58 |
-| `renderMobileCards()` — mobile card layout | 195 |
-| `renderEventsTab()` — events panel UI | 428 |
-| `renderPricesTab()` — prices matrix tab | 564 |
-| `buildPriceBreakdown()` — tooltip showing buy/sell modifiers | 1600 |
-| `renderBestLoop()` — optimal round-trip route card | 1048 |
-| `exportCSV()` — export routes to CSV | 843 |
-| `saveNamedState()` / `loadNamedState()` — named setup presets | 1000 / 1014 |
-| `syncFromApi()` — fetches all game data from API, overwrites engine globals | 1892 |
+| `getPlayerState()` - reads character setup from UI/localStorage | 4 |
+| `updateAll()` - triggers full recalculation + render | 42 |
+| `renderTable()` - main routes table rendering | 58 |
+| `renderMobileCards()` - mobile card layout | 195 |
+| `renderEventsTab()` - events panel UI | 428 |
+| `renderPricesTab()` - prices matrix tab | 564 |
+| `buildPriceBreakdown()` - tooltip showing buy/sell modifiers | 1600 |
+| `renderBestLoop()` - optimal round-trip route card | 1048 |
+| `exportCSV()` - export routes to CSV | 843 |
+| `saveNamedState()` / `loadNamedState()` - named setup presets | 1000 / 1014 |
+| `syncFromApi()` - fetches all game data from API, overwrites engine globals | 1892 |
 
 ---
 
-## Backend API — `backend/index.js`
+## Backend API - `backend/index.js`
 
 ### Public
 
@@ -150,10 +151,10 @@ For buy: positive city modifier → negative adjustment (cheaper). For sell: pos
 
 | Route | Line |
 |-------|------|
-| `GET /api/auth/discord` — initiates OAuth | 482 |
-| `GET /api/auth/discord/callback` — OAuth callback | 492 |
-| `GET /api/auth/me` — current user | 539 |
-| `POST /api/session/ping` — session tracking for analytics | 460 |
+| `GET /api/auth/discord` - initiates OAuth | 482 |
+| `GET /api/auth/discord/callback` - OAuth callback | 492 |
+| `GET /api/auth/me` - current user | 539 |
+| `POST /api/session/ping` - session tracking for analytics | 460 |
 
 ### Admin (JWT auth required)
 
@@ -161,13 +162,13 @@ For buy: positive city modifier → negative adjustment (cheaper). For sell: pos
 |-------|------|
 | `POST /api/admin/login` | 750 |
 | `GET /api/analytics` | 957 |
-| `POST /api/admin/maintenance` | — |
-| `POST /api/admin/notices` | — |
-| `POST /api/admin/changelogs` | — |
+| `POST /api/admin/maintenance` | - |
+| `POST /api/admin/notices` | - |
+| `POST /api/admin/changelogs` | - |
 
 ---
 
-## Database — `backend/db.js`
+## Database - `backend/db.js`
 
 `initSchema()` starts at **line 9** and creates all tables:
 
@@ -175,25 +176,25 @@ For buy: positive city modifier → negative adjustment (cheaper). For sell: pos
 
 ---
 
-## Seed Script — `backend/seed.js`
+## Seed Script - `backend/seed.js`
 
-Run `node seed.js` from `backend/` to populate or update the database. Uses `ON CONFLICT ... DO UPDATE SET` so re-running always overwrites existing values.
+Run `node seed.js` from `backend/` to populate or update the database. Uses `ON CONFLICT ... DO UPDATE SET` so re-running always overwrites existing values without duplicating.
 
 | What | Line |
 |------|------|
-| `GOODS` — 20 goods with base prices + hop% | 5 |
-| `CITIES` — 6 cities with traits + produced goods | 38 |
-| `TRAITS` — city trait definitions | 100 |
-| `TRAIT_EFFECTS` — trait modifier rules | 117 |
+| `GOODS` - 20 goods with base prices + hop% | 5 |
+| `CITIES` - 6 cities with traits + produced goods | 38 |
+| `TRAITS` - city trait definitions | 100 |
+| `TRAIT_EFFECTS` - trait modifier rules | 117 |
 | `LANGUAGES` | 190 |
 | `CULTURES` | 191 |
 | `RELIGIONS` | 196 |
 | `RELIGION_PERKS` | 197 |
 | `EVENT_TYPES` | 228 |
 | `EVENT_LEVELS` | 263 |
-| `TRAVEL_TIMES_RAW` — travel time matrix in hours | 326 |
-| `ins()` — upsert helper | 448 |
-| `seed()` — main seed function | 461 |
+| `TRAVEL_TIMES_RAW` - travel time matrix in hours | 326 |
+| `ins()` - upsert helper | 448 |
+| `seed()` - main seed function | 461 |
 
 ---
 
@@ -215,12 +216,12 @@ Run `node seed.js` from `backend/` to populate or update the database. Uses `ON 
 
 ## Data Flow
 
-1. Page loads → `setup-sync.js` fetches `/api/goods`, `/api/cities`, `/api/trait-effects`, etc.
-2. Fetched values overwrite the hardcoded fallbacks in `main-engine.js` globals
+1. Page loads - `syncFromApi()` (routes) or `syncData()` (planner) fetches `/api/goods`, `/api/cities`, `/api/trait-effects`, etc.
+2. Fetched values overwrite the empty defaults in `main-engine.js` globals
 3. `generateRoutes()` computes all buy/sell combinations using current engine state
 4. UI renders routes table / planner / prices
 
-If the API is unreachable, hardcoded fallbacks in `main-engine.js` are used. Keep fallbacks in sync with `seed.js` values.
+If the API is unreachable, pages fall back to empty data (no routes shown). All game data lives in `seed.js` and the database.
 
 ---
 
@@ -233,4 +234,4 @@ cd backend
 node seed.js
 ```
 
-No GitHub push needed — writes directly to Railway PostgreSQL. Changes are live immediately after the next API call.
+No GitHub push needed - writes directly to Railway PostgreSQL. Changes are live immediately after the next API call.
