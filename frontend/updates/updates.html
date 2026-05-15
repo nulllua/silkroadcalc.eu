@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/frontend/assets/images/icon.png" />
     <link rel="stylesheet" href="../shared/base.css" />
-    <link rel="stylesheet" href="./updates.css" />
+    <link rel="stylesheet" href="./updates.css?v=credits-2" />
   </head>
   <body data-theme="slate">
     <script src="../shared/theme-sync.js"></script>
@@ -47,13 +47,32 @@
 
     <div class="page-wrap">
       <div class="page-content">
-        <div class="updates-header">
-          <h1>Site updates</h1>
-          <p>Version history for SilkRoadCalc.eu</p>
-        </div>
-        <div id="updatesChangelog" class="changelog-list">
-          <div class="cl-loading">Loading updates…</div>
-        </div>
+        <section class="credits-panel" aria-labelledby="creditsTitle">
+          <h1 id="creditsTitle">Created by DSK Development team</h1>
+          <div class="credits-grid">
+            <div class="credit-card">
+              <h2>Domi</h2>
+              <p>Backend systems, calculator logic, route math</p>
+            </div>
+            <div class="credit-card">
+              <h2>Sensitive Young Man</h2>
+              <p>Frontend polish, interface design, site feel</p>
+            </div>
+            <div class="credit-card">
+              <h2>KUGLERKNIGHT</h2>
+              <p>In-game pricing research and trade analytics</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="changelog-panel" aria-label="Changelog">
+          <div class="changelog-head">
+            <h2>Changelog</h2>
+          </div>
+          <div id="updatesChangelog" class="changelog-list">
+            <div class="cl-loading">Loading updates...</div>
+          </div>
+        </section>
       </div>
     </div>
 

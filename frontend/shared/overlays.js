@@ -21,14 +21,28 @@
 
   async function checkMaintenance() {
     try {
-      var res  = await fetch(API + '/api/maintenance');
+      var res  = await fetch(API + '/api/maintenance', { credentials: 'include' });
       if (!res.ok) return;
       var data = await res.json();
+      var ov  = document.getElementById('maintenanceOverlay');
+      if (ov && !data.active) {
+        ov.style.cssText = 'display:none!important';
+        return;
+      }
       if (data.active) {
-        var ov  = document.getElementById('maintenanceOverlay');
         var msg = document.getElementById('maintenanceMsg');
         if (msg && data.message) msg.textContent = data.message;
-        if (ov) { ov.style.cssText = 'display:flex!important'; }
+        if (ov) {
+          var login = document.getElementById('maintenanceLogin');
+          if (!login) {
+            login = document.createElement('a');
+            login.id = 'maintenanceLogin';
+            login.href = API + '/api/auth/discord';
+            login.textContent = 'Login with Discord';
+            ov.appendChild(login);
+          }
+          ov.style.cssText = 'display:flex!important';
+        }
       }
     } catch (_) {}
   }

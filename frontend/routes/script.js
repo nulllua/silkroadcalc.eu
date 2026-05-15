@@ -1856,7 +1856,7 @@ async function syncFromApi() {
     const [gr, tr, mr, cr, nr, citr, evr, tefr, rpr] = await Promise.all([
       fetch(API_BASE + '/api/goods', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/travel-times', { signal: ctrl.signal }),
-      fetch(API_BASE + '/api/maintenance', { signal: ctrl.signal }),
+      fetch(API_BASE + '/api/maintenance', { signal: ctrl.signal, credentials: 'include' }),
       fetch(API_BASE + '/api/changelogs', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/notices', { signal: ctrl.signal }),
       fetch(API_BASE + '/api/cities', { signal: ctrl.signal }),
@@ -1963,6 +1963,14 @@ async function syncFromApi() {
         ov.style.display = m.active ? 'flex' : 'none';
         const msg = document.getElementById('maintMsg');
         if (msg && m.message) msg.textContent = m.message;
+        if (m.active && !document.getElementById('maintLogin')) {
+          const login = document.createElement('a');
+          login.id = 'maintLogin';
+          login.href = API_BASE + '/api/auth/discord';
+          login.textContent = 'Login with Discord';
+          login.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 18px;border:1px solid rgba(255,255,255,.18);border-radius:6px;margin-top:8px;background:#5865f2;color:#fff;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:16px';
+          ov.appendChild(login);
+        }
       }
     }
     if (cr.ok) {
@@ -1979,9 +1987,9 @@ async function syncFromApi() {
           if (noticeText) noticeText.textContent = notices[0].message;
           const level = notices[0].level || 'info';
           const colors = {
-            info: { bg: '#3a3a2e', border: '#5a5a4e', text: '#ddd' },
-            warning: { bg: '#4a3a2e', border: '#8a6a3e', text: '#f0d080' },
-            error: { bg: '#4a2a2e', border: '#8a3a3e', text: '#ff9999' },
+            info: { bg: '#122038', border: '#2a5ca8', text: '#ddd' },
+            warning: { bg: '#13284a', border: '#3d8eff', text: '#9dc4ff' },
+            error: { bg: '#3a1722', border: '#b91c1c', text: '#ff9999' },
           };
           const c = colors[level] || colors.info;
           noticeBar.style.background = c.bg;

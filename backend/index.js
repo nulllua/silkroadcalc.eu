@@ -389,10 +389,21 @@ app.get('/api/languages', async (_req, res) => {
   }
 });
 
-app.get('/api/maintenance', async (_req, res) => {
+app.get('/api/maintenance', async (req, res) => {
   try {
     const { rows } = await pool.query(`SELECT value FROM settings WHERE key='maintenance'`);
     const data = rows.length ? JSON.parse(rows[0].value) : { active: false, message: '' };
+    if (data.active) {
+      const token = parseCookies(req).auth_token;
+      if (token) {
+        try {
+          const payload = jwt.verify(token, process.env.JWT_SECRET);
+          if (isAdmin(payload.id)) {
+            return res.json({ ...data, active: false, maintenanceActive: true, bypassed: true });
+          }
+        } catch (_) {}
+      }
+    }
     res.json(data);
   } catch (e) {
     err(res, e);

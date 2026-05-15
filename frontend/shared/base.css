@@ -491,6 +491,22 @@ select option { background: var(--bg-inset); color: var(--text); }
 #maintenanceOverlay.active { display: flex; }
 #maintenanceOverlay h2 { font-size: 20px; letter-spacing: 4px; }
 #maintenanceOverlay p  { color: var(--text-dim); max-width: 400px; font-size: 13px; }
+#maintenanceLogin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  margin-top: 8px;
+  background: #5865f2;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+#maintenanceLogin:hover { filter: brightness(1.08); }
 
 /* ─── SHIMMER FX (disabled) ──────────────────────────────────────────────── */
 .fx-shimmer {
