@@ -220,8 +220,8 @@ const RELIGION_PERKS = [
     religion: 'Judaism',
     min_level: 3,
     perk_type: 'amplify_positive',
-    multiplier: 2,
-    description: 'Price bonuses are doubled at level 3',
+    multiplier: 1.5,
+    description: 'Increases positive city modifiers by 50% at level 3',
   },
 ];
 

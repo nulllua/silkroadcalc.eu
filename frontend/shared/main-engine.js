@@ -11,84 +11,9 @@ const CITY_NEIGHBORS = {
   Ecbatana: ['Ctesiphon'],
 };
 
-let CITIES = {
-  Antioch: {
-    culture: 'Byzantine',
-    language: 'Greek',
-    traits: ['Pentarchy', 'Earthquake Prone'],
-    hasFireTemple: false,
-    produced: ['Sea Salt', 'Wool', 'Coriander', 'Byzantine Silk'],
-  },
-  Tyre: {
-    culture: 'Byzantine',
-    language: 'Greek',
-    traits: ['Port'],
-    hasFireTemple: false,
-    produced: ['Olive Oil', 'Dried Fish', 'Sea Salt', 'Glassware', 'Linen'],
-  },
-  Damascus: {
-    culture: 'Syriac',
-    language: 'Aramaic',
-    traits: ['Desert'],
-    hasFireTemple: false,
-    produced: ['Iron Ingot', 'Copper Ingot', 'Weapons', 'Tools', 'Earthenware', 'Sesame'],
-  },
-  Palmyra: {
-    culture: 'Syriac',
-    language: 'Aramaic',
-    traits: ['Frontier', 'Cosmopolitan'],
-    hasFireTemple: false,
-    produced: ['Linen', 'Wool', 'Cotton Yarn', 'Wheat', 'Barley', 'Leather'],
-  },
-  Ctesiphon: {
-    culture: 'Persian',
-    language: 'Persian',
-    traits: ['Capital'],
-    hasFireTemple: true,
-    produced: [
-      'Wheat',
-      'Olive Oil',
-      'Cotton Yarn',
-      'Glassware',
-      'Earthenware',
-      'Tools',
-      'Iron Ingot',
-      'Coriander',
-      'Sesame',
-      'Persian Carpets',
-    ],
-  },
-  Ecbatana: {
-    culture: 'Persian',
-    language: 'Persian',
-    traits: ['Homogenous'],
-    hasFireTemple: true,
-    produced: ['Copper Ingot', 'Barley', 'Wool', 'Leather', 'Weapons', 'Saffron'],
-  },
-};
+let CITIES = {};
 
-let GOODS = [
-  { name: 'Leather', base: 35, type: 'Textile', hopPct: 0.2 },
-  { name: 'Wool', base: 35, type: 'Textile', hopPct: 0.2 },
-  { name: 'Linen', base: 10, type: 'Textile', hopPct: 0.5 },
-  { name: 'Cotton Yarn', base: 20, type: 'Textile', hopPct: 0.3 },
-  { name: 'Iron Ingot', base: 35, type: 'Metal', hopPct: 0.2 },
-  { name: 'Copper Ingot', base: 130, type: 'Metal', hopPct: 10 / 130 },
-  { name: 'Earthenware', base: 10, type: 'Household', hopPct: 0.5 },
-  { name: 'Glassware', base: 20, type: 'Household', hopPct: 0.3 },
-  { name: 'Weapons', base: 35, type: 'Craft', hopPct: 0.2 },
-  { name: 'Tools', base: 35, type: 'Craft', hopPct: 0.2 },
-  { name: 'Olive Oil', base: 20, type: 'Agricultural', hopPct: 0.3 },
-  { name: 'Dried Fish', base: 100, type: 'Agricultural', hopPct: 0.09 },
-  { name: 'Barley', base: 10, type: 'Agricultural', hopPct: 0.5 },
-  { name: 'Wheat', base: 10, type: 'Agricultural', hopPct: 0.5 },
-  { name: 'Sea Salt', base: 80, type: 'Spices', hopPct: 0.1 },
-  { name: 'Coriander', base: 80, type: 'Spices', hopPct: 0.1 },
-  { name: 'Sesame', base: 100, type: 'Spices', hopPct: 0.09 },
-  { name: 'Saffron', base: 200, type: 'Spices', hopPct: 0.07 },
-  { name: 'Byzantine Silk', base: 300, type: 'Luxury', hopPct: 17 / 300 },
-  { name: 'Persian Carpets', base: 300, type: 'Luxury', hopPct: 17 / 300 },
-];
+let GOODS = [];
 
 const FOOD_TYPES = new Set(['Agricultural']);
 // These goods are sold by Spice Merchants in every city - can be bought anywhere (not just producing cities)
@@ -111,8 +36,6 @@ const ANIMALS_DATA = {
   'Dromedary Camel': { slots: 2, slotsSaddle: 4, speed: 2, saddle: true },
   'Dzungarian Horse': { slots: 1, slotsSaddle: 3, speed: 3, saddle: true },
   'Nisean Horse': { slots: 4, speed: 6, saddle: false },
-  'White Nisean Horse': { slots: 4, speed: 6, saddle: false },
-  'Red Chestnut Nisean': { slots: 4, speed: 6, saddle: false },
 };
 
 const CULTURES = {
@@ -121,18 +44,7 @@ const CULTURES = {
   Persian: { nativeLang: 'Persian' },
 };
 
-// Base travel times in minutes at walk speed 16. All values are estimates
-// derived from in-game measurements (auto-walk speed varies ~10-15%).
-// Direct legs measured at speed 26 then scaled; Damascus<->Antioch cross-validated
-// at speed 20 -> best estimate 7.0 min at speed 16. Non-adjacent = sum of legs.
-let TRAVEL_TIMES = {
-  Antioch: { Tyre: 8.7, Damascus: 7.0, Palmyra: 13.5, Ctesiphon: 19.3, Ecbatana: 23.6 },
-  Tyre: { Antioch: 8.7, Damascus: 6.2, Palmyra: 12.7, Ctesiphon: 18.5, Ecbatana: 22.8 },
-  Damascus: { Antioch: 7.0, Tyre: 6.2, Palmyra: 6.5, Ctesiphon: 12.3, Ecbatana: 16.6 },
-  Palmyra: { Antioch: 13.5, Tyre: 12.7, Damascus: 6.5, Ctesiphon: 5.8, Ecbatana: 10.1 },
-  Ctesiphon: { Antioch: 19.3, Tyre: 18.5, Damascus: 12.3, Palmyra: 5.8, Ecbatana: 4.3 },
-  Ecbatana: { Antioch: 23.6, Tyre: 22.8, Damascus: 16.6, Palmyra: 10.1, Ctesiphon: 4.3 },
-};
+let TRAVEL_TIMES = {};
 
 /* Warm-toned city palette to fit the parchment look */
 const CITY_BADGE_COLORS = {
@@ -217,24 +129,8 @@ function calculateDistanceValue(good, city) {
   return good.base * (Math.pow(1 + r, hops) - 1);
 }
 
-let TRAIT_EFFECTS = [
-  { trait_name: 'Port',             kind: null,   bonus:  0.05, cond_type: null,              cond_value: null           },
-  { trait_name: 'Capital',          kind: null,   bonus:  0.1,  cond_type: 'good_type',        cond_value: 'Luxury'       },
-  { trait_name: 'Desert',           kind: 'sell', bonus:  0.1,  cond_type: 'good_type_food',   cond_value: 'Agricultural' },
-  { trait_name: 'Frontier',         kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Tools'        },
-  { trait_name: 'Frontier',         kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Weapons'      },
-  { trait_name: 'Earthquake Prone', kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Tools'        },
-  { trait_name: 'Earthquake Prone', kind: null,   bonus:  0.1,  cond_type: 'good_name',        cond_value: 'Weapons'      },
-  { trait_name: 'Cosmopolitan',     kind: null,   bonus:  0.1,  cond_type: 'culture_mismatch', cond_value: null           },
-  { trait_name: 'Pentarchy',        kind: null,   bonus:  0.1,  cond_type: 'religion',         cond_value: 'Christianity' },
-  { trait_name: 'Homogenous',       kind: null,   bonus: -0.1,  cond_type: 'culture_mismatch', cond_value: null           },
-];
-let RELIGION_PERKS = [
-  { religion: 'Christianity', min_level: 3, perk_type: 'reduce_negative', multiplier: 0.5 },
-  { religion: 'Judaism', min_level: 1, perk_type: 'amplify_negative', multiplier: 2 },
-  { religion: 'Judaism', min_level: 3, perk_type: 'amplify_positive', multiplier: 1.25 },
-  { religion: 'Zoroastrianism', min_level: 1, perk_type: 'byzantine_penalty', multiplier: 1.5 },
-];
+let TRAIT_EFFECTS = [];
+let RELIGION_PERKS = [];
 
 function calculateCityModifier(good, sellCity, culture, religion, religionLevel, kind = 'sell') {
   const city = CITIES[sellCity];
@@ -300,49 +196,8 @@ function calculateReligionModifier(good, sellCity, religion, religionLevel) {
   return mod;
 }
 
-// Events
-// Random events affect prices in a city for 1 hour. One per city at a time.
-// Effect = base + (base * pct), signed by direction. Applied to BOTH buy & sell
-// in the affected city (commodity scarcity raises both; abundance lowers both).
-let EVENTS = {
-  Conflict: {
-    dir: +1,
-    label: 'Conflict',
-    glyph: '⚔',
-    goodTypes: ['Metal'],
-    goodNames: ['Weapons'],
-    desc: 'Increases value of Weapons & Metal',
-  },
-  Festival: {
-    dir: +1,
-    label: 'Festival',
-    glyph: '✿',
-    goodTypes: ['Craft', 'Household'],
-    goodNames: [],
-    desc: 'Increases value of Craft & Household',
-  },
-  Drought: {
-    dir: +1,
-    label: 'Drought',
-    glyph: '☼',
-    goodTypes: ['Agricultural'],
-    goodNames: [],
-    desc: 'Increases value of Agriculture',
-  },
-  Harvest: {
-    dir: -1,
-    label: 'Harvest',
-    glyph: '❀',
-    goodTypes: ['Agricultural'],
-    goodNames: [],
-    desc: 'Decreases value of Agriculture',
-  },
-};
-let EVENT_LEVELS = {
-  1: { pct: 0.05,  base: 3, label: { Conflict: 'Small', Festival: 'Small',  Drought: 'Small',    Harvest: 'Good'      } },
-  2: { pct: 0.1,   base: 5, label: { Conflict: 'Local', Festival: 'Local',  Drought: 'Moderate', Harvest: 'Plentiful' } },
-  3: { pct: 0.15,  base: 8, label: { Conflict: 'Major', Festival: 'Major',  Drought: 'Severe',   Harvest: 'Abundant'  } },
-};
+let EVENTS = {};
+let EVENT_LEVELS = {};
 const EVENT_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
 // State: { cityName: { type:'Conflict', level:2, startTime: 1700000000000 } }

@@ -10,8 +10,6 @@
     'Dromedary Camel',
     'Dzungarian Horse',
     'Nisean Horse',
-    'White Nisean Horse',
-    'Red Chestnut Nisean',
   ];
   var HAS_SADDLE = {
     'Pack Mule': true,
@@ -28,8 +26,6 @@
     'Dromedary Camel':       { slots:2, slotsSaddle:4, speed:2,  saddle:true },
     'Dzungarian Horse':      { slots:1, slotsSaddle:3, speed:3,  saddle:true },
     'Nisean Horse':          { slots:4, speed:6, saddle:false },
-    'White Nisean Horse':    { slots:4, speed:6, saddle:false },
-    'Red Chestnut Nisean':   { slots:4, speed:6, saddle:false },
   };
 
   function calcStats() {
