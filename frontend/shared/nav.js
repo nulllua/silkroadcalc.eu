@@ -3,13 +3,12 @@
 
   /* ── Active link ──────────────────────────────────────────────────────── */
   function setActiveLink() {
-    const path = window.location.pathname.replace(/\/$/, '') || '/index.html';
+    const path = window.location.pathname.replace(/\/$/, '') || '/';
     const links = document.querySelectorAll('.nav-link[data-page]');
     const map = {
-      home:    ['/index.html', '/'],
-      routes:  ['/frontend/routes/routes.html'],
+      updates: ['/frontend/updates/updates.html'],
+      routes:  ['/frontend/routes/routes.html', '/index.html', '/'],
       planner: ['/frontend/planner/planner.html'],
-      forum:   ['/frontend/forum/forum.html'],
       setup:   ['/frontend/setup/setup.html'],
       settings:['/frontend/settings/settings.html'],
     };
@@ -66,32 +65,10 @@
     }, { passive: true });
   }
 
-  /* ── Auth button ──────────────────────────────────────────────────────── */
-  async function initAuthBtn() {
-    var btns = [
-      document.querySelector('.nav-actions .nav-discord'),
-      document.querySelector('.nav-mobile-panel .nav-discord'),
-    ].filter(Boolean);
-    if (!btns.length) return;
-    try {
-      var res  = await fetch('https://admin.silkroadcalc.eu/api/auth/me', { credentials: 'include' });
-      if (!res.ok) return;
-      var data = await res.json();
-      if (!data.username) return;
-      var name = data.username.length > 16 ? data.username.slice(0, 15) + '…' : data.username;
-      btns.forEach(function (btn) {
-        btn.href = 'https://admin.silkroadcalc.eu/api/auth/logout';
-        var lbl = btn.querySelector('.nav-auth-label');
-        if (lbl) lbl.textContent = name;
-      });
-    } catch (_) {}
-  }
-
   /* ── Init ─────────────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     setActiveLink();
     initMobileMenu();
     initScrollShadow();
-    initAuthBtn();
   });
 })();

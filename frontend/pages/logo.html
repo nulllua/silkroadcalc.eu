@@ -23,8 +23,7 @@ body { background: #0d0602; }
 #splash::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 55% 42% at 50% 48%,
-    rgba(180,110,20,.18) 0%, transparent 68%);
+  background: rgba(90, 50, 12, 0.22);
   pointer-events: none;
 }
 
@@ -84,15 +83,15 @@ body { background: #0d0602; }
        animation: drw .38s ease 1.39s forwards; }
 .pnk { stroke:#d4a843; stroke-width:1.6; fill:#c09060;
        animation: drw .18s ease 1.77s forwards, col .45s ease 4.00s forwards; }
-.pto { stroke:#d4a843; stroke-width:2.2; fill:url(#jgrad);
+.pto { stroke:#d4a843; stroke-width:2.2; fill:#566130;
        animation: drw .62s ease 1.95s forwards, col .45s ease 4.00s forwards; }
-.pal { stroke:#d4a843; stroke-width:1.8; fill:url(#agrad);
+.pal { stroke:#d4a843; stroke-width:1.8; fill:#4e5a2a;
        animation: drw .42s ease 2.57s forwards, col .45s ease 4.00s forwards; }
-.par { stroke:#d4a843; stroke-width:1.8; fill:url(#agrad);
+.par { stroke:#d4a843; stroke-width:1.8; fill:#4e5a2a;
        animation: drw .42s ease 2.99s forwards, col .45s ease 4.00s forwards; }
-.pll { stroke:#d4a843; stroke-width:1.8; fill:url(#lgrad);
+.pll { stroke:#d4a843; stroke-width:1.8; fill:#1c2a0d;
        animation: drw .28s ease 3.41s forwards, col .45s ease 4.00s forwards; }
-.plr { stroke:#d4a843; stroke-width:1.8; fill:url(#lgrad);
+.plr { stroke:#d4a843; stroke-width:1.8; fill:#1c2a0d;
        animation: drw .28s ease 3.69s forwards, col .45s ease 4.00s forwards; }
 
 /* Jacket seam lines — dark, drawn after fill appears */
@@ -110,7 +109,7 @@ body { background: #0d0602; }
 }
 .bar-fill {
   height: 100%; width: 0;
-  background: linear-gradient(90deg, #a86010, #f3d07a, #a86010);
+  background: #d4a843;
   border-radius: 2px;
   animation: bf 4.8s cubic-bezier(.15,.85,.2,1) .2s forwards;
 }
@@ -137,24 +136,6 @@ body { background: #0d0602; }
   <div class="splash-title">Silk Road Calculator</div>
 
   <svg id="rblx" viewBox="0 0 160 242" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Jacket gradient: lighter olive at top, darker at bottom -->
-      <linearGradient id="jgrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#7c8d45"/>
-        <stop offset="100%" stop-color="#566130"/>
-      </linearGradient>
-      <!-- Arm gradient -->
-      <linearGradient id="agrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#6e7d3a"/>
-        <stop offset="100%" stop-color="#4e5a2a"/>
-      </linearGradient>
-      <!-- Leg/pants gradient -->
-      <linearGradient id="lgrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#2e3d16"/>
-        <stop offset="100%" stop-color="#1c2a0d"/>
-      </linearGradient>
-    </defs>
-
     <!-- ── LEGS (back layer) ── -->
     <rect class="dp pll" x="36" y="190" width="36" height="52" rx="2" pathLength="100"/>
     <rect class="dp plr" x="88" y="190" width="36" height="52" rx="2" pathLength="100"/>

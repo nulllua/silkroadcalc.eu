@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Settings | Silk Road Trading Calculator</title>
-    <meta name="description" content="Manage your Silk Road Trading Calculator preferences, notification settings, Discord webhooks, and saved character setups." />
+    <meta name="description" content="Manage your Silk Road Trading Calculator preferences, notifications, and saved character setups." />
     <meta name="robots" content="noindex" />
     <link rel="canonical" href="https://silkroadcalc.eu/frontend/settings/settings.html" />
-    <meta name="theme-color" content="#291610" />
+    <meta name="theme-color" content="#0f1115" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -15,41 +15,33 @@
     <link rel="stylesheet" href="../shared/base.css" />
     <link rel="stylesheet" href="./settings.css" />
   </head>
-  <body>
+  <body data-theme="slate">
+    <script src="../shared/theme-sync.js"></script>
     <div class="fx-shimmer" aria-hidden="true"></div>
 
     <nav id="topnav">
       <div class="nav-inner">
-        <a class="nav-logo" href="/index.html">
+        <a class="nav-logo" href="/frontend/routes/routes.html">
           <img src="/frontend/assets/images/icon.png" alt="SilkRoadCalc" width="28" height="28" />
           <span>SilkRoadCalc</span>
         </a>
         <div class="nav-links" id="navLinks">
-          <a href="/index.html"    class="nav-link" data-page="home">Home</a>
           <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
           <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
-          <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
           <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
           <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
-        </div>
-        <div class="nav-actions">
-          <a href="https://admin.silkroadcalc.eu/api/auth/discord" class="nav-discord">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
-            <span class="nav-auth-label">Login with Discord</span>
-          </a>
+          <a href="/frontend/updates/updates.html" class="nav-link" data-page="updates">Updates</a>
         </div>
         <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
       <div class="nav-mobile-panel" id="navMobilePanel">
-        <a href="/index.html"    class="nav-link" data-page="home">Home</a>
         <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
         <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
-        <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
         <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
           <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
-        <a href="https://admin.silkroadcalc.eu/api/auth/discord" class="nav-discord"><span class="nav-auth-label">Login with Discord</span></a>
+        <a href="/frontend/updates/updates.html" class="nav-link" data-page="updates">Updates</a>
       </div>
     </nav>
 
@@ -92,30 +84,13 @@
             </div>
           </section>
 
-          <!-- Discord Webhooks -->
-          <section class="scard card">
-            <div class="scard-title">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
-              Discord Webhooks
-            </div>
-            <div class="scard-desc">Receive site update announcements and maintenance notices in a Discord channel.</div>
-            <div class="scard-body">
-              <label class="sfield-label" for="webhookUrl">Webhook URL</label>
-              <div class="sfield-row">
-                <input type="text" id="webhookUrl" class="sfield-input" placeholder="https://discord.com/api/webhooks/…" />
-                <button class="btn" id="webhookSave">Save</button>
-              </div>
-              <div class="sfield-hint">Only update announcements and maintenance notices will be sent to this webhook.</div>
-            </div>
-          </section>
-
           <!-- Display Preferences -->
           <section class="scard card">
             <div class="scard-title">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
               Display
             </div>
-            <div class="scard-desc">Adjust visual preferences for the calculator.</div>
+            <div class="scard-desc">Compact rows on Routes and a low-gold reminder (stored for Routes).</div>
             <div class="scard-body">
               <label class="stoggle">
                 <span class="stoggle-label">Compact table rows</span>
@@ -123,31 +98,51 @@
                 <input type="checkbox" id="settingCompact" />
                 <span class="stoggle-track"></span>
               </label>
+              <label class="stoggle">
+                <span class="stoggle-label">Low on gold</span>
+                <span class="stoggle-sub">Browser-only reminder. On Routes, use Spend max $ next to the table to cap outbound buy cost when you’re broke or early-game.</span>
+                <input type="checkbox" id="lowBudgetMode" />
+                <span class="stoggle-track"></span>
+              </label>
             </div>
           </section>
 
-          <!-- Account / Profile -->
+          <!-- Saved Routes setups -->
           <section class="scard card">
             <div class="scard-title">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              Account
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+              Saved setups
             </div>
-            <div class="scard-desc">Log in with Discord to access the forum, save presets to the cloud, and receive personal notifications.</div>
+            <div class="scard-desc">Named snapshots of your merchant configuration (same keys as Routes: <code>silkroad_v1</code> and <code>silkroad_setups</code>). <strong>Save</strong> stores whatever Routes last autosaved—open Routes first if you changed your character. <strong>Load</strong> writes that preset into storage; open Routes to see it.</div>
             <div class="scard-body">
-              <div id="accountStatus" class="saccount-status">
-                <span class="sas-text">Not logged in</span>
+              <div>
+                <label class="sfield-label" for="setupNameInput">Save current setup</label>
+                <div class="sfield-row">
+                  <input type="text" id="setupNameInput" class="sfield-input" placeholder="Setup name…" maxlength="40" />
+                  <button type="button" class="btn" id="btnSaveSetup" disabled>Save</button>
+                </div>
               </div>
-              <a href="https://admin.silkroadcalc.eu/api/auth/discord" class="btn btn-primary saccount-login">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
-                Login with <span class="nav-auth-label">Login with Discord</span>
-              </a>
+              <div>
+                <label class="sfield-label" for="loadSetupSelect">Load setup</label>
+                <div class="sfield-row">
+                  <select id="loadSetupSelect" class="sfield-input sfield-select"></select>
+                  <button type="button" class="btn" id="btnLoadSetup">Load</button>
+                </div>
+              </div>
+              <div>
+                <label class="sfield-label" for="clearSetupSelect">Delete setup</label>
+                <div class="sfield-row">
+                  <select id="clearSetupSelect" class="sfield-input sfield-select"></select>
+                  <button type="button" class="btn btn-red" id="btnClearSetup">Delete</button>
+                </div>
+              </div>
             </div>
           </section>
 
         </div>
 
         <div class="settings-footer-note">
-          Settings on this page are independent from the setup saved in the Routes calculator (which uses its own localStorage keys).
+          Display and notification toggles here are separate from your Routes character state.
           <a href="/frontend/routes/routes.html">Go to Routes →</a>
         </div>
 
@@ -158,11 +153,9 @@
       <div class="footer-inner">
         <span class="footer-brand">SilkRoadCalc.eu</span>
         <div class="footer-links">
-          <a href="/frontend/routes/routes.html">Routes</a>
-          <a href="/frontend/planner/planner.html">Planner</a>
-          <a href="/frontend/forum/forum.html">Forum</a>
+          <a href="https://discord.gg/dEsV8QPqSU" target="_blank" rel="noopener">Discord</a>
+          <a href="https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki" target="_blank" rel="noopener">Wiki</a>
           <a href="/frontend/settings/settings.html">Settings</a>
-          <a href="https://discord.gg/dEsV8QPqSU" target="_blank" rel="noopener"><span class="nav-auth-label">Login with Discord</span></a>
         </div>
         <span class="footer-copy">Not affiliated with Roblox or Silk Road Trading Simulator.</span>
       </div>

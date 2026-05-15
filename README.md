@@ -40,12 +40,7 @@ silkroadcalc.eu/
 │   │   ├── planner.js
 │   │   └── planner.css
 │   │
-│   ├── forum/                        Community forum
-│   │   ├── forum.html
-│   │   ├── forum.js
-│   │   └── forum.css
-│   │
-│   ├── home/                         Home page scripts + styles
+│   ├── setup/                        Character setup wizard
 │   │   ├── home.js
 │   │   └── home.css
 │   │
@@ -159,19 +154,6 @@ For buy: positive city modifier → negative adjustment (cheaper). For sell: pos
 | `GET /api/auth/discord/callback` — OAuth callback | 492 |
 | `GET /api/auth/me` — current user | 539 |
 | `POST /api/session/ping` — session tracking for analytics | 460 |
-
-### Forum
-
-| Route | Line |
-|-------|------|
-| `GET /api/forum/posts` | 597 |
-| `GET /api/forum/posts/:id` | 633 |
-| `POST /api/forum/posts` | 704 |
-| `DELETE /api/forum/posts/:id` | 679 |
-| `GET /api/forum/posts/:id/comments` | 654 |
-| `POST /api/forum/posts/:id/comments` | 665 |
-| `DELETE /api/forum/comments/:id` | 691 |
-| `POST /api/forum/posts/:id/vote` | 719 |
 
 ### Admin (JWT auth required)
 

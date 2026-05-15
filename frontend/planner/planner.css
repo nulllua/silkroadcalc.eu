@@ -35,7 +35,7 @@
 }
 
 .ps-select {
-  background: linear-gradient(180deg, var(--bg-inset) 0%, #1a0b06 100%);
+  background: #1a0b06;
   color: var(--text);
   border: 1px solid var(--gold-dark);
   border-radius: var(--r-sm);
@@ -140,7 +140,7 @@
   min-height: 260px;
   text-align: center;
   padding: 40px;
-  background: linear-gradient(160deg, rgba(255,210,140,0.02) 0%, transparent 50%), var(--bg-card);
+  background: rgba(255,210,140,0.02), var(--bg-card);
   border: var(--border);
   border-radius: var(--r-md);
   border-style: dashed;
@@ -158,7 +158,7 @@
 /* Result segments */
 .pr-segment {
   margin-bottom: 16px;
-  background: linear-gradient(160deg, rgba(255,210,140,0.02) 0%, transparent 40%), var(--bg-card);
+  background: rgba(255,210,140,0.02), var(--bg-card);
   border: var(--border);
   border-radius: var(--r-md);
   overflow: hidden;
@@ -224,7 +224,7 @@
 .pr-summary {
   margin-top: 16px;
   padding: 16px;
-  background: linear-gradient(160deg, rgba(180,204,98,0.04) 0%, transparent 50%), var(--bg-card);
+  background: rgba(180,204,98,0.04), var(--bg-card);
   border: 1px solid rgba(180,204,98,0.2);
   border-radius: var(--r-md);
   display: grid;
@@ -269,7 +269,7 @@
   gap: 12px;
   align-items: flex-start;
   padding: 14px 16px;
-  background: linear-gradient(160deg, rgba(255,210,140,0.02) 0%, transparent 40%), var(--bg-card);
+  background: rgba(255,210,140,0.02), var(--bg-card);
   border: var(--border);
   border-radius: var(--r-md);
 }
@@ -333,7 +333,44 @@
 }
 .pr-delivery-badge.short { color: var(--green); }
 .pr-delivery-badge.long  { color: var(--gold); }
-.pr-delivery-reward { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; color: var(--green); }
+
+/* ─── SLATE THEME ─────────────────────────────────────────────────────────── */
+body[data-theme="slate"] .ps-select {
+  border-color: var(--gold-dark);
+  background-color: var(--bg-inset);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%233d8eff'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 10px 6px;
+}
+body[data-theme="slate"] .ps-select:focus {
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 2px rgba(61, 142, 255, 0.18);
+}
+body[data-theme="slate"] .ps-quest-badge.long {
+  background: rgba(61, 142, 255, 0.1);
+  border-color: rgba(61, 142, 255, 0.28);
+}
+body[data-theme="slate"] .ps-actions {
+  border-top-color: rgba(61, 142, 255, 0.12);
+}
+body[data-theme="slate"] .pr-leg {
+  border-bottom-color: rgba(61, 142, 255, 0.1);
+}
+body[data-theme="slate"] .pr-seg-header {
+  border-bottom-color: rgba(61, 142, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+}
+body[data-theme="slate"] .pr-seg-step {
+  background: rgba(61, 142, 255, 0.1);
+  border-color: var(--gold-dark);
+}
+body[data-theme="slate"] .pr-segment {
+  border-color: #2a3445;
+}
+body[data-theme="slate"] .pr-section-label::after {
+  background: rgba(61, 142, 255, 0.14);
+}
 
 /* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
 @media (max-width: 860px) {

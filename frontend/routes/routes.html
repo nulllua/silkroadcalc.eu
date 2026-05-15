@@ -17,7 +17,7 @@
     <meta property="og:url" content="https://silkroadcalc.eu/frontend/routes/routes.html" />
     <meta property="og:image" content="https://silkroadcalc.eu/frontend/assets/images/og-image.png" />
 
-    <meta name="theme-color" content="#1c100a" />
+    <meta name="theme-color" content="#0f1115" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,45 +28,34 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./routes.css" />
   </head>
-  <body>
+  <body data-theme="slate">
+    <script src="../shared/theme-sync.js"></script>
     <div class="fx-shimmer" id="fxShimmer" aria-hidden="true"></div>
 
     <!-- ── TOP NAV ──────────────────────────────────────────────────────── -->
     <nav id="topnav">
       <div class="nav-inner">
-        <a class="nav-logo" href="/index.html">
+        <a class="nav-logo" href="/frontend/routes/routes.html">
           <img src="/frontend/assets/images/icon.png" alt="SilkRoadCalc" width="28" height="28" />
           <span>SilkRoadCalc</span>
         </a>
         <div class="nav-links" id="navLinks">
-          <a href="/index.html"    class="nav-link" data-page="home">Home</a>
           <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
           <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
-          <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
           <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
           <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
-        </div>
-        <div class="nav-actions">
-          <a href="https://admin.silkroadcalc.eu/api/auth/discord" class="nav-discord">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
-            <span class="nav-auth-label">Login with Discord</span>
-          </a>
+          <a href="/frontend/updates/updates.html" class="nav-link" data-page="updates">Updates</a>
         </div>
         <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
       <div class="nav-mobile-panel" id="navMobilePanel">
-        <a href="/index.html"    class="nav-link" data-page="home">Home</a>
         <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
         <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
-        <a href="/frontend/forum/forum.html"    class="nav-link" data-page="forum">Forum</a>
         <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
-          <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
-        <a href="https://admin.silkroadcalc.eu/api/auth/discord" class="nav-discord">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.956 2.417-2.157 2.417zm7.975 0c-1.183 0-2.157-1.085-2.157-2.418 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.332-.946 2.417-2.157 2.417z"/></svg>
-          <span class="nav-auth-label">Login with Discord</span>
-        </a>
+        <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
+        <a href="/frontend/updates/updates.html" class="nav-link" data-page="updates">Updates</a>
       </div>
     </nav>
 
@@ -84,106 +73,130 @@
       <select id="sassanidRank"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
       <span id="animalSlotsTitle"></span><div id="animalSlots"></div>
       <b id="statBaseSpeed"></b><b id="statAutoBonus"></b><b id="statAnimalBonus"></b><b id="statSpeed"></b><b id="statSlots"></b>
+      <select id="currentCity" onchange="onCurrentCityChange()">
+        <option value="">Not set</option>
+        <option value="Antioch">Antioch</option>
+        <option value="Tyre">Tyre</option>
+        <option value="Damascus">Damascus</option>
+        <option value="Palmyra">Palmyra</option>
+        <option value="Ctesiphon">Ctesiphon</option>
+        <option value="Ecbatana">Ecbatana</option>
+      </select>
+      <select id="sellInCity" onchange="onSellCityChange()">
+        <option value="">Any city</option>
+        <option value="Antioch">Antioch</option>
+        <option value="Tyre">Tyre</option>
+        <option value="Damascus">Damascus</option>
+        <option value="Palmyra">Palmyra</option>
+        <option value="Ctesiphon">Ctesiphon</option>
+        <option value="Ecbatana">Ecbatana</option>
+      </select>
     </div>
 
     <div id="app">
       <!-- ───── Main ───── -->
       <main id="main" class="panel">
-        <span class="corner-tl"></span><span class="corner-br"></span>
         <div id="mainInner">
 
           <div id="tabsRow">
-            <span class="tab active" id="tabRoutes" onclick="switchTab('routes')">Trading Routes</span>
+            <span class="tab active" id="tabRoutes" onclick="switchTab('routes')">Routes</span>
             <span class="tab" id="tabPrices" onclick="switchTab('prices')">Prices</span>
           </div>
 
-          <div id="toolbar">
-            <span class="tlabel">Sort by:</span>
-            <select id="sortBy" onchange="onSortByChange()">
-              <option value="profitPerMin">Profit per Minute</option>
-              <option value="profitPerHour">Profit per Hour</option>
-              <option value="profitPerTrip">Profit per Trip</option>
-              <option value="profitPerUnit">Profit per Unit</option>
-              <option value="time">Travel Time</option>
-              <option value="sellPrice">Sell Price</option>
-              <option value="buyPrice">Buy Price</option>
-              <option value="good">Good (A to Z)</option>
-              <option value="buyCity">Buy City</option>
-              <option value="sellCity">Sell City</option>
-            </select>
-            <span class="tlabel" style="margin-left:14px">Show:</span>
-            <select id="rowLimit" onchange="renderTable()">
-              <option value="5">Top 5</option>
-              <option value="10">Top 10</option>
-              <option value="25">Top 25</option>
-              <option value="50" selected>Top 50</option>
-              <option value="100">Top 100</option>
-              <option value="0">All routes</option>
-            </select>
-            <span class="spacer"></span>
-            <span class="toolbar-notice">⚠ Prices may differ slightly from in-game values ⚠</span>
-            <span class="spacer"></span>
-            <input type="text" id="searchInput" placeholder="Search…" oninput="onSearchInput()" />
-          </div>
-
-          <div id="locationBar">
-            <span class="tlabel">I'm in:</span>
-            <select id="currentCity" onchange="onCurrentCityChange()">
-              <option value="">Not set</option>
-              <option value="Antioch">Antioch</option>
-              <option value="Tyre">Tyre</option>
-              <option value="Damascus">Damascus</option>
-              <option value="Palmyra">Palmyra</option>
-              <option value="Ctesiphon">Ctesiphon</option>
-              <option value="Ecbatana">Ecbatana</option>
-            </select>
-            <span class="tlabel">Sell in:</span>
-            <select id="sellInCity" onchange="onSellCityChange()">
-              <option value="">Any city</option>
-              <option value="Antioch">Antioch</option>
-              <option value="Tyre">Tyre</option>
-              <option value="Damascus">Damascus</option>
-              <option value="Palmyra">Palmyra</option>
-              <option value="Ctesiphon">Ctesiphon</option>
-              <option value="Ecbatana">Ecbatana</option>
-            </select>
-          </div>
-
-          <div id="eventToolbar">
-            <span class="tlabel">Event:</span>
-            <select id="evqCity">
-              <option value="">City…</option>
-              <option value="Antioch">Antioch</option>
-              <option value="Tyre">Tyre</option>
-              <option value="Damascus">Damascus</option>
-              <option value="Palmyra">Palmyra</option>
-              <option value="Ctesiphon">Ctesiphon</option>
-              <option value="Ecbatana">Ecbatana</option>
-            </select>
-            <select id="evqType" onchange="updateQuickEventLevel()">
-              <option value="">Event…</option>
-              <option value="Conflict">⚔ Conflict</option>
-              <option value="Festival">✿ Festival</option>
-              <option value="Drought">☼ Drought</option>
-              <option value="Harvest">❀ Harvest</option>
-            </select>
-            <select id="evqLevel" disabled>
-              <option value="">Level…</option>
-            </select>
-            <select id="evqDur">
-              <option value="30">30 min</option>
-              <option value="60" selected>1 hour</option>
-              <option value="120">2 hours</option>
-            </select>
-            <button class="btn btn-gold evq-btn" onclick="setQuickEvent()">Start</button>
-            <button class="btn evq-btn-clear" onclick="clearQuickEvent()">Clear</button>
+          <div id="routeControls">
+            <div class="route-controls-head">
+              <button
+                type="button"
+                id="routeControlsToggle"
+                class="route-controls-toggle"
+                aria-expanded="true"
+                aria-controls="routeControlsBody"
+              >
+                <span class="rct-label">Filters, sort &amp; events</span>
+                <span class="rct-chevron" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div id="routeControlsBody" class="route-controls-body">
+              <div id="routesFilterRow" class="routes-filter-row">
+                <input type="text" id="searchInput" placeholder="Filter…" oninput="onSearchInput()" />
+              </div>
+              <div class="routes-toolbar-row">
+                <div id="toolbar">
+                  <span class="tlabel">Sort</span>
+                  <select id="sortBy" onchange="onSortByChange()">
+                    <option value="profitPerMin">Profit per Minute</option>
+                    <option value="profitPerHour">Profit per Hour</option>
+                    <option value="profitPerTrip">Profit per Trip</option>
+                    <option value="profitPerUnit">Profit per Unit</option>
+                    <option value="time">Travel Time</option>
+                    <option value="sellPrice">Sell Price</option>
+                    <option value="buyPrice">Buy Price</option>
+                    <option value="good">Good (A to Z)</option>
+                    <option value="buyCity">Buy City</option>
+                    <option value="sellCity">Sell City</option>
+                  </select>
+                  <span class="tlabel">Rows</span>
+                  <select id="rowLimit" onchange="renderTable()">
+                    <option value="5">Top 5</option>
+                    <option value="10">Top 10</option>
+                    <option value="25">Top 25</option>
+                    <option value="50" selected>Top 50</option>
+                    <option value="100">Top 100</option>
+                    <option value="0">All routes</option>
+                  </select>
+                  <span class="tlabel tbudget-lbl" title="Outbound only: caps cargo to what you can buy at listed buy price · return leg unchanged">Spend max $</span>
+                  <input
+                    type="number"
+                    id="budgetCap"
+                    min="1"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder="—"
+                    title="Leave empty for full hold. Rows use min(your cargo slots, floor(cap ÷ buy price)) · profit/recs use that load."
+                    aria-label="Maximum gold to spend on buying outbound cargo"
+                    class="toolbar-budget-input"
+                  />
+                </div>
+              </div>
+              <div class="routes-events-row">
+                <div id="eventToolbar">
+                  <span class="tlabel">Event</span>
+                  <select id="evqCity">
+                    <option value="">City…</option>
+                    <option value="Antioch">Antioch</option>
+                    <option value="Tyre">Tyre</option>
+                    <option value="Damascus">Damascus</option>
+                    <option value="Palmyra">Palmyra</option>
+                    <option value="Ctesiphon">Ctesiphon</option>
+                    <option value="Ecbatana">Ecbatana</option>
+                  </select>
+                  <select id="evqType" onchange="updateQuickEventLevel()">
+                    <option value="">Event…</option>
+                    <option value="Conflict">⚔ Conflict</option>
+                    <option value="Festival">✿ Festival</option>
+                    <option value="Drought">☼ Drought</option>
+                    <option value="Harvest">❀ Harvest</option>
+                  </select>
+                  <select id="evqLevel" disabled>
+                    <option value="">Level…</option>
+                  </select>
+                  <select id="evqDur">
+                    <option value="30">30 min</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="120">2 hours</option>
+                  </select>
+                  <button class="btn btn-gold evq-btn" onclick="setQuickEvent()">Start</button>
+                  <button class="btn evq-btn-clear" onclick="clearQuickEvent()">Clear</button>
+                </div>
+              </div>
+            </div>
+            <div class="routes-best-loop-row">
+              <div id="bestLoopCard"></div>
+            </div>
           </div>
 
           <div id="routesPanel">
-            <div id="bestLoopCard"></div>
-            <div class="routes-divider">
-              <span class="routes-divider-label">Trading Routes</span>
-            </div>
+            <p class="routes-data-notice" role="note">⚠ Prices may differ slightly from in-game values ⚠</p>
             <div id="tableWrap">
               <table id="routeTable">
                 <thead id="thead">
@@ -194,11 +207,10 @@
                     <th id="h-buyPrice"      onclick="sortBy('buyPrice')"      data-tip="Base purchase price">Buy Price</th>
                     <th id="h-sellPrice"     onclick="sortBy('sellPrice')"     data-tip="Estimated sell price with all modifiers">Sell Price</th>
                     <th id="h-profitPerUnit" onclick="sortBy('profitPerUnit')" data-tip="Profit per cargo slot used">Profit / Unit</th>
-                    <th id="h-profitPerTrip" onclick="sortBy('profitPerTrip')" data-tip="Total profit filling all your cargo slots">Profit / Trip</th>
+                    <th id="h-profitPerTrip" onclick="sortBy('profitPerTrip')" data-tip="Total outbound profit using your cargo slots, or fewer if a spend cap limits how much you can buy">Profit / Trip</th>
                     <th id="h-time"          onclick="sortBy('time')"          data-tip="Estimated one-way travel time at your walkspeed. Auto-walk speed varies in-game, so treat these as approximate.">Travel Time ~</th>
                     <th id="h-profitPerMin"  onclick="sortBy('profitPerMin')"  data-tip="Outbound profit divided by travel time, the headline metric">Profit / Min</th>
                     <th data-tip="Best good to haul on the return journey">Return Cargo (Best)</th>
-                    <th data-tip="Copy this route as a Discord-friendly message">Share</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -222,37 +234,23 @@
 
           <div id="eventsPanel"></div>
 
-          <div id="settingsPanel">
-            <div class="set-h">Save / Load Setup</div>
-            <p class="set-p">Save named character/animal setups to this browser.</p>
-            <div class="setup-block">
-              <div class="setup-label">Save current setup</div>
-              <div class="setup-row">
-                <input type="text" id="setupNameInput" placeholder="Setup name…" maxlength="40" oninput="document.getElementById('btnSaveSetup').disabled = !this.value.trim()" />
-                <button class="btn" id="btnSaveSetup" onclick="saveNamedState()" disabled>Save</button>
-              </div>
-            </div>
-            <div class="setup-block">
-              <div class="setup-label">Load setup</div>
-              <div class="setup-row">
-                <select id="loadSetupSelect"><option value="">Choose setup</option></select>
-                <button class="btn" onclick="loadNamedState()">Load</button>
-              </div>
-            </div>
-            <div class="setup-block">
-              <div class="setup-label">Delete setup</div>
-              <div class="setup-row">
-                <select id="clearSetupSelect"><option value="">Choose setup</option></select>
-                <button class="btn btn-red" onclick="clearNamedState()">Delete</button>
-              </div>
-            </div>
-          </div>
-
           <div id="aboutPanel"></div>
 
         </div>
       </main>
     </div>
+
+    <footer id="footer">
+      <div class="footer-inner">
+        <span class="footer-brand">SilkRoadCalc.eu</span>
+        <div class="footer-links">
+          <a href="https://discord.gg/dEsV8QPqSU" target="_blank" rel="noopener">Discord</a>
+          <a href="https://srtsimulator.fandom.com/wiki/Silk_Road_Trading_Simulator_Wiki" target="_blank" rel="noopener">Wiki</a>
+          <a href="/frontend/settings/settings.html">Settings</a>
+        </div>
+        <span class="footer-copy">Not affiliated with Roblox or Silk Road Trading Simulator.</span>
+      </div>
+    </footer>
 
     <!-- Active event timers -->
     <div id="eventFloater" aria-live="polite"></div>
@@ -292,30 +290,10 @@
       <div style="font-size:11px;color:#555;letter-spacing:.12em;text-transform:uppercase">Check back soon</div>
     </div>
 
-    <!-- Feedback button -->
+    <!-- Feedback launcher -->
     <div id="feedbackContainer">
-      <button id="feedbackBtn" type="button" aria-label="Open feedback">
-        <div id="fbPeekBubble">
-          <span class="fbpb-title">Got feedback?</span>
-          <span class="fbpb-sub">Bugs · Suggestions · Praise</span>
-        </div>
-        <svg id="fbPeekChar" viewBox="0 0 70 110" xmlns="http://www.w3.org/2000/svg" width="60" height="93" aria-hidden="true">
-          <g transform="translate(70,0) scale(-1,1)">
-            <rect x="15" y="2" width="40" height="36" rx="4" fill="#c09060"/>
-            <path d="M15,20 L15,8 Q15,2 21,2 L49,2 Q55,2 55,8 L55,20 Z" fill="#3b1c07"/>
-            <rect x="21" y="20" width="7" height="9" rx="1.5" fill="#0c0401"/>
-            <rect x="42" y="20" width="7" height="9" rx="1.5" fill="#0c0401"/>
-            <rect x="23" y="31" width="24" height="4" rx="2" fill="#1a0a00"/>
-            <rect x="27" y="38" width="16" height="9" rx="1" fill="#c09060"/>
-            <rect x="10" y="46" width="50" height="36" rx="3" fill="#6b7a3c"/>
-            <line x1="10" y1="61" x2="60" y2="61" stroke="rgba(0,0,0,.25)" stroke-width="1"/>
-            <line x1="35" y1="46" x2="35" y2="82" stroke="rgba(0,0,0,.25)" stroke-width="1"/>
-            <g id="fbArmL"><rect x="2" y="46" width="10" height="26" rx="3" fill="#5e6c34"/><rect x="0" y="68" width="14" height="12" rx="3" fill="#c09060"/></g>
-            <g id="fbArmR"><rect x="58" y="46" width="10" height="26" rx="3" fill="#5e6c34"/><rect x="56" y="68" width="14" height="12" rx="3" fill="#c09060"/></g>
-            <rect id="fbLegR" x="14" y="82" width="16" height="20" rx="2" fill="#253012"/>
-            <rect id="fbLegL" x="40" y="82" width="16" height="20" rx="2" fill="#253012"/>
-          </g>
-        </svg>
+      <button id="feedbackBtn" type="button" class="feedback-fab-mini" aria-label="Send feedback">
+        Feedback
       </button>
     </div>
 

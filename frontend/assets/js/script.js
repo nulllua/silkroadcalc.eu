@@ -105,7 +105,7 @@ function renderTable() {
 
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="11" class="no-rows">⚔ No routes match your search ⚔</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="no-rows">⚔ No routes match your search ⚔</td></tr>`;
     renderMobileCards([]);
     return;
   }
@@ -154,8 +154,7 @@ function renderTable() {
       `<td class="${cls(6, puc)}">${pu >= 0 ? '+$' : '-$'}${Math.abs(r.profitPerTrip)}</td>` +
       `<td class="${cls(7)}">${fmtTime(r.time)}</td>` +
       `<td class="${cls(8, pmc)}">${pm >= 0 ? '+$' : '-$'}${Math.abs(pm)}</td>` +
-      `<td class="retcell">${returnCard(r.returnObj)}</td>` +
-      `<td class="share-cell"><button class="copy-btn" onclick="copyRouteForDiscord(${routeIdx})" title="Copy as Discord message">⎘</button></td>`;
+      `<td class="retcell">${returnCard(r.returnObj)}</td>`;
     const expTr = document.createElement('tr');
     expTr.className = 'expand-row';
     frag.appendChild(tr);
@@ -178,7 +177,7 @@ function initTableEvents() {
   if (!tbody || tbody._evtBound) return;
   tbody._evtBound = true;
   tbody.addEventListener('click', (e) => {
-    if (e.target.closest('.copy-btn,.price-cell')) return;
+    if (e.target.closest('.price-cell')) return;
     const tr = e.target.closest('tr:not(.expand-row)');
     if (!tr) return;
     const expRow = tr.nextElementSibling;
@@ -358,7 +357,7 @@ function renderExpandCells(r) {
   const sign = (v) => (v >= 0 ? '+$' : '-$') + Math.abs(v);
 
   if (!ret)
-    return `<td class="expand-td exp-first exp-last" colspan="11"><span class="expand-label">↩ Return Leg</span><span class="expand-empty">No profitable return cargo for this route.</span></td>`;
+    return `<td class="expand-td exp-first exp-last" colspan="10"><span class="expand-label">↩ Return Leg</span><span class="expand-empty">No profitable return cargo for this route.</span></td>`;
   const puc = ret.profitPerUnit > 0 ? 'profit' : ret.profitPerUnit < 0 ? 'loss' : 'zero';
   const pmc = ret.profitPerMin > 0 ? 'profit' : ret.profitPerMin < 0 ? 'loss' : 'zero';
   const totalTrip = r.profitPerTrip + ret.profitPerTrip;
@@ -376,7 +375,7 @@ function renderExpandCells(r) {
     <td class="expand-td ${puc}">${sign(ret.profitPerTrip)}</td>
     <td class="expand-td">${fmtTime(ret.time)}</td>
     <td class="expand-td ${pmc}">${sign(ret.profitPerMin)}/min</td>
-    <td class="expand-td exp-last exp-total" colspan="2"><span class="exp-total-label">Round trip</span><span class="exp-total-val ${tc}">${sign(totalTrip)}</span><span class="exp-total-rate ${tc}">${sign(totalPerMin)}/min · ${sign(totalPerHour)}/h</span></td>`;
+    <td class="expand-td exp-last exp-total"><span class="exp-total-label">Round trip</span><span class="exp-total-val ${tc}">${sign(totalTrip)}</span><span class="exp-total-rate ${tc}">${sign(totalPerMin)}/min · ${sign(totalPerHour)}/h</span></td>`;
 }
 
 function returnCard(ret) {
@@ -1083,10 +1082,11 @@ function renderBestLoop() {
   }
   const collapsed = isLoopCollapsed();
   const { out, back, totalProfit, totalTime, ppm } = best;
-  const collapseBtn = `<button class="loop-collapse-btn" onclick="toggleLoopCollapsed()" title="${collapsed ? 'Expand' : 'Collapse'}">${collapsed ? '▾' : '▴'}</button>`;
+  const headChevron = '<span class="rct-chevron" aria-hidden="true"></span>';
+  const headBtnCls = 'loop-head loop-head-toggle' + (collapsed ? ' loop-head-collapsed is-collapsed' : '');
   if (collapsed) {
     card.innerHTML = `
-      <div class="loop-head loop-head-collapsed">
+      <button type="button" class="${headBtnCls}" onclick="toggleLoopCollapsed()" title="Expand" aria-expanded="false">
         <span class="loop-crown">⚜</span>
         <span class="loop-title">Best Round Trip</span>
         <span class="loop-collapsed-summary">
@@ -1094,18 +1094,18 @@ function renderBestLoop() {
           <span class="loop-collapsed-cargo">${goodIconHTML(out.good)} <span class="loop-collapsed-arrow">·</span> ${goodIconHTML(back.good)}</span>
         </span>
         <span class="loop-ppm">+$${ppm}<span class="loop-unit">/min</span></span>
-        ${collapseBtn}
-      </div>
+        ${headChevron}
+      </button>
     `;
     return;
   }
   card.innerHTML = `
-    <div class="loop-head">
+    <button type="button" class="${headBtnCls}" onclick="toggleLoopCollapsed()" title="Collapse" aria-expanded="true">
       <span class="loop-crown">⚜</span>
       <span class="loop-title">Best Round Trip</span>
       <span class="loop-ppm">+$${ppm}<span class="loop-unit">/min</span></span>
-      ${collapseBtn}
-    </div>
+      ${headChevron}
+    </button>
     <div class="loop-body">
       <div class="loop-leg">
         <div class="loop-leg-h">Outbound</div>
@@ -1208,19 +1208,6 @@ function bestGoodForLeg(from, to, ps, slots) {
   return best;
 }
 
-function getCourierRank(ps, city) {
-  const culture = CITIES[city]?.culture;
-  if (culture === 'Byzantine') return ps.byzantineRank || 1;
-  if (culture === 'Persian') return ps.sassanidRank || 1;
-  return Math.max(ps.byzantineRank || 1, ps.sassanidRank || 1);
-}
-
-function packageRewardAmount(type, ps, deliveryCity) {
-  const base = type === 'short' ? 30 : 100;
-  const rank = getCourierRank(ps, deliveryCity);
-  return Math.round(base * Math.pow(1.5, rank - 1));
-}
-
 let _courierData = null;
 
 function confirmCourierDelivery() {
@@ -1308,10 +1295,6 @@ function runCourierPlanner() {
     if (deliveryMap[to]) packagesLeft -= deliveryMap[to].length;
   }
 
-  // Package cash rewards
-  let packageProfit = 0;
-  for (const pkg of packages) packageProfit += packageRewardAmount(pkg.type, ps, pkg.dest);
-
   // Build return legs (all packages delivered -> full slots)
   const returnLegs = [];
   let returnTradeProfit = 0;
@@ -1330,8 +1313,6 @@ function runCourierPlanner() {
     }
   }
 
-  const totalProfit = outboundTradeProfit + packageProfit + returnTradeProfit;
-
   _courierData = {
     start,
     packages,
@@ -1339,9 +1320,7 @@ function runCourierPlanner() {
     outboundLegs,
     returnLegs,
     outboundTradeProfit,
-    packageProfit,
     returnTradeProfit,
-    totalProfit,
     deliveryMap,
     totalSlots,
     mustReturn,
@@ -1354,16 +1333,12 @@ function runCourierPlanner() {
 function renderCourierUI(out, data) {
   const {
     start,
-    packages,
     outboundLegs,
     returnLegs,
     outboundTradeProfit,
-    packageProfit,
     returnTradeProfit,
-    totalProfit,
     deliveryMap,
     mustReturn,
-    ps,
     phase,
   } = data;
 
@@ -1391,12 +1366,10 @@ function renderCourierUI(out, data) {
     if (!pkgs) return '';
     return pkgs
       .map((pkg) => {
-        const reward = packageRewardAmount(pkg.type, ps, city);
         const label = pkg.type === 'short' ? 'Short' : 'Long';
         return `<div class="courier-delivery-event">
         <div class="courier-delivery-badge">
           📦 Deliver <span class="courier-quest-badge ${pkg.type}" style="margin:0 6px">${label}</span> quest package
-          <span class="pkg-reward">+$${reward}</span>
         </div>
       </div>`;
       })
@@ -1428,35 +1401,14 @@ function renderCourierUI(out, data) {
     `;
   }
 
-  // Package reward breakdown
-  const pkgBreakdownHtml = packages
-    .map((pkg) => {
-      const reward = packageRewardAmount(pkg.type, ps, pkg.dest);
-      const label = pkg.type === 'short' ? 'Short quest' : 'Long quest';
-      return `<div class="courier-pkg-reward">
-      <span>${label} → ${pkg.dest}</span><b>+$${reward}</b>
-    </div>`;
-    })
-    .join('');
-
-  // Totals shown in summary
   const tradeProfitShown =
     phase === 'delivered' ? outboundTradeProfit + returnTradeProfit : outboundTradeProfit;
-  const totalShown = phase === 'delivered' ? totalProfit : outboundTradeProfit + packageProfit;
+  const profitLabel =
+    phase === 'delivered' ? 'Total trade profit' : 'Trade profit';
 
-  const summaryHtml =
-    phase === 'delivered'
-      ? `
-    <div class="trip-summary" style="grid-template-columns:repeat(3,1fr)">
-      <div class="trip-stat"><span>Trade profit</span><b class="profit">+$${tradeProfitShown}</b></div>
-      <div class="trip-stat"><span>Package rewards</span><b class="profit">+$${packageProfit}</b></div>
-      <div class="trip-stat big"><span>Total profit</span><b class="profit">+$${totalShown}</b></div>
-    </div>`
-      : `
-    <div class="trip-summary" style="grid-template-columns:repeat(3,1fr)">
-      <div class="trip-stat"><span>Trade profit</span><b class="profit">+$${tradeProfitShown}</b></div>
-      <div class="trip-stat"><span>Package rewards</span><b class="profit">+$${packageProfit}</b></div>
-      <div class="trip-stat big"><span>Journey total</span><b class="profit">+$${totalShown}</b></div>
+  const summaryHtml = `
+    <div class="trip-summary" style="grid-template-columns:1fr">
+      <div class="trip-stat big"><span>${profitLabel}</span><b class="profit">+$${tradeProfitShown}</b></div>
     </div>`;
 
   const deliverBtn =
@@ -1472,7 +1424,6 @@ function renderCourierUI(out, data) {
   out.innerHTML = `
     <div class="trip-card" style="margin-top:16px">
       ${summaryHtml}
-      <div class="courier-pkg-rewards">${pkgBreakdownHtml}</div>
       <div class="courier-section-label">▼ Outbound Journey</div>
       <div class="trip-legs">${outHtml}</div>
       ${returnHtml}
@@ -1576,19 +1527,9 @@ function applyOptimal(culture, religion, faith, lang) {
   updateAll();
 }
 
-// theme system, persists to localStorage so it survives page refreshes -domi
-const THEME_KEY = 'silkroad_theme';
-function applyTheme(name) {
-  document.body.dataset.theme = name;
-  lsSet(THEME_KEY, name);
-  // sync radio
-  document.querySelectorAll('input[name="theme"]').forEach((r) => {
-    r.checked = r.value === name;
-  });
-}
 function loadTheme() {
-  const name = lsGet(THEME_KEY, 'parchment');
-  applyTheme(name);
+  document.body.dataset.theme = 'slate';
+  lsSet('silkroad_theme', 'slate');
 }
 
 const WALKER_KEY = 'srtc-walker';
@@ -1719,113 +1660,6 @@ document.addEventListener('mouseout', (e) => {
   if (!cell) return;
   if (priceTip) priceTip.style.display = 'none';
 });
-
-// formats a route as a nicely formatted Discord message and copies it to clipboard -domi
-function copyRouteForDiscord(idx) {
-  const r = allRoutes[idx];
-  if (!r) return;
-  const ret = r.returnObj
-    ? `\n↩ Return: **${r.returnObj.good}** (\`+$${r.returnObj.profitPerUnit}/unit\`)`
-    : '';
-
-  const ps = getPlayerState();
-  const langLabels = { 1: 'Broken', 2: 'Proficient', 3: 'Fluent' };
-  const backpackLabels = {
-    None: null,
-    SmallSatchel: 'Small Satchel',
-    LargeSatchel: 'Large Satchel',
-    BasketBackpack: 'Basket Backpack',
-    FramePack: 'Frame Pack',
-  };
-  const faithStr = ps.religionLevel > 0 ? ` L${ps.religionLevel}` : '';
-  const langStr = langLabels[ps.langLevel] || 'Proficient';
-  const backLabel = backpackLabels[ps.backpack];
-
-  const gamepasses = [];
-  if (ps.extraStorage) gamepasses.push('+1 Storage Slot');
-  if (ps.caravanGamepass) gamepasses.push('Caravan');
-  if (ps.autoWalk) gamepasses.push('Auto-Walk');
-
-  const animalCounts = {};
-  ps.animals.forEach((a) => {
-    if (a !== 'None') animalCounts[a] = (animalCounts[a] || 0) + 1;
-  });
-  const animalStr = Object.entries(animalCounts)
-    .map(([a, c]) => (c > 1 ? `${a} ×${c}` : a))
-    .join(', ');
-  const saddlebagCount = ps.saddlebags.filter(Boolean).length;
-  const animalParts = [
-    animalStr,
-    saddlebagCount ? `${saddlebagCount} saddlebag${saddlebagCount > 1 ? 's' : ''}` : '',
-  ].filter(Boolean);
-
-  const rankParts = [];
-  if ((ps.byzantineRank || 1) > 1) rankParts.push(`Byzantine R${ps.byzantineRank}`);
-  if ((ps.sassanidRank || 1) > 1) rankParts.push(`Sassanid R${ps.sassanidRank}`);
-
-  const setupLines = [
-    `👤 \`${ps.culture}\`  ·  \`${ps.religion}\`${faithStr}  ·  Language: \`${langStr}\``,
-  ];
-  if (backLabel) setupLines.push(`🧳 ${backLabel}`);
-  if (gamepasses.length) setupLines.push(`🎫 Gamepasses: \`${gamepasses.join(', ')}\``);
-  if (animalParts.length) setupLines.push(`🐎 ${animalParts.join('  ·  ')}`);
-  if (rankParts.length) setupLines.push(`⚔️ ${rankParts.join('  ·  ')}`);
-  const setup = `\n\n⚙️ **Merchant Setup**\n${setupLines.join('\n')}`;
-
-  const msg = `🐪 **Silk Road Trade Route**
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 **${r.good}**  ·  ${r.buyCity} → ${r.sellCity}
-
-💰 Buy \`$${r.buyPrice}\`  ·  Sell \`$${r.sellPrice}\`  ·  Profit \`+$${r.profitPerUnit}/unit\`
-🎒 Trip \`+$${r.profitPerTrip}\`  ·  ${r.slots} slots  ·  ⏱ ${fmtTime(r.time)}  ·  📈 \`+$${r.profitPerMin}/min\`${ret}${setup}
-
-🔗 [silkroadcalc.eu](https://silkroadcalc.eu/)`;
-
-  const fallbackCopy = (text) => {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-      return ok;
-    } catch (_) {
-      return false;
-    }
-  };
-
-  const onSuccess = () => showToast('Route copied to clipboard');
-  const onFail = () => {
-    if (fallbackCopy(msg)) onSuccess();
-    else showToast('Copy failed - try opening the live site');
-  };
-
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(msg).then(onSuccess).catch(onFail);
-  } else {
-    if (fallbackCopy(msg)) onSuccess();
-    else onFail();
-  }
-}
-function showToast(text) {
-  let t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    document.body.appendChild(t);
-  }
-  t.textContent = text;
-  t.className = 'show';
-  clearTimeout(showToast._tid);
-  showToast._tid = setTimeout(() => {
-    t.className = '';
-  }, 1800);
-}
 
 buildAnimalSlots();
 loadTheme();

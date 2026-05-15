@@ -1,6 +1,54 @@
 // Main client runtime for the trading calculator.
 // Organized as: static data -> pricing engine -> UI/state -> network sync.
 
+const BUDGET_KEY = 'silkroad_budget';
+
+function getBudgetCap() {
+  const el = document.getElementById('budgetCap');
+  if (!el) return 0;
+  const raw = String(el.value).trim();
+  if (raw === '') return 0;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/** Recompute outbound trip profit/min when capital is capped (early-game). Ignores return leg. */
+function applyOutboundBudget(routes, budgetCap) {
+  for (const r of routes) {
+    delete r._budgetExcluded;
+    delete r.capacitySlots;
+    delete r.slotBudgetLimited;
+    const capacitySlots = r.slots;
+    if (!(budgetCap > 0)) continue;
+    const bp = Number(r.buyPrice);
+    if (!(bp > 0)) {
+      r._budgetExcluded = true;
+      continue;
+    }
+    r.capacitySlots = capacitySlots;
+    const affordable = Math.floor(budgetCap / bp);
+    const usable = Math.min(capacitySlots, Math.max(0, affordable));
+    if (usable < 1) {
+      r._budgetExcluded = true;
+      continue;
+    }
+    if (usable < capacitySlots) r.slotBudgetLimited = true;
+    r.slots = usable;
+    r.profitPerTrip = r.profitPerUnit * usable;
+    r.profitPerMin = r.time > 0 ? Math.round(r.profitPerTrip / r.time) : 0;
+    r.profitPerHour = r.profitPerMin * 60;
+  }
+  return routes;
+}
+
+function routesEmptyMessage(cap, narrowedByTextSearch, preBudgetCount) {
+  if (cap > 0 && preBudgetCount > 0)
+    return 'No routes match your filters within this buy budget.';
+  if (narrowedByTextSearch) return '⚔ No routes match your search ⚔';
+  if (cap > 0) return 'No route is affordable at this budget.';
+  return '⚔ No routes match your search ⚔';
+}
+
 function getPlayerState() {
   return {
     culture: document.getElementById('culture').value,
@@ -44,6 +92,7 @@ function updateAll() {
   let routes = generateRoutes(ps);
   routes = enrichRoutes(routes, ps);
   routes = attachReturnTrade(routes);
+  applyOutboundBudget(routes, getBudgetCap());
   routes.forEach((r, i) => {
     r._idx = i;
   });
@@ -58,9 +107,10 @@ function updateAll() {
 function renderTable() {
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   const limitEl = document.getElementById('rowLimit');
-  const limit = limitEl ? parseInt(limitEl.value) : 0;
+  const limit = limitEl ? parseInt(limitEl.value, 10) : 0;
   const currentCity = document.getElementById('currentCity')?.value || '';
   const sellInCity = document.getElementById('sellInCity')?.value || '';
+  const budgetCap = getBudgetCap();
 
   let rows = allRoutes.slice();
   if (q) {
@@ -75,7 +125,8 @@ function renderTable() {
   if (sellInCity) {
     rows = rows.filter((r) => r.sellCity === sellInCity);
   }
-
+  const preBudgetCount = rows.length;
+  if (budgetCap > 0) rows = rows.filter((r) => !r._budgetExcluded);
   rows.sort((a, b) => {
     // routes from current city pin to top (when not alphabetic sort)
     if (currentCity) {
@@ -101,8 +152,10 @@ function renderTable() {
 
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="11" class="no-rows">⚔ No routes match your search ⚔</td></tr>`;
-    renderMobileCards([]);
+    const narrowedByTextSearch = !!(q || sellInCity);
+    const msg = routesEmptyMessage(budgetCap, narrowedByTextSearch, preBudgetCount);
+    tbody.innerHTML = `<tr><td colspan="10" class="no-rows">${msg}</td></tr>`;
+    renderMobileCards([], msg);
     return;
   }
 
@@ -150,17 +203,16 @@ function renderTable() {
       `<td class="${cls(6, puc)}">${pu >= 0 ? '+$' : '-$'}${Math.abs(r.profitPerTrip)}</td>` +
       `<td class="${cls(7)}">${fmtTime(r.time)}</td>` +
       `<td class="${cls(8, pmc)}">${pm >= 0 ? '+$' : '-$'}${Math.abs(pm)}</td>` +
-      `<td class="retcell">${returnCard(r.returnObj)}</td>` +
-      `<td class="share-cell"><button class="copy-btn" onclick="copyRouteForDiscord(${routeIdx})" title="Copy as Discord message">⎘</button></td>`;
+      `<td class="retcell">${returnCard(r.returnObj)}</td>`;
+    frag.appendChild(tr);
     const expTr = document.createElement('tr');
     expTr.className = 'expand-row';
-    frag.appendChild(tr);
     frag.appendChild(expTr);
   });
   tbody.innerHTML = '';
   tbody.appendChild(frag);
   const cardsEl = document.getElementById('routeCards');
-  if (cardsEl && cardsEl.offsetParent !== null) renderMobileCards(rows);
+  if (cardsEl && cardsEl.offsetParent !== null) renderMobileCards(rows, '');
 }
 
 let _searchTimer = 0;
@@ -174,7 +226,7 @@ function initTableEvents() {
   if (!tbody || tbody._evtBound) return;
   tbody._evtBound = true;
   tbody.addEventListener('click', (e) => {
-    if (e.target.closest('.copy-btn,.price-cell')) return;
+    if (e.target.closest('.price-cell')) return;
     const tr = e.target.closest('tr:not(.expand-row)');
     if (!tr) return;
     const expRow = tr.nextElementSibling;
@@ -192,12 +244,37 @@ function initTableEvents() {
   });
 }
 
-function renderMobileCards(rows) {
+const ROUTE_CONTROLS_COLLAPSED_KEY = 'silkroad_routes_controls_collapsed';
+
+function initRouteControlsCollapse() {
+  const root = document.getElementById('routeControls');
+  const btn = document.getElementById('routeControlsToggle');
+  const body = document.getElementById('routeControlsBody');
+  if (!root || !btn || !body) return;
+  function apply(collapsed) {
+    const c = !!collapsed;
+    root.dataset.collapsed = c ? '1' : '0';
+    btn.setAttribute('aria-expanded', c ? 'false' : 'true');
+    try {
+      localStorage.setItem(ROUTE_CONTROLS_COLLAPSED_KEY, c ? '1' : '0');
+    } catch (_) {}
+  }
+  let startCollapsed = false;
+  try {
+    startCollapsed = localStorage.getItem(ROUTE_CONTROLS_COLLAPSED_KEY) === '1';
+  } catch (_) {}
+  apply(startCollapsed);
+  btn.addEventListener('click', () => {
+    apply(root.dataset.collapsed !== '1');
+  });
+}
+
+function renderMobileCards(rows, emptyMsg) {
   const container = document.getElementById('routeCards');
   if (!container) return;
   if (!rows.length) {
-    container.innerHTML =
-      '<div class="route-card" style="text-align:center;cursor:default;padding:16px"><span class="rc-empty-msg">⚔ No routes match your search ⚔</span></div>';
+    const msg = emptyMsg || '⚔ No routes match your search ⚔';
+    container.innerHTML = `<div class="route-card" style="text-align:center;cursor:default;padding:16px"><span class="rc-empty-msg">${msg}</span></div>`;
     return;
   }
   const ALPHA_SORTS = new Set(['good', 'buyCity', 'sellCity']);
@@ -352,7 +429,7 @@ function renderExpandCells(r) {
   const sign = (v) => (v >= 0 ? '+$' : '-$') + Math.abs(v);
 
   if (!ret)
-    return `<td class="expand-td exp-first exp-last" colspan="11"><span class="expand-label">↩ Return Leg</span><span class="expand-empty">No profitable return cargo for this route.</span></td>`;
+    return `<td class="expand-td exp-first exp-last" colspan="10"><span class="expand-label">↩ Return Leg</span><span class="expand-empty">No profitable return cargo for this route.</span></td>`;
   const puc = ret.profitPerUnit > 0 ? 'profit' : ret.profitPerUnit < 0 ? 'loss' : 'zero';
   const pmc = ret.profitPerMin > 0 ? 'profit' : ret.profitPerMin < 0 ? 'loss' : 'zero';
   const totalTrip = r.profitPerTrip + ret.profitPerTrip;
@@ -370,7 +447,7 @@ function renderExpandCells(r) {
     <td class="expand-td ${puc}">${sign(ret.profitPerTrip)}</td>
     <td class="expand-td">${fmtTime(ret.time)}</td>
     <td class="expand-td ${pmc}">${sign(ret.profitPerMin)}/min</td>
-    <td class="expand-td exp-last exp-total" colspan="2"><span class="exp-total-label">Round trip</span><span class="exp-total-val ${tc}">${sign(totalTrip)}</span><span class="exp-total-rate ${tc}">${sign(totalPerMin)}/min · ${sign(totalPerHour)}/h</span></td>`;
+    <td class="expand-td exp-last exp-total"><span class="exp-total-label">Round trip</span><span class="exp-total-val ${tc}">${sign(totalTrip)}</span><span class="exp-total-rate ${tc}">${sign(totalPerMin)}/min · ${sign(totalPerHour)}/h</span></td>`;
 }
 
 function returnCard(ret) {
@@ -402,18 +479,25 @@ function switchTab(tab) {
   const isSettings = tab === 'settings';
   const isAbout = tab === 'about';
   document.getElementById('routesPanel').style.display = isRoutes ? 'flex' : 'none';
-  document.getElementById('toolbar').style.display = isRoutes ? 'flex' : 'none';
+  const rc = document.getElementById('routeControls');
+  if (rc) rc.style.display = isRoutes ? 'flex' : 'none';
   document.getElementById('pricesPanel').style.display = isPrices ? 'flex' : 'none';
   document.getElementById('toolsPanel').style.display = isTools ? 'block' : 'none';
   document.getElementById('eventsPanel').style.display = isEvents ? 'flex' : 'none';
-  document.getElementById('settingsPanel').style.display = isSettings ? 'block' : 'none';
+  const sp = document.getElementById('settingsPanel');
+  if (sp) sp.style.display = isSettings ? 'block' : 'none';
   document.getElementById('aboutPanel').style.display = isAbout ? 'block' : 'none';
-  document.getElementById('tabRoutes').className = 'tab' + (isRoutes ? ' active' : '');
-  document.getElementById('tabPrices').className = 'tab' + (isPrices ? ' active' : '');
-  document.getElementById('tabTools').className = 'tab' + (isTools ? ' active' : '');
-  document.getElementById('tabEvents').className = 'tab' + (isEvents ? ' active' : '');
-  document.getElementById('tabSettings').className = 'tab' + (isSettings ? ' active' : '');
-  document.getElementById('tabAbout').className = 'tab' + (isAbout ? ' active' : '');
+  [
+    ['tabRoutes', isRoutes],
+    ['tabPrices', isPrices],
+    ['tabTools', isTools],
+    ['tabEvents', isEvents],
+    ['tabSettings', isSettings],
+    ['tabAbout', isAbout],
+  ].forEach(([id, active]) => {
+    const el = document.getElementById(id);
+    if (el) el.className = 'tab' + (active ? ' active' : '');
+  });
   if (isEvents) renderEventsTab();
   if (isPrices) renderPricesTab();
 }
@@ -877,7 +961,9 @@ function exportCSV() {
     'Return Cargo',
   ];
   const lines = [headers.join(',')];
+  const cap = getBudgetCap();
   for (const r of allRoutes) {
+    if (cap > 0 && r._budgetExcluded) continue;
     const ret = r.returnObj ? `${r.returnObj.good} (+$${r.returnObj.profitPerUnit})` : 'None';
     lines.push(
       [
@@ -1017,7 +1103,8 @@ function refreshSetupDropdowns() {
 
 function saveNamedState() {
   const nameEl = document.getElementById('setupNameInput');
-  const name = (nameEl?.value || '').trim();
+  if (!nameEl) return;
+  const name = (nameEl.value || '').trim();
   if (!name) {
     return;
   }
@@ -1025,7 +1112,8 @@ function saveNamedState() {
   setups[name] = stateToObj();
   saveSetups(setups);
   nameEl.value = '';
-  document.getElementById('btnSaveSetup').disabled = true;
+  const btnSv = document.getElementById('btnSaveSetup');
+  if (btnSv) btnSv.disabled = true;
   refreshSetupDropdowns();
 }
 
@@ -1075,6 +1163,7 @@ function renderBestLoop() {
   let best = null;
   const byPair = {};
   for (const r of allRoutes) {
+    if (r._budgetExcluded) continue;
     const k = r.buyCity + '|' + r.sellCity;
     if (!byPair[k] || r.profitPerTrip > byPair[k].profitPerTrip) byPair[k] = r;
   }
@@ -1088,58 +1177,56 @@ function renderBestLoop() {
     if (!best || ppm > best.ppm) best = { out, back, totalProfit, totalTime, ppm };
   }
   if (!best || best.totalProfit <= 0) {
-    card.innerHTML = `<div class="loop-empty">No profitable round trip with current setup.</div>`;
+    card.innerHTML = `<div class="loop-empty">No profitable loop.</div>`;
     return;
   }
   const collapsed = isLoopCollapsed();
   const { out, back, totalProfit, totalTime, ppm } = best;
-  const collapseBtn = `<button class="loop-collapse-btn" onclick="toggleLoopCollapsed()" title="${collapsed ? 'Expand' : 'Collapse'}">${collapsed ? '▾' : '▴'}</button>`;
+  const headChevron = '<span class="rct-chevron" aria-hidden="true"></span>';
+  const headBtnCls =
+    'loop-head loop-head-inline loop-head-toggle' +
+    (collapsed ? ' loop-head-collapsed is-collapsed' : '');
   if (collapsed) {
     card.innerHTML = `
-      <div class="loop-head loop-head-collapsed">
-        <span class="loop-crown">⚜</span>
-        <span class="loop-title">Best Round Trip</span>
+      <button type="button" class="${headBtnCls}" onclick="toggleLoopCollapsed()" title="Expand" aria-expanded="false">
+        <span class="loop-crown" aria-hidden="true">⚜</span>
+        <span class="loop-title">Loop</span>
         <span class="loop-collapsed-summary">
-          ${badge(out.buyCity)} <span class="loop-arrow">⇄</span> ${badge(out.sellCity)}
-          <span class="loop-collapsed-cargo">${goodIconHTML(out.good)} <span class="loop-collapsed-arrow">·</span> ${goodIconHTML(back.good)}</span>
+          ${badge(out.buyCity)}<span class="loop-arrow">⇄</span>${badge(out.sellCity)}
+          <span class="loop-collapsed-cargo">${goodIconHTML(out.good)}<span class="loop-collapsed-arrow">·</span>${goodIconHTML(back.good)}</span>
         </span>
-        <span class="loop-ppm">+$${ppm}<span class="loop-unit">/min</span></span>
-        ${collapseBtn}
-      </div>
+        <span class="loop-ppm">+$${ppm}<span class="loop-unit">/m</span></span>
+        ${headChevron}
+      </button>
     `;
     return;
   }
   card.innerHTML = `
-    <div class="loop-head">
-      <span class="loop-crown">⚜</span>
-      <span class="loop-title">Best Round Trip</span>
+    <button type="button" class="${headBtnCls}" onclick="toggleLoopCollapsed()" title="Collapse" aria-expanded="true">
+      <span class="loop-crown" aria-hidden="true">⚜</span>
+      <span class="loop-title">Best loop</span>
       <span class="loop-ppm">+$${ppm}<span class="loop-unit">/min</span></span>
-      ${collapseBtn}
-    </div>
-    <div class="loop-body">
-      <div class="loop-leg">
-        <div class="loop-leg-h">Outbound</div>
-        <div class="loop-leg-inline">
-          <div class="loop-leg-route">${badge(out.buyCity)} <span class="loop-arrow">→</span> ${badge(out.sellCity)}</div>
-          <div class="loop-leg-cargo">${goodIconHTML(out.good)}<span>${out.good}</span></div>
-          <div class="loop-leg-stats">+$${out.profitPerTrip} · ${fmtTime(out.time)}</div>
+      ${headChevron}
+    </button>
+    <div class="loop-body loop-body-inline">
+      <div class="loop-inline-grid">
+        <div class="loop-mini-row">
+          <span class="loop-mini-h">Out</span>
+          <span class="loop-mini-route">${badge(out.buyCity)}<span class="loop-arrow">→</span>${badge(out.sellCity)}</span>
+          <span class="loop-leg-cargo">${goodIconHTML(out.good)}<span>${out.good}</span></span>
+          <span class="loop-mini-st">+$${out.profitPerTrip} · ${fmtTime(out.time)}</span>
+        </div>
+        <div class="loop-mini-row">
+          <span class="loop-mini-h">Ret</span>
+          <span class="loop-mini-route">${badge(back.buyCity)}<span class="loop-arrow">→</span>${badge(back.sellCity)}</span>
+          <span class="loop-leg-cargo">${goodIconHTML(back.good)}<span>${back.good}</span></span>
+          <span class="loop-mini-st">+$${back.profitPerTrip} · ${fmtTime(back.time)}</span>
         </div>
       </div>
-      <div class="loop-divider"></div>
-      <div class="loop-leg">
-        <div class="loop-leg-h">Return</div>
-        <div class="loop-leg-inline">
-          <div class="loop-leg-route">${badge(back.buyCity)} <span class="loop-arrow">→</span> ${badge(back.sellCity)}</div>
-          <div class="loop-leg-cargo">${goodIconHTML(back.good)}<span>${back.good}</span></div>
-          <div class="loop-leg-stats">+$${back.profitPerTrip} · ${fmtTime(back.time)}</div>
-        </div>
-      </div>
-      <div class="loop-divider"></div>
-      <div class="loop-totals">
-        <div class="loop-totals-row"><span>Total profit</span><b class="profit">+$${totalProfit}</b></div>
-        <div class="loop-totals-row"><span>Total time</span><b>${fmtTime(totalTime)}</b></div>
-        <div class="loop-totals-row big"><span>Profit / min</span><b class="profit">+$${ppm}</b></div>
-        <div class="loop-totals-row big"><span>Profit / hour</span><b class="profit">+$${ppm * 60}</b></div>
+      <div class="loop-inline-totals">
+        <span>Σ <b class="profit">+$${totalProfit}</b></span>
+        <span>${fmtTime(totalTime)}</span>
+        <span>/h <b class="profit">+$${ppm * 60}</b></span>
       </div>
     </div>
   `;
@@ -1216,19 +1303,6 @@ function bestGoodForLeg(from, to, ps, slots) {
       };
   }
   return best;
-}
-
-function getCourierRank(ps, city) {
-  const culture = CITIES[city]?.culture;
-  if (culture === 'Byzantine') return ps.byzantineRank || 1;
-  if (culture === 'Persian') return ps.sassanidRank || 1;
-  return Math.max(ps.byzantineRank || 1, ps.sassanidRank || 1);
-}
-
-function packageRewardAmount(type, ps, deliveryCity) {
-  const base = type === 'short' ? 30 : 100;
-  const rank = getCourierRank(ps, deliveryCity);
-  return Math.round(base * Math.pow(1.5, rank - 1));
 }
 
 let _courierData = null;
@@ -1317,10 +1391,6 @@ function runCourierPlanner() {
     if (deliveryMap[to]) packagesLeft -= deliveryMap[to].length;
   }
 
-  // Package cash rewards
-  let packageProfit = 0;
-  for (const pkg of packages) packageProfit += packageRewardAmount(pkg.type, ps, pkg.dest);
-
   // Build return legs (all packages delivered -> full slots)
   const returnLegs = [];
   let returnTradeProfit = 0;
@@ -1339,8 +1409,6 @@ function runCourierPlanner() {
     }
   }
 
-  const totalProfit = outboundTradeProfit + packageProfit + returnTradeProfit;
-
   _courierData = {
     start,
     packages,
@@ -1348,9 +1416,7 @@ function runCourierPlanner() {
     outboundLegs,
     returnLegs,
     outboundTradeProfit,
-    packageProfit,
     returnTradeProfit,
-    totalProfit,
     deliveryMap,
     totalSlots,
     mustReturn,
@@ -1363,16 +1429,12 @@ function runCourierPlanner() {
 function renderCourierUI(out, data) {
   const {
     start,
-    packages,
     outboundLegs,
     returnLegs,
     outboundTradeProfit,
-    packageProfit,
     returnTradeProfit,
-    totalProfit,
     deliveryMap,
     mustReturn,
-    ps,
     phase,
   } = data;
 
@@ -1400,12 +1462,10 @@ function renderCourierUI(out, data) {
     if (!pkgs) return '';
     return pkgs
       .map((pkg) => {
-        const reward = packageRewardAmount(pkg.type, ps, city);
         const label = pkg.type === 'short' ? 'Short' : 'Long';
         return `<div class="courier-delivery-event">
         <div class="courier-delivery-badge">
           📦 Deliver <span class="courier-quest-badge ${pkg.type}" style="margin:0 6px">${label}</span> quest package
-          <span class="pkg-reward">+$${reward}</span>
         </div>
       </div>`;
       })
@@ -1437,35 +1497,14 @@ function renderCourierUI(out, data) {
     `;
   }
 
-  // Package reward breakdown
-  const pkgBreakdownHtml = packages
-    .map((pkg) => {
-      const reward = packageRewardAmount(pkg.type, ps, pkg.dest);
-      const label = pkg.type === 'short' ? 'Short quest' : 'Long quest';
-      return `<div class="courier-pkg-reward">
-      <span>${label} → ${pkg.dest}</span><b>+$${reward}</b>
-    </div>`;
-    })
-    .join('');
-
-  // Totals shown in summary
   const tradeProfitShown =
     phase === 'delivered' ? outboundTradeProfit + returnTradeProfit : outboundTradeProfit;
-  const totalShown = phase === 'delivered' ? totalProfit : outboundTradeProfit + packageProfit;
+  const profitLabel =
+    phase === 'delivered' ? 'Total trade profit' : 'Trade profit';
 
-  const summaryHtml =
-    phase === 'delivered'
-      ? `
-    <div class="trip-summary" style="grid-template-columns:repeat(3,1fr)">
-      <div class="trip-stat"><span>Trade profit</span><b class="profit">+$${tradeProfitShown}</b></div>
-      <div class="trip-stat"><span>Package rewards</span><b class="profit">+$${packageProfit}</b></div>
-      <div class="trip-stat big"><span>Total profit</span><b class="profit">+$${totalShown}</b></div>
-    </div>`
-      : `
-    <div class="trip-summary" style="grid-template-columns:repeat(3,1fr)">
-      <div class="trip-stat"><span>Trade profit</span><b class="profit">+$${tradeProfitShown}</b></div>
-      <div class="trip-stat"><span>Package rewards</span><b class="profit">+$${packageProfit}</b></div>
-      <div class="trip-stat big"><span>Journey total</span><b class="profit">+$${totalShown}</b></div>
+  const summaryHtml = `
+    <div class="trip-summary" style="grid-template-columns:1fr">
+      <div class="trip-stat big"><span>${profitLabel}</span><b class="profit">+$${tradeProfitShown}</b></div>
     </div>`;
 
   const deliverBtn =
@@ -1481,7 +1520,6 @@ function renderCourierUI(out, data) {
   out.innerHTML = `
     <div class="trip-card" style="margin-top:16px">
       ${summaryHtml}
-      <div class="courier-pkg-rewards">${pkgBreakdownHtml}</div>
       <div class="courier-section-label">▼ Outbound Journey</div>
       <div class="trip-legs">${outHtml}</div>
       ${returnHtml}
@@ -1515,9 +1553,11 @@ function runOptimalFinder() {
             };
             let routes = generateRoutes(ps);
             routes = enrichRoutes(routes, ps);
+            applyOutboundBudget(routes, getBudgetCap());
             // best round trip
             const byPair = {};
             for (const rt of routes) {
+              if (rt._budgetExcluded) continue;
               const k = rt.buyCity + '|' + rt.sellCity;
               if (!byPair[k] || rt.profitPerTrip > byPair[k].profitPerTrip) byPair[k] = rt;
             }
@@ -1585,19 +1625,9 @@ function applyOptimal(culture, religion, faith, lang) {
   updateAll();
 }
 
-/* Theme system */
-const THEME_KEY = 'silkroad_theme';
-function applyTheme(name) {
-  document.body.dataset.theme = name;
-  lsSet(THEME_KEY, name);
-  // sync radio
-  document.querySelectorAll('input[name="theme"]').forEach((r) => {
-    r.checked = r.value === name;
-  });
-}
 function loadTheme() {
-  const name = lsGet(THEME_KEY, 'parchment');
-  applyTheme(name);
+  document.body.dataset.theme = 'slate';
+  lsSet('silkroad_theme', 'slate');
 }
 
 const WALKER_KEY = 'srtc-walker';
@@ -1729,113 +1759,6 @@ document.addEventListener('mouseout', (e) => {
   if (priceTip) priceTip.style.display = 'none';
 });
 
-/* Discord copy */
-function copyRouteForDiscord(idx) {
-  const r = allRoutes[idx];
-  if (!r) return;
-  const ret = r.returnObj
-    ? `\n↩ Return: **${r.returnObj.good}** (\`+$${r.returnObj.profitPerUnit}/unit\`)`
-    : '';
-
-  const ps = getPlayerState();
-  const langLabels = { 1: 'Broken', 2: 'Proficient', 3: 'Fluent' };
-  const backpackLabels = {
-    None: null,
-    SmallSatchel: 'Small Satchel',
-    LargeSatchel: 'Large Satchel',
-    BasketBackpack: 'Basket Backpack',
-    FramePack: 'Frame Pack',
-  };
-  const faithStr = ps.religionLevel > 0 ? ` L${ps.religionLevel}` : '';
-  const langStr = langLabels[ps.langLevel] || 'Proficient';
-  const backLabel = backpackLabels[ps.backpack];
-
-  const gamepasses = [];
-  if (ps.extraStorage) gamepasses.push('+1 Storage Slot');
-  if (ps.caravanGamepass) gamepasses.push('Caravan');
-  if (ps.autoWalk) gamepasses.push('Auto-Walk');
-
-  const animalCounts = {};
-  ps.animals.forEach((a) => {
-    if (a !== 'None') animalCounts[a] = (animalCounts[a] || 0) + 1;
-  });
-  const animalStr = Object.entries(animalCounts)
-    .map(([a, c]) => (c > 1 ? `${a} ×${c}` : a))
-    .join(', ');
-  const saddlebagCount = ps.saddlebags.filter(Boolean).length;
-  const animalParts = [
-    animalStr,
-    saddlebagCount ? `${saddlebagCount} saddlebag${saddlebagCount > 1 ? 's' : ''}` : '',
-  ].filter(Boolean);
-
-  const rankParts = [];
-  if ((ps.byzantineRank || 1) > 1) rankParts.push(`Byzantine R${ps.byzantineRank}`);
-  if ((ps.sassanidRank || 1) > 1) rankParts.push(`Sassanid R${ps.sassanidRank}`);
-
-  const setupLines = [
-    `👤 \`${ps.culture}\`  ·  \`${ps.religion}\`${faithStr}  ·  Language: \`${langStr}\``,
-  ];
-  if (backLabel) setupLines.push(`🧳 ${backLabel}`);
-  if (gamepasses.length) setupLines.push(`🎫 Gamepasses: \`${gamepasses.join(', ')}\``);
-  if (animalParts.length) setupLines.push(`🐎 ${animalParts.join('  ·  ')}`);
-  if (rankParts.length) setupLines.push(`⚔️ ${rankParts.join('  ·  ')}`);
-  const setup = `\n\n⚙️ **Merchant Setup**\n${setupLines.join('\n')}`;
-
-  const msg = `🐪 **Silk Road Trade Route**
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 **${r.good}**  ·  ${r.buyCity} → ${r.sellCity}
-
-💰 Buy \`$${r.buyPrice}\`  ·  Sell \`$${r.sellPrice}\`  ·  Profit \`+$${r.profitPerUnit}/unit\`
-🎒 Trip \`+$${r.profitPerTrip}\`  ·  ${r.slots} slots  ·  ⏱ ${fmtTime(r.time)}  ·  📈 \`+$${r.profitPerMin}/min\`${ret}${setup}
-
-🔗 [silkroadcalc.eu](https://silkroadcalc.eu/)`;
-
-  const fallbackCopy = (text) => {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-      return ok;
-    } catch (_) {
-      return false;
-    }
-  };
-
-  const onSuccess = () => showToast('Route copied to clipboard');
-  const onFail = () => {
-    if (fallbackCopy(msg)) onSuccess();
-    else showToast('Copy failed - try opening the live site');
-  };
-
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(msg).then(onSuccess).catch(onFail);
-  } else {
-    if (fallbackCopy(msg)) onSuccess();
-    else onFail();
-  }
-}
-function showToast(text) {
-  let t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    document.body.appendChild(t);
-  }
-  t.textContent = text;
-  t.className = 'show';
-  clearTimeout(showToast._tid);
-  showToast._tid = setTimeout(() => {
-    t.className = '';
-  }, 1800);
-}
-
 buildAnimalSlots();
 loadTheme();
 loadWalker();
@@ -1877,6 +1800,22 @@ refreshSetupDropdowns();
     : null;
   if (merged) applyState(merged);
 }
+(function initBudgetCapEarly() {
+  const el = document.getElementById('budgetCap');
+  if (!el) return;
+  const saved = lsGet(BUDGET_KEY, '');
+  if (saved !== '') el.value = saved;
+  let t = 0;
+  const persistAndRefresh = () => {
+    lsSet(BUDGET_KEY, String(el.value).trim());
+    updateAll();
+  };
+  el.addEventListener('change', persistAndRefresh);
+  el.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(persistAndRefresh, 280);
+  });
+})();
 updateAll();
 
 const API_BASE = 'https://admin.silkroadcalc.eu';
@@ -2126,6 +2065,7 @@ function isTrollFeedbackMessage(message) {
 
 document.addEventListener('DOMContentLoaded', () => {
   initTableEvents();
+  initRouteControlsCollapse();
   const feedbackBtn = document.getElementById('feedbackBtn');
   const modal = document.getElementById('feedbackModal');
   const closeBtn = document.getElementById('closeBtn');
@@ -2134,6 +2074,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const messageEl = document.getElementById('message');
   const submitBtn = document.getElementById('sendBtn');
   const fbContainer = document.getElementById('feedbackContainer');
+  if (
+    feedbackBtn &&
+    modal &&
+    closeBtn &&
+    form &&
+    statusEl &&
+    messageEl &&
+    submitBtn
+  ) {
   const typeRadios = form.querySelectorAll('input[name="fbType"]');
 
   function getType() {
@@ -2262,4 +2211,5 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.disabled = false;
     }
   });
+  }
 });

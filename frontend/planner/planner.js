@@ -106,19 +106,6 @@
     return best;
   }
 
-  function getCourierRank(ps, city) {
-    var culture = CITIES[city]?.culture;
-    if (culture === 'Byzantine') return ps.byzantineRank || 1;
-    if (culture === 'Persian')   return ps.sassanidRank  || 1;
-    return Math.max(ps.byzantineRank || 1, ps.sassanidRank || 1);
-  }
-
-  function packageReward(type, ps, deliveryCity) {
-    var base = type === 'short' ? 30 : 100;
-    var rank = getCourierRank(ps, deliveryCity);
-    return Math.round(base * Math.pow(1.5, rank - 1));
-  }
-
   /* ── Run ──────────────────────────────────────────────────────────────── */
   function run() {
     var startEl  = $id('plannerStart');
@@ -184,10 +171,6 @@
       if (deliveryMap[to]) pkgsLeft -= deliveryMap[to].length;
     }
 
-    var pkgProfit = 0;
-    for (var i = 0; i < packages.length; i++)
-      pkgProfit += packageReward(packages[i].type, ps, packages[i].dest);
-
     var retLegs = [];
     var retTradeProfit = 0;
     if (mustReturn) {
@@ -204,10 +187,10 @@
       }
     }
 
-    var totalProfit = outTradeProfit + pkgProfit + retTradeProfit;
+    var totalProfit = outTradeProfit + retTradeProfit;
 
     _data = { start: start, packages: packages, outLegs: outLegs, retLegs: retLegs,
-              outTradeProfit: outTradeProfit, pkgProfit: pkgProfit, retTradeProfit: retTradeProfit,
+              outTradeProfit: outTradeProfit, retTradeProfit: retTradeProfit,
               totalProfit: totalProfit, deliveryMap: deliveryMap, totalSlots: totalSlots,
               mustReturn: mustReturn, ps: ps };
     saveInputs();
@@ -246,15 +229,13 @@
     '</div>';
   }
 
-  function deliveryBadgesHTML(deliveryMap, city, ps) {
+  function deliveryBadgesHTML(deliveryMap, city) {
     var pkgs = deliveryMap[city];
     if (!pkgs) return '';
     return pkgs.map(function (pkg) {
-      var reward = packageReward(pkg.type, ps, city);
       var label  = pkg.type === 'short' ? 'Short' : 'Long';
       return '<div class="pr-delivery">' +
         '<span class="pr-delivery-badge ' + pkg.type + '">📦 ' + label + ' Quest Delivery</span>' +
-        '<span class="pr-delivery-reward">+$' + reward + '</span>' +
       '</div>';
     }).join('');
   }
@@ -269,7 +250,7 @@
     for (var i = 0; i < d.outLegs.length; i++) {
       if (i > 0) html += '<div class="pr-leg-arrow-down">↓</div>';
       html += legHTML(d.outLegs[i], legNum++);
-      html += deliveryBadgesHTML(d.deliveryMap, d.outLegs[i].to, d.ps);
+      html += deliveryBadgesHTML(d.deliveryMap, d.outLegs[i].to);
     }
     html += '</div>';
 
@@ -287,7 +268,6 @@
     /* Summary */
     html += '<div class="pr-summary">' +
       '<div class="prs-item"><span class="prs-val ' + cls(d.outTradeProfit) + '">' + sign(d.outTradeProfit) + '</span><span class="prs-label">Trade Profit</span></div>' +
-      '<div class="prs-item"><span class="prs-val profit">+$' + d.pkgProfit + '</span><span class="prs-label">Package Rewards</span></div>' +
       (d.mustReturn && d.retLegs.length > 0 ? '<div class="prs-item"><span class="prs-val ' + cls(d.retTradeProfit) + '">' + sign(d.retTradeProfit) + '</span><span class="prs-label">Return Profit</span></div>' : '') +
       '<div class="prs-item"><span class="prs-val ' + cls(d.totalProfit) + '">' + sign(d.totalProfit) + '</span><span class="prs-label">Total Profit</span></div>' +
     '</div>';

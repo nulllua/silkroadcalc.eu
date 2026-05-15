@@ -2,117 +2,133 @@
   'use strict';
 
   var KEYS = {
-    compact:     'silkroad_compact',
-    webhook:     'silkroad_webhook',
+    compact: 'silkroad_compact',
     notifEvents: 'silkroad_notif_events',
-    notifForum:  'silkroad_notif_forum',
-    notifReplies:'silkroad_notif_replies',
+    lowBudget: 'silkroad_routes_low_budget',
   };
+  var SETUPS_KEY = 'silkroad_setups';
+  var LS_KEY = 'silkroad_v1';
+
+  function lsGetJson(k, def) {
+    try {
+      var v = localStorage.getItem(k);
+      if (!v) return def;
+      return JSON.parse(v);
+    } catch (_) {
+      return def;
+    }
+  }
+  function lsSet(k, v) {
+    try {
+      localStorage.setItem(k, v);
+    } catch (_) {}
+  }
+  function getSetups() {
+    return lsGetJson(SETUPS_KEY, {});
+  }
+  function saveSetups(obj) {
+    lsSet(SETUPS_KEY, JSON.stringify(obj));
+  }
+  function refreshSetupDropdowns() {
+    var names = Object.keys(getSetups()).sort();
+    ['loadSetupSelect', 'clearSetupSelect'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML =
+        '<option value="">Choose setup</option>' +
+        names
+          .map(function (n) {
+            return (
+              '<option value="' +
+              String(n).replace(/&/g, '&amp;').replace(/"/g, '&quot;') +
+              '">' +
+              String(n).replace(/&/g, '&amp;').replace(/</g, '&lt;') +
+              '</option>'
+            );
+          })
+          .join('');
+    });
+  }
+  function saveNamedState() {
+    var nameEl = document.getElementById('setupNameInput');
+    var name = (nameEl && nameEl.value) || '';
+    name = String(name).trim();
+    if (!name) return;
+    var cur = lsGetJson(LS_KEY, null);
+    if (!cur || typeof cur !== 'object') {
+      window.alert('No Routes setup found. Open Routes and configure your character first.');
+      return;
+    }
+    var setups = getSetups();
+    setups[name] = cur;
+    saveSetups(setups);
+    nameEl.value = '';
+    var btn = document.getElementById('btnSaveSetup');
+    if (btn) btn.disabled = true;
+    refreshSetupDropdowns();
+  }
+  function loadNamedState() {
+    var sel = document.getElementById('loadSetupSelect');
+    var name = sel && sel.value;
+    if (!name) return;
+    var setups = getSetups();
+    if (!setups[name]) return;
+    lsSet(LS_KEY, JSON.stringify(setups[name]));
+  }
+  function clearNamedState() {
+    var sel = document.getElementById('clearSetupSelect');
+    var name = sel && sel.value;
+    if (!name) return;
+    var setups = getSetups();
+    delete setups[name];
+    saveSetups(setups);
+    refreshSetupDropdowns();
+  }
 
   function load() {
-    var ids  = ['settingCompact', 'notifEvents', 'notifForum'];
-    var keys = [KEYS.compact, KEYS.notifEvents, KEYS.notifForum];
+    var ids = ['settingCompact', 'notifEvents', 'lowBudgetMode'];
+    var keys = [KEYS.compact, KEYS.notifEvents, KEYS.lowBudget];
     ids.forEach(function (id, i) {
       var el = document.getElementById(id);
       if (el) el.checked = localStorage.getItem(keys[i]) === '1';
     });
-    var repliesEl = document.getElementById('notifReplies');
-    if (repliesEl) repliesEl.checked = localStorage.getItem(KEYS.notifReplies) !== '0';
-
-    var wu = document.getElementById('webhookUrl');
-    if (!wu) return;
-    wu.value = localStorage.getItem(KEYS.webhook) || '';
-    fetch('https://admin.silkroadcalc.eu/api/user/webhook', { credentials: 'include' }).then(function (r) {
-      if (!r.ok) return;
-      return r.json();
-    }).then(function (d) {
-      if (d && d.url) { wu.value = d.url; localStorage.setItem(KEYS.webhook, d.url); }
-    }).catch(function () {});
+    refreshSetupDropdowns();
   }
 
   function bind() {
     var pairs = [
       ['settingCompact', KEYS.compact],
-      ['notifEvents',    KEYS.notifEvents],
-      ['notifForum',     KEYS.notifForum],
-      ['notifReplies',   KEYS.notifReplies],
+      ['notifEvents', KEYS.notifEvents],
+      ['lowBudgetMode', KEYS.lowBudget],
     ];
     pairs.forEach(function (pair) {
       var el = document.getElementById(pair[0]);
       if (!el) return;
       el.addEventListener('change', function () {
         localStorage.setItem(pair[1], el.checked ? '1' : '0');
-        var isNotif = pair[0] === 'notifEvents' || pair[0] === 'notifForum' || pair[0] === 'notifReplies';
+        var isNotif = pair[0] === 'notifEvents';
         if (el.checked && isNotif && Notification.permission !== 'granted')
           Notification.requestPermission();
       });
     });
 
-    var saveBtn = document.getElementById('webhookSave');
-    if (saveBtn) saveBtn.addEventListener('click', async function () {
-      var v = (document.getElementById('webhookUrl')?.value || '').trim();
-      if (!v) {
-        localStorage.removeItem(KEYS.webhook);
-        fetch('https://admin.silkroadcalc.eu/api/user/webhook', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: '' }) }).catch(function () {});
-        saveBtn.textContent = 'Cleared';
-        setTimeout(function () { saveBtn.textContent = 'Save'; }, 1500);
-        return;
-      }
-      if (!v.startsWith('https://discord.com/api/webhooks/')) {
-        saveBtn.textContent = 'Invalid URL';
-        setTimeout(function () { saveBtn.textContent = 'Save'; }, 2000);
-        return;
-      }
-      saveBtn.textContent = 'Testing...';
-      saveBtn.disabled = true;
-      try {
-        var res = await fetch(v, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            embeds: [{
-              title: 'SilkRoadCalc Webhook Connected',
-              description: 'You will receive update announcements and maintenance notices here.',
-              color: 0xe7c885,
-              timestamp: new Date().toISOString(),
-            }],
-          }),
-        });
-        if (res.ok || res.status === 204) {
-          localStorage.setItem(KEYS.webhook, v);
-          fetch('https://admin.silkroadcalc.eu/api/user/webhook', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: v }) }).catch(function () {});
-          saveBtn.textContent = 'Saved';
-        } else {
-          saveBtn.textContent = 'Invalid webhook';
-        }
-      } catch (_) {
-        saveBtn.textContent = 'Failed';
-      }
-      saveBtn.disabled = false;
-      setTimeout(function () { saveBtn.textContent = 'Save'; }, 2000);
-    });
-  }
-
-  async function loadAccount() {
-    var status = document.getElementById('accountStatus');
-    if (!status) return;
-    try {
-      var res  = await fetch('https://admin.silkroadcalc.eu/api/auth/me', { credentials: 'include' });
-      if (!res.ok) return;
-      var data = await res.json();
-      if (data.username) {
-        status.innerHTML =
-          '<span class="sas-text" style="color:var(--gold)">Logged in as <b>' +
-          data.username.replace(/</g,'&lt;') + '</b></span>';
-        var loginBtn = document.querySelector('.saccount-login');
-        if (loginBtn) { loginBtn.textContent = 'Log out'; loginBtn.href = 'https://admin.silkroadcalc.eu/api/auth/logout'; }
-      }
-    } catch (_) {}
+    var setupName = document.getElementById('setupNameInput');
+    if (setupName) {
+      setupName.addEventListener('input', function () {
+        var b = document.getElementById('btnSaveSetup');
+        if (b) b.disabled = !String(setupName.value || '').trim();
+      });
+    }
+    var btnSaveSetup = document.getElementById('btnSaveSetup');
+    if (btnSaveSetup) btnSaveSetup.addEventListener('click', saveNamedState);
+    var btnLoadSetup = document.getElementById('btnLoadSetup');
+    if (btnLoadSetup) btnLoadSetup.addEventListener('click', loadNamedState);
+    var btnClearSetup = document.getElementById('btnClearSetup');
+    if (btnClearSetup) btnClearSetup.addEventListener('click', clearNamedState);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     load();
     bind();
-    loadAccount();
   });
 })();
