@@ -478,15 +478,18 @@ function switchTab(tab) {
   const isEvents = tab === 'events';
   const isSettings = tab === 'settings';
   const isAbout = tab === 'about';
-  document.getElementById('routesPanel').style.display = isRoutes ? 'flex' : 'none';
+  const show = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = v;
+  };
+  show('routesPanel', isRoutes ? 'flex' : 'none');
   const rc = document.getElementById('routeControls');
   if (rc) rc.style.display = isRoutes ? 'flex' : 'none';
-  document.getElementById('pricesPanel').style.display = isPrices ? 'flex' : 'none';
-  document.getElementById('toolsPanel').style.display = isTools ? 'block' : 'none';
-  document.getElementById('eventsPanel').style.display = isEvents ? 'flex' : 'none';
-  const sp = document.getElementById('settingsPanel');
-  if (sp) sp.style.display = isSettings ? 'block' : 'none';
-  document.getElementById('aboutPanel').style.display = isAbout ? 'block' : 'none';
+  show('pricesPanel', isPrices ? 'flex' : 'none');
+  show('toolsPanel', isTools ? 'block' : 'none');
+  show('eventsPanel', isEvents ? 'flex' : 'none');
+  show('settingsPanel', isSettings ? 'block' : 'none');
+  show('aboutPanel', isAbout ? 'block' : 'none');
   [
     ['tabRoutes', isRoutes],
     ['tabPrices', isPrices],
@@ -2015,7 +2018,7 @@ function pingSession() {
   }).catch(() => {});
 }
 
-syncFromApi();
+void syncFromApi().catch(() => {});
 pingSession();
 setInterval(pingSession, 60000);
 

@@ -43,15 +43,16 @@
       var text = notice.message;
       var bar = document.getElementById('noticeBar');
       if (!bar) return;
-      var txt = bar.querySelector('.notice-text') || bar;
-      txt.textContent = text;
+      var txt = document.getElementById('noticeText') || bar.querySelector('.notice-text');
+      if (txt) txt.textContent = text;
+      else bar.textContent = text;
       bar.style.cssText = 'display:flex!important';
     } catch (_) {}
   }
 
   async function checkVersion() {
     try {
-      var res = await fetch('/index.html', { method: 'HEAD', cache: 'no-store' });
+      var res = await fetch('/frontend/assets/images/icon.png', { method: 'HEAD', cache: 'no-store' });
       var current = res.headers.get('etag') || res.headers.get('last-modified');
       if (!current) return;
       var stored = localStorage.getItem('srtc-version');
