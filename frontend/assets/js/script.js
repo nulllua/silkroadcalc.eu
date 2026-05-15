@@ -581,7 +581,7 @@ function renderPricesTab() {
   for (const city of CITY_ORDER) {
     const isO = city === originCity;
     parts.push(
-      `<th class="pt2-th-city${isO ? ' pt2-origin-th' : ''}">${city}<span class="pt2-city-culture">${CITIES[city].culture}</span></th>`
+      `<th class="pt2-th-city${isO ? ' pt2-origin-th' : ''}">${city}<span class="pt2-city-culture">${CITIES[city]?.culture || ''}</span></th>`
     );
   }
   parts.push(`</tr></thead><tbody>`);
