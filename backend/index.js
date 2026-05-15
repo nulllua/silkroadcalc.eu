@@ -1829,6 +1829,27 @@ async function logActivity(actor, action) {
   await pool.query('INSERT INTO project_activity (actor, action) VALUES ($1,$2)', [actor, action]);
 }
 
+async function getSectionClaim(sectionId) {
+  const { rows } = await pool.query('SELECT claimed_by FROM project_sections WHERE id=$1', [sectionId]);
+  return rows[0] ?? null;
+}
+
+async function getTodoClaim(todoId) {
+  const { rows } = await pool.query(
+    'SELECT ps.claimed_by FROM section_todos t JOIN project_sections ps ON ps.id=t.section_id WHERE t.id=$1',
+    [todoId]
+  );
+  return rows[0] ?? null;
+}
+
+async function getCommentClaim(commentId) {
+  const { rows } = await pool.query(
+    'SELECT ps.claimed_by FROM section_comments c JOIN project_sections ps ON ps.id=c.section_id WHERE c.id=$1',
+    [commentId]
+  );
+  return rows[0] ?? null;
+}
+
 app.get('/api/admin/sections', requireAuth, async (_req, res) => {
   try {
     const { rows: sections } = await pool.query('SELECT * FROM project_sections ORDER BY position, id');
@@ -1860,6 +1881,9 @@ app.patch('/api/admin/sections/:id', requireAuth, async (req, res) => {
   const { title, description } = req.body;
   const actor = req.adminUser.username;
   try {
+    const claim = await getSectionClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
     await pool.query(
       'UPDATE project_sections SET title=COALESCE($1,title), description=COALESCE($2,description) WHERE id=$3',
       [title ?? null, description ?? null, req.params.id]
@@ -1872,9 +1896,37 @@ app.patch('/api/admin/sections/:id', requireAuth, async (req, res) => {
 app.delete('/api/admin/sections/:id', requireAuth, async (req, res) => {
   const actor = req.adminUser.username;
   try {
-    const { rows } = await pool.query('SELECT title FROM project_sections WHERE id=$1', [req.params.id]);
+    const { rows } = await pool.query('SELECT title, claimed_by FROM project_sections WHERE id=$1', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    if (rows[0].claimed_by && rows[0].claimed_by !== actor)
+      return res.status(403).json({ error: 'Section is claimed by ' + rows[0].claimed_by });
     await pool.query('DELETE FROM project_sections WHERE id=$1', [req.params.id]);
-    if (rows[0]) await logActivity(actor, `deleted section "${rows[0].title}"`);
+    await logActivity(actor, `deleted section "${rows[0].title}"`);
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/sections/:id/claim', requireAuth, async (req, res) => {
+  const actor = req.adminUser.username;
+  try {
+    const claim = await getSectionClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by && claim.claimed_by !== actor)
+      return res.status(409).json({ error: 'Already claimed by ' + claim.claimed_by });
+    await pool.query('UPDATE project_sections SET claimed_by=$1, claimed_at=NOW() WHERE id=$2', [actor, req.params.id]);
+    await logActivity(actor, 'claimed a section');
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.delete('/api/admin/sections/:id/claim', requireAuth, async (req, res) => {
+  const actor = req.adminUser.username;
+  try {
+    const claim = await getSectionClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Not your claim' });
+    await pool.query('UPDATE project_sections SET claimed_by=NULL, claimed_at=NULL WHERE id=$1', [req.params.id]);
+    await logActivity(actor, 'released a section claim');
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
@@ -1884,6 +1936,9 @@ app.post('/api/admin/sections/:id/todos', requireAuth, async (req, res) => {
   if (!text) return res.status(400).json({ error: 'Missing text' });
   const actor = req.adminUser.username;
   try {
+    const claim = await getSectionClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
     const { rows } = await pool.query(
       'INSERT INTO section_todos (section_id, text, created_by) VALUES ($1,$2,$3) RETURNING *',
       [req.params.id, text, actor]
@@ -1898,6 +1953,9 @@ app.patch('/api/admin/todos/:id', requireAuth, async (req, res) => {
   const { done, text } = req.body;
   const actor = req.adminUser.username;
   try {
+    const claim = await getTodoClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
     const { rows } = await pool.query(
       `UPDATE section_todos SET
         done=COALESCE($1,done),
@@ -1915,6 +1973,9 @@ app.patch('/api/admin/todos/:id', requireAuth, async (req, res) => {
 app.delete('/api/admin/todos/:id', requireAuth, async (req, res) => {
   const actor = req.adminUser.username;
   try {
+    const claim = await getTodoClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
     const { rows } = await pool.query('SELECT text FROM section_todos WHERE id=$1', [req.params.id]);
     await pool.query('DELETE FROM section_todos WHERE id=$1', [req.params.id]);
     if (rows[0]) await logActivity(actor, `removed todo "${rows[0].text}"`);
@@ -1927,6 +1988,9 @@ app.post('/api/admin/sections/:id/comments', requireAuth, async (req, res) => {
   if (!text) return res.status(400).json({ error: 'Missing text' });
   const actor = req.adminUser.username;
   try {
+    const claim = await getSectionClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
     const { rows } = await pool.query(
       'INSERT INTO section_comments (section_id, text, created_by) VALUES ($1,$2,$3) RETURNING *',
       [req.params.id, text, actor]
@@ -1940,6 +2004,9 @@ app.post('/api/admin/sections/:id/comments', requireAuth, async (req, res) => {
 app.delete('/api/admin/comments/:id', requireAuth, async (req, res) => {
   const actor = req.adminUser.username;
   try {
+    const claim = await getCommentClaim(req.params.id);
+    if (!claim) return res.status(404).json({ error: 'Not found' });
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
     await pool.query('DELETE FROM section_comments WHERE id=$1', [req.params.id]);
     await logActivity(actor, 'deleted a comment');
     res.json({ ok: true });

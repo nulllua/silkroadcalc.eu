@@ -127,8 +127,11 @@
 
           <div class="proj-main">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-              <h2 style="margin:0">Sections</h2>
-              <button class="btn btn-add mini-btn" onclick="openNewSection()">+ New Section</button>
+              <div class="proj-subtabs">
+                <div class="proj-subtab active" data-subtab="all" onclick="switchProjSubtab('all')">All Tasks</div>
+                <div class="proj-subtab" data-subtab="claimed" onclick="switchProjSubtab('claimed')">Claimed</div>
+              </div>
+              <button class="btn btn-add mini-btn" style="margin-left:auto" onclick="openNewSection()">+ Create Task</button>
             </div>
 
             <div id="proj-new-section" style="display:none;margin-bottom:16px" class="card-box">

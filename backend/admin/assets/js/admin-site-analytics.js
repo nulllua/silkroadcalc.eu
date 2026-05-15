@@ -292,6 +292,16 @@ async function loadData() {
 
 // ── Projects tab ──────────────────────────────────────────────────────────────
 
+let projCurrentUser = null;
+let projSubtab = 'all';
+
+const CLAIM_COLORS = ['#3d8eff','#34d399','#f59e0b','#f87171','#a78bfa','#fb923c','#22d3ee','#e879f9'];
+function claimColor(username) {
+  let h = 0;
+  for (let i = 0; i < username.length; i++) h = (h * 31 + username.charCodeAt(i)) & 0xffff;
+  return CLAIM_COLORS[h % CLAIM_COLORS.length];
+}
+
 function timeAgo(dateStr) {
   const sec = Math.floor((Date.now() - new Date(dateStr)) / 1000);
   if (sec < 60) return sec + 's ago';
@@ -301,8 +311,18 @@ function timeAgo(dateStr) {
 }
 
 async function loadProjects() {
+  const meRes = await api('/api/admin/me');
+  if (meRes.ok) { const me = await meRes.json(); projCurrentUser = me.username; }
   loadCommits();
   loadActivity();
+  loadSections();
+}
+
+function switchProjSubtab(tab) {
+  projSubtab = tab;
+  document.querySelectorAll('.proj-subtab').forEach(t => {
+    t.classList.toggle('active', t.dataset.subtab === tab);
+  });
   loadSections();
 }
 
@@ -336,27 +356,38 @@ async function loadActivity() {
   `).join('') || '<span class="dim">No activity yet.</span>';
 }
 
+let _sectionsCache = [];
+
 async function loadSections() {
   const r = await api('/api/admin/sections');
   const container = el('proj-sections');
   if (!r.ok) { container.innerHTML = '<span class="dim">Could not load sections.</span>'; return; }
-  const sections = await r.json();
+  let sections = await r.json();
+  _sectionsCache = sections;
+  if (projSubtab === 'claimed')
+    sections = sections.filter(s => s.claimed_by === projCurrentUser);
   if (!sections.length) {
-    container.innerHTML = '<span class="dim">No sections yet.</span>';
+    container.innerHTML = `<span class="dim">${projSubtab === 'claimed' ? 'You have no claimed sections.' : 'No tasks yet.'}</span>`;
     return;
   }
   container.innerHTML = sections.map(s => renderSection(s)).join('');
 }
 
 function renderSection(s) {
+  const mine = s.claimed_by === projCurrentUser;
+  const claimedByOther = s.claimed_by && !mine;
+  const unclaimed = !s.claimed_by;
+  const canEdit = mine;
+  const color = s.claimed_by ? claimColor(s.claimed_by) : null;
+
   const todosHtml = s.todos.map(t => `
     <div class="proj-todo">
-      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${t.id}, this.checked)" />
+      <input type="checkbox" ${t.done ? 'checked' : ''} ${canEdit ? `onchange="toggleTodo(${t.id}, this.checked)"` : 'disabled'} />
       <div style="flex:1">
         <div class="proj-todo-text${t.done ? ' done' : ''}">${escHtml(t.text)}</div>
         <div class="proj-todo-meta">by ${escHtml(t.created_by)}${t.done_by ? ' · done by ' + escHtml(t.done_by) : ''}</div>
       </div>
-      <button class="proj-icon-btn del" onclick="deleteTodo(${t.id})" title="Remove">×</button>
+      ${canEdit ? `<button class="proj-icon-btn del" onclick="deleteTodo(${t.id})" title="Remove">×</button>` : ''}
     </div>
   `).join('');
 
@@ -364,34 +395,59 @@ function renderSection(s) {
     <div class="proj-comment">
       <span class="proj-comment-author">${escHtml(c.created_by)}</span>
       <span class="proj-comment-text">${escHtml(c.text)}</span>
-      <button class="proj-icon-btn del" onclick="deleteComment(${c.id})" title="Remove">×</button>
+      ${canEdit ? `<button class="proj-icon-btn del" onclick="deleteComment(${c.id})" title="Remove">×</button>` : ''}
     </div>
   `).join('');
 
+  let claimBadge = '';
+  if (mine) {
+    claimBadge = `<span class="proj-claim-badge" style="color:${color}">Claimed by you</span>`;
+  } else if (claimedByOther) {
+    claimBadge = `<span class="proj-claim-badge" style="color:${color}">Claimed by ${escHtml(s.claimed_by)}</span>`;
+  }
+
+  let claimBtn = '';
+  if (unclaimed) {
+    claimBtn = `<button class="btn btn-add mini-btn" onclick="claimSection(${s.id})">Claim</button>`;
+  } else if (mine) {
+    claimBtn = `<button class="btn mini-btn" onclick="unclaimSection(${s.id})">Release</button>`;
+  }
+
+  const sectionClass = mine ? 'proj-section claimed-mine' : claimedByOther ? 'proj-section claimed-other' : 'proj-section';
+  const colorStyle = color ? `style="--claim-color:${color}"` : '';
+
   return `
-    <div class="proj-section" id="section-${s.id}">
+    <div class="${sectionClass}" id="section-${s.id}" ${colorStyle}>
       <div class="proj-section-head">
         <div style="flex:1">
           <div class="proj-section-title">${escHtml(s.title)}</div>
           ${s.description ? `<div class="proj-section-desc">${escHtml(s.description)}</div>` : ''}
-          <div class="proj-section-meta">added by ${escHtml(s.created_by)} · ${timeAgo(s.created_at)}</div>
+          <div class="proj-section-meta">created by ${escHtml(s.created_by)} · ${timeAgo(s.created_at)}</div>
+          ${claimBadge ? `<div style="margin-top:5px">${claimBadge}</div>` : ''}
+          ${unclaimed ? '<div class="proj-readonly-note">Unclaimed — claim to edit</div>' : ''}
         </div>
-        <button class="btn btn-del mini-btn" onclick="deleteSection(${s.id})">Delete</button>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          <button class="btn mini-btn" onclick="copyAsPrompt(${s.id})" id="copy-btn-${s.id}" title="Copy as AI prompt">Copy prompt</button>
+          ${claimBtn}
+          ${!claimedByOther ? `<button class="btn btn-del mini-btn" onclick="deleteSection(${s.id})">Delete</button>` : ''}
+        </div>
       </div>
       <div class="proj-section-body">
         <div class="proj-todos">
-          ${todosHtml || '<div class="dim" style="font-size:12px;padding:4px 0">No todos yet.</div>'}
+          ${todosHtml || `<div class="dim" style="font-size:12px;padding:4px 0">No todos yet.</div>`}
         </div>
+        ${canEdit ? `
         <div class="proj-add-row">
           <input class="ifield" id="todo-input-${s.id}" placeholder="Add todo..." onkeydown="if(event.key==='Enter')addTodo(${s.id})" />
           <button class="btn btn-add mini-btn" onclick="addTodo(${s.id})">Add</button>
-        </div>
+        </div>` : ''}
         <div class="proj-comments">
           ${commentsHtml}
+          ${canEdit ? `
           <div class="proj-add-row" style="margin-top:${s.comments.length ? '8px' : '0'}">
             <textarea class="tfield" id="comment-input-${s.id}" rows="2" placeholder="Add comment..." style="margin-bottom:0"></textarea>
             <button class="btn btn-add mini-btn" onclick="addComment(${s.id})" style="align-self:flex-end">Post</button>
-          </div>
+          </div>` : ''}
         </div>
       </div>
     </div>
@@ -417,9 +473,60 @@ async function createSection() {
   if (r.ok) { closeNewSection(); loadSections(); loadActivity(); }
 }
 
+function copyAsPrompt(id) {
+  const section = _sectionsCache.find(s => s.id === id);
+  if (!section) return;
+
+  const lines = [];
+  lines.push('# Task: ' + section.title);
+  if (section.description) {
+    lines.push('');
+    lines.push('## Description');
+    lines.push(section.description);
+  }
+  if (section.todos.length) {
+    lines.push('');
+    lines.push('## Todos');
+    section.todos.forEach(t => {
+      lines.push((t.done ? '[x] ' : '[ ] ') + t.text);
+    });
+  }
+  if (section.comments.length) {
+    lines.push('');
+    lines.push('## Notes');
+    section.comments.forEach(c => {
+      lines.push('- ' + c.created_by + ': ' + c.text);
+    });
+  }
+  lines.push('');
+  lines.push('---');
+  lines.push('Please implement the above task. Focus only on what is described. Do not add features beyond the scope of the todos.');
+
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = el('copy-btn-' + id);
+    if (!btn) return;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
+  });
+}
+
+async function claimSection(id) {
+  const r = await api('/api/admin/sections/' + id + '/claim', { method: 'POST', body: '{}' });
+  if (!r.ok) { const d = await r.json(); alert(d.error || 'Could not claim'); return; }
+  loadSections(); loadActivity();
+}
+
+async function unclaimSection(id) {
+  await api('/api/admin/sections/' + id + '/claim', { method: 'DELETE' });
+  loadSections(); loadActivity();
+}
+
 async function deleteSection(id) {
   if (!confirm('Delete this section and all its todos/comments?')) return;
-  await api('/api/admin/sections/' + id, { method: 'DELETE' });
+  const r = await api('/api/admin/sections/' + id, { method: 'DELETE' });
+  if (!r.ok) { const d = await r.json(); alert(d.error || 'Could not delete'); return; }
   loadSections(); loadActivity();
 }
 

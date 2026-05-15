@@ -703,3 +703,42 @@ table.data tr:hover > td { background: rgba(61,142,255,.05); }
 .proj-comment-author { color: var(--blue-soft); font-weight: 600; flex-shrink: 0; }
 .proj-comment-text { flex: 1; color: var(--text); white-space: pre-wrap; word-break: break-word; }
 @media (max-width: 900px) { .proj-layout { grid-template-columns: 1fr; } }
+
+.proj-subtabs {
+  display: flex;
+  gap: 2px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 5px;
+  padding: 3px;
+}
+.proj-subtab {
+  padding: 4px 14px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--muted);
+  border-radius: 3px;
+  transition: background .1s, color .1s;
+}
+.proj-subtab:hover { color: var(--text); }
+.proj-subtab.active { background: var(--line-2); color: var(--text); }
+
+.proj-section { border-left: 3px solid transparent; }
+.proj-section.claimed-mine { border-left-color: var(--claim-color, var(--blue)); background: color-mix(in srgb, var(--claim-color, var(--blue)) 5%, var(--panel)); }
+.proj-section.claimed-other { border-left-color: var(--claim-color, #888); background: color-mix(in srgb, var(--claim-color, #888) 4%, var(--panel)); }
+.proj-claim-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+.proj-claimed-by { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.proj-readonly-note { font-size: 11px; color: var(--dim); font-style: italic; margin-top: 6px; }
