@@ -15,7 +15,7 @@ let CITIES = {
   Antioch: {
     culture: 'Byzantine',
     language: 'Greek',
-    traits: ['Pentarchy', 'Earthquake Prone'],
+    traits: ['Pentarchy', 'Earthquake Prone', 'Capital'],
     hasFireTemple: false,
     produced: ['Sea Salt', 'Wool', 'Coriander', 'Byzantine Silk'],
   },
@@ -274,7 +274,7 @@ let TRAIT_EFFECTS = [
 let RELIGION_PERKS = [
   { religion: 'Christianity', min_level: 3, perk_type: 'reduce_negative', multiplier: 0.5 },
   { religion: 'Judaism', min_level: 1, perk_type: 'amplify_negative', multiplier: 2 },
-  { religion: 'Judaism', min_level: 3, perk_type: 'amplify_positive', multiplier: 1.25 },
+  { religion: 'Judaism', min_level: 3, perk_type: 'amplify_positive', multiplier: 2 },
   { religion: 'Zoroastrianism', min_level: 1, perk_type: 'byzantine_penalty', multiplier: 1.5 },
 ];
 
@@ -316,7 +316,7 @@ function calculateLanguageModifier(sellCity, culture, langLevel, religion, relig
   ) {
     pct *= 1.5;
   }
-  if (religion === 'Judaism' && religionLevel >= 2) pct *= 1.2;
+  if (religion === 'Judaism' && religionLevel >= 2) pct *= 1.75;
   return pct;
 }
 
@@ -336,8 +336,8 @@ function calculateReligionModifier(good, sellCity, religion, religionLevel) {
       mod += 0.1;
   }
   if (religion === 'Zoroastrianism') {
-    if (religionLevel >= 2 && city.hasFireTemple) mod += 0.2;
-    if (religionLevel >= 3 && (good.type === 'Metal' || good.type === 'Craft')) mod += 0.2;
+    if (religionLevel >= 2 && city.hasFireTemple) mod += 0.05;
+    if (religionLevel >= 3 && (good.type === 'Metal' || good.type === 'Craft')) mod += 0.1;
   }
   return mod;
 }

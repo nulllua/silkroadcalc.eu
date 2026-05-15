@@ -41,7 +41,7 @@ const CITIES = [
     culture: 'Byzantine',
     language: 'Greek',
     has_fire_temple: false,
-    traits: ['Pentarchy', 'Earthquake Prone'],
+    traits: ['Pentarchy', 'Earthquake Prone', 'Capital'],
     produced: ['Sea Salt', 'Wool', 'Coriander', 'Byzantine Silk'],
   },
   {
@@ -220,8 +220,8 @@ const RELIGION_PERKS = [
     religion: 'Judaism',
     min_level: 3,
     perk_type: 'amplify_positive',
-    multiplier: 1.25,
-    description: '25% bonus for positive city modifiers at level 3',
+    multiplier: 2,
+    description: 'Price bonuses are doubled at level 3',
   },
 ];
 
