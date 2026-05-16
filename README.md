@@ -21,7 +21,7 @@ No deploy needed. Writes directly to Railway PostgreSQL and goes live on the nex
 | Event types or levels | `EVENT_TYPES` / `EVENT_LEVELS` (~line 228) |
 | Travel times between cities | `TRAVEL_TIMES_RAW` (~line 326) |
 
-If you also changed **language modifier percentages, reputation discount threshold/amount, or luxury goods access rules**, those are hardcoded constants in `frontend/shared/engine-constants.js` and must be updated there too (they are not seeded from the database).
+If you also changed **language modifier percentages, reputation discount threshold/amount, or luxury goods access rules**, those are hardcoded constants in `frontend/shared/engine-constants.js` and must be updated there too (they are not seeded from the database). `backend/engine-constants.js` is a copy of the same file - update both.
 
 ---
 

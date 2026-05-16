@@ -239,7 +239,7 @@ async function fireUserWebhooks(embed) {
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-const ENGINE_CONSTANTS = require('../frontend/shared/engine-constants.js');
+const ENGINE_CONSTANTS = require('./engine-constants.js');
 app.get('/api/constants', (_req, res) => res.json(ENGINE_CONSTANTS));
 
 app.get('/api/goods', async (_req, res) => {
