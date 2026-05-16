@@ -293,7 +293,7 @@ async function loadData() {
 // ── Projects tab ──────────────────────────────────────────────────────────────
 
 let projCurrentUser = null;
-let projSubtab = 'all';
+let projSubtab = 'unclaimed';
 
 const CLAIM_COLORS = ['#3d8eff','#34d399','#f59e0b','#f87171','#a78bfa','#fb923c','#22d3ee','#e879f9'];
 function claimColor(username) {
@@ -362,12 +362,21 @@ async function loadSections() {
   const r = await api('/api/admin/sections');
   const container = el('proj-sections');
   if (!r.ok) { container.innerHTML = '<span class="dim">Could not load sections.</span>'; return; }
-  let sections = await r.json();
-  _sectionsCache = sections;
-  if (projSubtab === 'claimed')
-    sections = sections.filter(s => s.claimed_by === projCurrentUser);
+  const all = await r.json();
+  _sectionsCache = all;
+
+  let sections;
+  if (projSubtab === 'unclaimed') {
+    sections = all.filter(s => !s.claimed_by && !s.done);
+  } else if (projSubtab === 'claimed') {
+    sections = all.filter(s => s.claimed_by === projCurrentUser);
+  } else {
+    sections = all.filter(s => s.claimed_by);
+  }
+
   if (!sections.length) {
-    container.innerHTML = `<span class="dim">${projSubtab === 'claimed' ? 'You have no claimed sections.' : 'No tasks yet.'}</span>`;
+    const msgs = { unclaimed: 'No unclaimed tasks.', claimed: 'You have no claimed tasks.', all: 'No claimed tasks.' };
+    container.innerHTML = `<span class="dim">${msgs[projSubtab]}</span>`;
     return;
   }
   container.innerHTML = sections.map(s => renderSection(s)).join('');
@@ -420,14 +429,16 @@ function renderSection(s) {
     <div class="${sectionClass}" id="section-${s.id}" ${colorStyle}>
       <div class="proj-section-head">
         <div style="flex:1">
-          <div class="proj-section-title">${escHtml(s.title)}</div>
+          <div class="proj-section-title" style="${s.done ? 'text-decoration:line-through;opacity:.5' : ''}">${escHtml(s.title)}</div>
           ${s.description ? `<div class="proj-section-desc">${escHtml(s.description)}</div>` : ''}
           <div class="proj-section-meta">created by ${escHtml(s.created_by)} · ${timeAgo(s.created_at)}</div>
           ${claimBadge ? `<div style="margin-top:5px">${claimBadge}</div>` : ''}
           ${unclaimed ? '<div class="proj-readonly-note">Unclaimed — claim to edit</div>' : ''}
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-          <button class="btn mini-btn" onclick="copyAsPrompt(${s.id})" id="copy-btn-${s.id}" title="Copy as AI prompt">Copy prompt</button>
+          ${mine ? `<button class="btn mini-btn" onclick="copyAsPrompt(${s.id})" id="copy-btn-${s.id}" title="Copy as AI prompt">Copy prompt</button>` : ''}
+          ${mine && !s.done ? `<button class="btn btn-save mini-btn" onclick="doneSection(${s.id})">Done</button>` : ''}
+          ${s.done ? `<span class="proj-claim-badge" style="color:var(--green)">Completed</span>` : ''}
           ${claimBtn}
           ${!claimedByOther ? `<button class="btn btn-del mini-btn" onclick="deleteSection(${s.id})">Delete</button>` : ''}
         </div>
@@ -463,14 +474,45 @@ function closeNewSection() {
   el('proj-new-section').style.display = 'none';
   el('ns-title').value = '';
   el('ns-desc').value = '';
+  el('ns-todos-list').innerHTML = '';
+}
+
+function addNsTodoRow(value) {
+  const list = el('ns-todos-list');
+  const row = document.createElement('div');
+  row.className = 'proj-add-row';
+  row.style.marginBottom = '4px';
+  const inp = document.createElement('input');
+  inp.className = 'ifield ns-todo-input';
+  inp.placeholder = 'Todo...';
+  if (value) inp.value = value;
+  inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); addNsTodoRow(); } };
+  const del = document.createElement('button');
+  del.className = 'proj-icon-btn del';
+  del.type = 'button';
+  del.textContent = '×';
+  del.onclick = () => row.remove();
+  row.appendChild(inp);
+  row.appendChild(del);
+  list.appendChild(row);
+  inp.focus();
 }
 
 async function createSection() {
   const title = v('ns-title');
   const description = v('ns-desc');
   if (!title) { flash(el('ns-title'), false); return; }
-  const r = await api('/api/admin/sections', { method: 'POST', body: JSON.stringify({ title, description }) });
+  const todos = [...document.querySelectorAll('.ns-todo-input')]
+    .map(i => i.value.trim()).filter(Boolean);
+  const r = await api('/api/admin/sections', { method: 'POST', body: JSON.stringify({ title, description, todos }) });
   if (r.ok) { closeNewSection(); loadSections(); loadActivity(); }
+}
+
+async function doneSection(id) {
+  if (!confirm('Mark this task as done?')) return;
+  const r = await api('/api/admin/sections/' + id + '/done', { method: 'POST', body: '{}' });
+  if (!r.ok) { const d = await r.json(); alert(d.error || 'Could not mark done'); return; }
+  loadSections(); loadActivity();
 }
 
 function copyAsPrompt(id) {

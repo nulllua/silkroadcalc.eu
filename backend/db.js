@@ -283,7 +283,9 @@ async function initSchema() {
       created_by  TEXT NOT NULL DEFAULT '',
       created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       claimed_by  TEXT,
-      claimed_at  TIMESTAMPTZ
+      claimed_at  TIMESTAMPTZ,
+      done        BOOL NOT NULL DEFAULT false,
+      done_at     TIMESTAMPTZ
     );
     CREATE TABLE IF NOT EXISTS section_todos (
       id          SERIAL PRIMARY KEY,
@@ -311,6 +313,8 @@ async function initSchema() {
   await pool.query(`
     ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS claimed_by TEXT;
     ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMPTZ;
+    ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS done BOOL NOT NULL DEFAULT false;
+    ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS done_at TIMESTAMPTZ;
   `);
 }
 

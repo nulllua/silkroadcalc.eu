@@ -128,8 +128,9 @@
           <div class="proj-main">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
               <div class="proj-subtabs">
-                <div class="proj-subtab active" data-subtab="all" onclick="switchProjSubtab('all')">All Tasks</div>
+                <div class="proj-subtab active" data-subtab="unclaimed" onclick="switchProjSubtab('unclaimed')">Unclaimed</div>
                 <div class="proj-subtab" data-subtab="claimed" onclick="switchProjSubtab('claimed')">Claimed</div>
+                <div class="proj-subtab" data-subtab="all" onclick="switchProjSubtab('all')">All Tasks</div>
               </div>
               <button class="btn btn-add mini-btn" style="margin-left:auto" onclick="openNewSection()">+ Create Task</button>
             </div>
@@ -137,14 +138,19 @@
             <div id="proj-new-section" style="display:none;margin-bottom:16px" class="card-box">
               <div style="margin-bottom:8px">
                 <label class="field-label">Title</label>
-                <input id="ns-title" class="ifield" style="width:100%" placeholder="Section title..." />
+                <input id="ns-title" class="ifield" style="width:100%" placeholder="Task title..." />
               </div>
               <div style="margin-bottom:10px">
                 <label class="field-label">Description / Steps</label>
                 <textarea id="ns-desc" class="tfield" rows="3" placeholder="What needs to be done..."></textarea>
               </div>
+              <div style="margin-bottom:10px">
+                <label class="field-label">Todos</label>
+                <div id="ns-todos-list"></div>
+                <button class="btn mini-btn" style="margin-top:6px" type="button" onclick="addNsTodoRow()">+ Add todo</button>
+              </div>
               <div style="display:flex;gap:8px">
-                <button class="btn btn-save" onclick="createSection()">Add Section</button>
+                <button class="btn btn-save" onclick="createSection()">Create Task</button>
                 <button class="btn" onclick="closeNewSection()">Cancel</button>
               </div>
             </div>

@@ -127,9 +127,61 @@ async function sendNoticeToDiscord({ active, message, level }) {
   );
 }
 
+async function sendNewTaskToDiscord({ title, description, todos, createdBy }) {
+  const webhookUrl = process.env.DISCORD_NEW_TASKS_WEBHOOK;
+  const todoLines = (todos || []).filter(Boolean).map(t => `- [ ] ${t}`).join('\n');
+  const embed = {
+    title: 'New Task: ' + title,
+    color: 0x3d8eff,
+    timestamp: new Date().toISOString(),
+    fields: [{ name: 'Created by', value: createdBy || 'unknown', inline: true }],
+  };
+  if (description) embed.description = description;
+  if (todoLines) embed.fields.push({ name: 'Todos', value: todoLines, inline: false });
+  await postWebhook(webhookUrl, { embeds: [embed] }, 'new-task');
+}
+
+async function sendClaimedTaskToDiscord({ title, claimedBy }) {
+  const webhookUrl = process.env.DISCORD_CLAIMED_TASKS_WEBHOOK;
+  const embed = {
+    title: 'Task Claimed: ' + title,
+    color: 0xa78bfa,
+    timestamp: new Date().toISOString(),
+    fields: [{ name: 'Claimed by', value: claimedBy || 'unknown', inline: true }],
+  };
+  await postWebhook(webhookUrl, { embeds: [embed] }, 'claimed-task');
+}
+
+async function sendUnclaimedTaskToDiscord({ title, unclaimedBy }) {
+  const webhookUrl = process.env.DISCORD_NEW_TASKS_WEBHOOK;
+  const embed = {
+    title: 'Task Available: ' + title,
+    description: 'This task was released and is available to claim.',
+    color: 0xf59e0b,
+    timestamp: new Date().toISOString(),
+    fields: [{ name: 'Released by', value: unclaimedBy || 'unknown', inline: true }],
+  };
+  await postWebhook(webhookUrl, { embeds: [embed] }, 'unclaimed-task');
+}
+
+async function sendDoneTaskToDiscord({ title, doneBy }) {
+  const webhookUrl = process.env.DISCORD_DONE_TASKS_WEBHOOK;
+  const embed = {
+    title: 'Task Done: ' + title,
+    color: 0x34d399,
+    timestamp: new Date().toISOString(),
+    fields: [{ name: 'Completed by', value: doneBy || 'unknown', inline: true }],
+  };
+  await postWebhook(webhookUrl, { embeds: [embed] }, 'done-task');
+}
+
 module.exports = {
   sendChangelogToDiscord,
   sendMaintenanceToDiscord,
   sendPermissionRequestToDiscord,
   sendNoticeToDiscord,
+  sendNewTaskToDiscord,
+  sendClaimedTaskToDiscord,
+  sendUnclaimedTaskToDiscord,
+  sendDoneTaskToDiscord,
 };

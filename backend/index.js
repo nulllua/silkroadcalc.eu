@@ -11,6 +11,10 @@ const {
   sendMaintenanceToDiscord,
   sendPermissionRequestToDiscord,
   sendNoticeToDiscord,
+  sendNewTaskToDiscord,
+  sendClaimedTaskToDiscord,
+  sendUnclaimedTaskToDiscord,
+  sendDoneTaskToDiscord,
 } = require('./services/discord.js');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1864,7 +1868,7 @@ app.get('/api/admin/sections', requireAuth, async (_req, res) => {
 });
 
 app.post('/api/admin/sections', requireAuth, async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, todos } = req.body;
   if (!title) return res.status(400).json({ error: 'Missing title' });
   const actor = req.adminUser.username;
   try {
@@ -1872,7 +1876,13 @@ app.post('/api/admin/sections', requireAuth, async (req, res) => {
       'INSERT INTO project_sections (title, description, created_by) VALUES ($1,$2,$3) RETURNING *',
       [title, description || '', actor]
     );
-    await logActivity(actor, `added section "${title}"`);
+    const sectionId = rows[0].id;
+    const validTodos = Array.isArray(todos) ? todos.map(t => String(t).trim()).filter(Boolean) : [];
+    for (const text of validTodos) {
+      await pool.query('INSERT INTO section_todos (section_id, text, created_by) VALUES ($1,$2,$3)', [sectionId, text, actor]);
+    }
+    await logActivity(actor, `created task "${title}"`);
+    sendNewTaskToDiscord({ title, description: description || '', todos: validTodos, createdBy: actor });
     res.json(rows[0]);
   } catch (e) { err(res, e); }
 });
@@ -1909,12 +1919,13 @@ app.delete('/api/admin/sections/:id', requireAuth, async (req, res) => {
 app.post('/api/admin/sections/:id/claim', requireAuth, async (req, res) => {
   const actor = req.adminUser.username;
   try {
-    const claim = await getSectionClaim(req.params.id);
-    if (!claim) return res.status(404).json({ error: 'Not found' });
-    if (claim.claimed_by && claim.claimed_by !== actor)
-      return res.status(409).json({ error: 'Already claimed by ' + claim.claimed_by });
+    const { rows } = await pool.query('SELECT title, claimed_by FROM project_sections WHERE id=$1', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    if (rows[0].claimed_by && rows[0].claimed_by !== actor)
+      return res.status(409).json({ error: 'Already claimed by ' + rows[0].claimed_by });
     await pool.query('UPDATE project_sections SET claimed_by=$1, claimed_at=NOW() WHERE id=$2', [actor, req.params.id]);
-    await logActivity(actor, 'claimed a section');
+    await logActivity(actor, `claimed task "${rows[0].title}"`);
+    sendClaimedTaskToDiscord({ title: rows[0].title, claimedBy: actor });
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
@@ -1922,11 +1933,28 @@ app.post('/api/admin/sections/:id/claim', requireAuth, async (req, res) => {
 app.delete('/api/admin/sections/:id/claim', requireAuth, async (req, res) => {
   const actor = req.adminUser.username;
   try {
+    const { rows } = await pool.query('SELECT title, claimed_by FROM project_sections WHERE id=$1', [req.params.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    if (rows[0].claimed_by !== actor) return res.status(403).json({ error: 'Not your claim' });
+    await pool.query('UPDATE project_sections SET claimed_by=NULL, claimed_at=NULL WHERE id=$1', [req.params.id]);
+    await logActivity(actor, `released task "${rows[0].title}"`);
+    sendUnclaimedTaskToDiscord({ title: rows[0].title, unclaimedBy: actor });
+    res.json({ ok: true });
+  } catch (e) { err(res, e); }
+});
+
+app.post('/api/admin/sections/:id/done', requireAuth, async (req, res) => {
+  const actor = req.adminUser.username;
+  try {
     const claim = await getSectionClaim(req.params.id);
     if (!claim) return res.status(404).json({ error: 'Not found' });
-    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Not your claim' });
-    await pool.query('UPDATE project_sections SET claimed_by=NULL, claimed_at=NULL WHERE id=$1', [req.params.id]);
-    await logActivity(actor, 'released a section claim');
+    if (claim.claimed_by !== actor) return res.status(403).json({ error: 'Section not claimed by you' });
+    const { rows } = await pool.query(
+      'UPDATE project_sections SET done=true, done_at=NOW() WHERE id=$1 RETURNING title',
+      [req.params.id]
+    );
+    await logActivity(actor, `marked task "${rows[0]?.title}" as done`);
+    sendDoneTaskToDiscord({ title: rows[0]?.title || '', doneBy: actor });
     res.json({ ok: true });
   } catch (e) { err(res, e); }
 });
