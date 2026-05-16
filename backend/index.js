@@ -239,8 +239,10 @@ async function fireUserWebhooks(embed) {
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-const ENGINE_CONSTANTS = require('./engine-constants.js');
-app.get('/api/constants', (_req, res) => res.json(ENGINE_CONSTANTS));
+app.get('/api/constants', async (_req, res) => {
+  const r = await pool.query('SELECT data FROM game_constants WHERE id=1');
+  res.json(r.rows[0]?.data || {});
+});
 
 app.get('/api/goods', async (_req, res) => {
   try {

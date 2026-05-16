@@ -8,11 +8,16 @@ function syncFromApi(cb) {
     fetch(API_BASE + '/api/trait-effects',  { signal: ctrl.signal }),
     fetch(API_BASE + '/api/religion-perks', { signal: ctrl.signal }),
     fetch(API_BASE + '/api/events',         { signal: ctrl.signal }),
+    fetch(API_BASE + '/api/constants',      { signal: ctrl.signal }),
   ]).then(function (rs) {
     clearTimeout(t);
     return Promise.all(rs.map(function (r) { return r.ok ? r.json() : null; }));
   }).then(function (ds) {
-    var goods = ds[0], cities = ds[1], travel = ds[2], traits = ds[3], perks = ds[4], events = ds[5];
+    var goods = ds[0], cities = ds[1], travel = ds[2], traits = ds[3], perks = ds[4], events = ds[5], constants = ds[6];
+    if (constants && constants.langMod) {
+      ENGINE_CONSTANTS = constants;
+      LUXURY_CITY = Object.fromEntries(Object.entries(ENGINE_CONSTANTS.luxury).map(function (e) { return [e[0], e[1].city]; }));
+    }
     if (goods && goods.length)
       GOODS = goods.map(function (g) { return { name: g.name, base: g.base_price, type: g.type, hopPct: g.hop_pct, produced_in: g.produced_in }; });
     if (cities && cities.length) {

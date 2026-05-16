@@ -187,6 +187,24 @@ const TRAIT_EFFECTS = [
   },
 ];
 
+const GAME_CONSTANTS = {
+  langMod: {
+    nativePct:           0.03,
+    foreignL1Pct:       -0.03,
+    foreignL3Pct:        0.03,
+    zoroL1ByzMultiplier: 1.5,
+    judaismL2Multiplier: 1.75,
+  },
+  repDiscount: {
+    minRank:  6,
+    discount: 0.1,
+  },
+  luxury: {
+    'Byzantine Silk':  { city: 'Antioch',   culture: 'Byzantine', minRank: 4 },
+    'Persian Carpets': { city: 'Ctesiphon', culture: 'Persian',   minRank: 4 },
+  },
+};
+
 const LANGUAGES = ['Greek', 'Aramaic', 'Persian'];
 const CULTURES = [
   { name: 'Byzantine', native_language: 'Greek' },
@@ -543,6 +561,12 @@ async function seed() {
       );
     }
   }
+
+  console.log('Game constants...');
+  await pool.query(
+    `INSERT INTO game_constants (id, data) VALUES (1, $1) ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data`,
+    [JSON.stringify(GAME_CONSTANTS)]
+  );
 
   console.log('Owner bootstrap...');
   if (process.env.OWNER_USERNAME && process.env.OWNER_PASSWORD) {

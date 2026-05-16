@@ -16,12 +16,10 @@ No deploy needed. Writes directly to Railway PostgreSQL and goes live on the nex
 | Good base prices or hop% | `GOODS` (~line 5) |
 | City traits or produced goods | `CITIES` (~line 38) |
 | Trait modifier rules | `TRAIT_EFFECTS` (~line 117) |
-| Language modifiers | `LANGUAGES` (~line 190) |
-| Religion bonus rules | `RELIGION_PERKS` (~line 197) |
-| Event types or levels | `EVENT_TYPES` / `EVENT_LEVELS` (~line 228) |
-| Travel times between cities | `TRAVEL_TIMES_RAW` (~line 326) |
-
-If you also changed **language modifier percentages, reputation discount threshold/amount, or luxury goods access rules**, those are hardcoded constants in `frontend/shared/engine-constants.js` and must be updated there too (they are not seeded from the database). `backend/engine-constants.js` is a copy of the same file - update both.
+| Language modifier %, rep discount, luxury goods access | `GAME_CONSTANTS` (~line 190) |
+| Religion bonus rules | `RELIGION_PERKS` (~line 213) |
+| Event types or levels | `EVENT_TYPES` / `EVENT_LEVELS` (~line 244) |
+| Travel times between cities | `TRAVEL_TIMES_RAW` (~line 342) |
 
 ---
 
@@ -47,7 +45,6 @@ silkroadcalc.eu/
 │
 ├── frontend/
 │   ├── shared/                       Loaded by every page
-│   │   ├── engine-constants.js       Hardcoded constants (lang mod%, rep discount, luxury access)
 │   │   ├── api-config.js             API base URL config
 │   │   ├── sync.js                   Shared API sync helpers
 │   │   ├── setup-sync.js             Fetches API data + overwrites engine globals
@@ -137,23 +134,6 @@ All price calculations live here. Dynamic data (GOODS, CITIES, TRAVEL_TIMES, TRA
 **Sell:** `round(base + base*(pow(1+hopPct, hops)-1) + floor(base*|mod|)*sign + eventDelta)`
 
 For buy: positive city modifier means negative adjustment (cheaper). For sell: positive modifier means positive adjustment (more profit). Modifiers below $1 floor to zero.
-
----
-
-## Hardcoded Constants - `frontend/shared/engine-constants.js`
-
-Constants not stored in the database. Used by both the browser (via `window.ENGINE_CONSTANTS`) and the backend `/api/constants` endpoint (via `require()`).
-
-| Constant | What it controls |
-|---|---|
-| `langMod.nativePct` | Native language sell bonus (+3%) |
-| `langMod.foreignL1Pct` | Broken language penalty (-3%) |
-| `langMod.foreignL3Pct` | Fluent language bonus (+3%) |
-| `langMod.zoroL1ByzMultiplier` | Zoroastrianism L1 language multiplier |
-| `langMod.judaismL2Multiplier` | Judaism L2 language multiplier |
-| `repDiscount.minRank` | Minimum rank for reputation discount |
-| `repDiscount.discount` | Discount amount (10%) |
-| `luxury` | Which goods are luxury, what city sells them, and min rank to buy |
 
 ---
 

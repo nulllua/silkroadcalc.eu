@@ -308,6 +308,10 @@ async function initSchema() {
       actor      TEXT NOT NULL,
       action     TEXT NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS game_constants (
+      id   INTEGER PRIMARY KEY DEFAULT 1,
+      data JSONB   NOT NULL DEFAULT '{}'
     )
   `);
   await pool.query(`
