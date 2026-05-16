@@ -19,7 +19,7 @@ const FOOD_TYPES = new Set(['Agricultural']);
 // These goods are sold by Spice Merchants in every city - can be bought anywhere (not just producing cities)
 const SPICE_MERCHANT_GOODS = new Set(['Coriander', 'Sesame', 'Saffron']);
 // Luxury goods are exclusive to one city - only available to buy there
-const LUXURY_CITY = { 'Byzantine Silk': 'Antioch', 'Persian Carpets': 'Ctesiphon' };
+const LUXURY_CITY = Object.fromEntries(Object.entries(ENGINE_CONSTANTS.luxury).map(([k, v]) => [k, v.city]));
 
 const BACKPACKS = {
   None: { extraSlots: 0 },
@@ -161,16 +161,17 @@ function calculateCityModifier(good, sellCity, culture, religion, religionLevel,
 function calculateLanguageModifier(sellCity, culture, langLevel, religion, religionLevel) {
   const native = CULTURES[culture].nativeLang;
   const cityLang = CITIES[sellCity].language;
-  let pct = native === cityLang ? 0.03 : langLevel === 1 ? -0.03 : langLevel === 3 ? 0.03 : 0;
+  const lm = ENGINE_CONSTANTS.langMod;
+  let pct = native === cityLang ? lm.nativePct : langLevel === 1 ? lm.foreignL1Pct : langLevel === 3 ? lm.foreignL3Pct : 0;
   if (
     religion === 'Zoroastrianism' &&
     religionLevel >= 1 &&
     CITIES[sellCity].culture === 'Byzantine' &&
     pct < 0
   ) {
-    pct *= 1.5;
+    pct *= lm.zoroL1ByzMultiplier;
   }
-  if (religion === 'Judaism' && religionLevel >= 2) pct *= 1.75;
+  if (religion === 'Judaism' && religionLevel >= 2) pct *= lm.judaismL2Multiplier;
   return pct;
 }
 
@@ -276,8 +277,9 @@ function eventAffects(good, ev) {
 
 function calculateRepDiscount(buyCity, ps) {
   const culture = CITIES[buyCity].culture;
-  if (culture === 'Byzantine' && (ps.byzantineRank || 0) >= 6) return 0.1;
-  if (culture === 'Persian' && (ps.sassanidRank || 0) >= 6) return 0.1;
+  const rd = ENGINE_CONSTANTS.repDiscount;
+  if (culture === 'Byzantine' && (ps.byzantineRank || 0) >= rd.minRank) return rd.discount;
+  if (culture === 'Persian' && (ps.sassanidRank || 0) >= rd.minRank) return rd.discount;
   return 0;
 }
 
@@ -343,9 +345,11 @@ function isLuxuryAccessible(good, ps) {
   if (good.type !== 'Luxury') return true;
   const producerCity = LUXURY_CITY[good.name];
   if (!producerCity) return true;
+  const luxDef = ENGINE_CONSTANTS.luxury[good.name];
+  const minRank = luxDef ? luxDef.minRank : 4;
   const culture = CITIES[producerCity].culture;
-  if (culture === 'Byzantine') return (ps.byzantineRank || 1) >= 4;
-  if (culture === 'Persian') return (ps.sassanidRank || 1) >= 4;
+  if (culture === 'Byzantine') return (ps.byzantineRank || 1) >= minRank;
+  if (culture === 'Persian') return (ps.sassanidRank || 1) >= minRank;
   return true;
 }
 

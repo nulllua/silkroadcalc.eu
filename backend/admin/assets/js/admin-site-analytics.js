@@ -26,14 +26,6 @@ async function loadFpBans() {
   return (await res.json()).map(b => ({ ...b, _kind: 'Fingerprint', _id: b.fp_id, _unban: 'unbanFp' }));
 }
 
-async function banFp() {
-  const fpId = v('ban-fp');
-  const reason = v('ban-fp-reason');
-  if (!fpId) return ss('ban-fp-ss', false, 'Need fingerprint ID');
-  const res = await api('/api/admin/fp-bans', { method: 'POST', body: JSON.stringify({ fpId, reason }) });
-  ss('ban-fp-ss', res.ok);
-  if (res.ok) { el('ban-fp').value = ''; el('ban-fp-reason').value = ''; loadFpBans(); }
-}
 
 async function unbanFp(fpId) {
   const res = await api('/api/admin/fp-bans/' + encodeURIComponent(fpId), { method: 'DELETE' });
@@ -46,14 +38,6 @@ async function loadIpBans() {
   return (await res.json()).map(b => ({ ...b, _kind: 'IP', _id: b.ip, _unban: 'unbanIp' }));
 }
 
-async function banIp() {
-  const ip = v('ban-ip');
-  const reason = v('ban-ip-reason');
-  if (!ip) return ss('ban-ip-ss', false, 'Need IP');
-  const res = await api('/api/admin/ip-bans', { method: 'POST', body: JSON.stringify({ ip, reason }) });
-  ss('ban-ip-ss', res.ok);
-  if (res.ok) { el('ban-ip').value = ''; el('ban-ip-reason').value = ''; loadIpBans(); }
-}
 
 async function unbanIp(ip) {
   const res = await api('/api/admin/ip-bans/' + encodeURIComponent(ip), { method: 'DELETE' });
@@ -201,11 +185,12 @@ async function loadAnalytics() {
 }
 
 async function loadData() {
-  const [gr, er, tefr, rpr] = await Promise.all([
+  const [gr, er, tefr, rpr, cr] = await Promise.all([
     api('/api/goods'),
     api('/api/events'),
     api('/api/trait-effects'),
     api('/api/religion-perks'),
+    api('/api/constants'),
   ]);
 
   if (gr.ok) {
@@ -288,6 +273,33 @@ async function loadData() {
       </tr>`
     ).join('') || '<tr><td colspan="5" class="dim">None</td></tr>';
   }
+
+  if (cr.ok) {
+    const c = await cr.json();
+    const lm = c.langMod;
+    const pct = v => `${v >= 0 ? '+' : ''}${Math.round(v * 100)}%`;
+    el('data-lang-body').innerHTML = `
+      <tr><td>Native language matches city language</td><td class="hl">${pct(lm.nativePct)}</td></tr>
+      <tr><td>Foreign language — Level 1</td><td style="color:var(--red)">${pct(lm.foreignL1Pct)}</td></tr>
+      <tr><td>Foreign language — Level 3</td><td class="hl">${pct(lm.foreignL3Pct)}</td></tr>
+      <tr><td>Foreign language — Level 2 (or native, already counted)</td><td>0%</td></tr>`;
+    el('data-lang-note').textContent =
+      `Zoroastrianism L1 + Byzantine city + negative lang mod: ×${lm.zoroL1ByzMultiplier}. Judaism L2: lang mod ×${lm.judaismL2Multiplier}.`;
+
+    const rd = c.repDiscount;
+    el('data-rep-body').innerHTML = `
+      <tr><td>Byzantine cities</td><td>Byzantine Rank ≥ ${rd.minRank}</td><td style="color:var(--green)">−${Math.round(rd.discount * 100)}%</td></tr>
+      <tr><td>Persian cities</td><td>Sassanid Rank ≥ ${rd.minRank}</td><td style="color:var(--green)">−${Math.round(rd.discount * 100)}%</td></tr>`;
+
+    el('data-luxury-body').innerHTML = Object.entries(c.luxury).map(([name, v]) =>
+      `<tr>
+        <td class="hl">${escHtml(name)}</td>
+        <td>${escHtml(v.city)}</td>
+        <td>${escHtml(v.culture)}</td>
+        <td>${escHtml(v.culture)} Rank ≥ ${v.minRank}</td>
+      </tr>`
+    ).join('') || '<tr><td colspan="4" class="dim">None</td></tr>';
+  }
 }
 
 // ── Projects tab ──────────────────────────────────────────────────────────────
@@ -312,7 +324,11 @@ function timeAgo(dateStr) {
 
 async function loadProjects() {
   const meRes = await api('/api/admin/me');
-  if (meRes.ok) { const me = await meRes.json(); projCurrentUser = me.username; }
+  if (meRes.ok) {
+    const me = await meRes.json();
+    projCurrentUser = me.username;
+    if (me.username === 'domi') el('proj-create-btn').style.display = '';
+  }
   loadCommits();
   loadActivity();
   loadSections();
@@ -425,11 +441,19 @@ function renderSection(s) {
   const sectionClass = mine ? 'proj-section claimed-mine' : claimedByOther ? 'proj-section claimed-other' : 'proj-section';
   const colorStyle = color ? `style="--claim-color:${color}"` : '';
 
+  const typeColors = { frontend: '#3d8eff', backend: '#f59e0b', 'frontend+backend': '#a78bfa' };
+  const typeLabels = { frontend: 'Frontend', backend: 'Backend', 'frontend+backend': 'Frontend + Backend' };
+  const typeColor = typeColors[s.task_type] || '#9aa0a8';
+  const typeLabel = typeLabels[s.task_type] || s.task_type;
+  const typeBadge = `<span class="proj-claim-badge" style="color:${typeColor};margin-left:8px;vertical-align:middle">${escHtml(typeLabel)}</span>`;
+
   return `
     <div class="${sectionClass}" id="section-${s.id}" ${colorStyle}>
       <div class="proj-section-head">
         <div style="flex:1">
-          <div class="proj-section-title" style="${s.done ? 'text-decoration:line-through;opacity:.5' : ''}">${escHtml(s.title)}</div>
+          <div class="proj-section-title" style="${s.done ? 'text-decoration:line-through;opacity:.5' : ''}">
+            ${escHtml(s.title)}${typeBadge}
+          </div>
           ${s.description ? `<div class="proj-section-desc">${escHtml(s.description)}</div>` : ''}
           <div class="proj-section-meta">created by ${escHtml(s.created_by)} · ${timeAgo(s.created_at)}</div>
           ${claimBadge ? `<div style="margin-top:5px">${claimBadge}</div>` : ''}
@@ -474,6 +498,7 @@ function closeNewSection() {
   el('proj-new-section').style.display = 'none';
   el('ns-title').value = '';
   el('ns-desc').value = '';
+  el('ns-type').value = 'frontend';
   el('ns-todos-list').innerHTML = '';
 }
 
@@ -504,7 +529,8 @@ async function createSection() {
   if (!title) { flash(el('ns-title'), false); return; }
   const todos = [...document.querySelectorAll('.ns-todo-input')]
     .map(i => i.value.trim()).filter(Boolean);
-  const r = await api('/api/admin/sections', { method: 'POST', body: JSON.stringify({ title, description, todos }) });
+  const task_type = el('ns-type').value;
+  const r = await api('/api/admin/sections', { method: 'POST', body: JSON.stringify({ title, description, todos, task_type }) });
   if (r.ok) { closeNewSection(); loadSections(); loadActivity(); }
 }
 

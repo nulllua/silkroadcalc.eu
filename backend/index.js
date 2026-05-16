@@ -56,20 +56,6 @@ function requireOwner(req, res, next) {
   next();
 }
 
-async function getLockState() {
-  const { rows } = await pool.query(
-    'SELECT is_locked, changed_at FROM admin_lock_state WHERE id=1'
-  );
-  if (!rows.length) return { is_locked: true };
-  return rows[0];
-}
-
-async function requireUnlockedOrOwner(req, res, next) {
-  if (req.adminUser?.role === 'owner') return next();
-  const lock = await getLockState();
-  if (lock.is_locked) return res.status(423).json({ error: 'Panel is locked by owner' });
-  next();
-}
 
 async function writeAudit(
   req,
@@ -252,6 +238,9 @@ async function fireUserWebhooks(embed) {
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
+
+const ENGINE_CONSTANTS = require('../frontend/shared/engine-constants.js');
+app.get('/api/constants', (_req, res) => res.json(ENGINE_CONSTANTS));
 
 app.get('/api/goods', async (_req, res) => {
   try {
@@ -1007,37 +996,11 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 app.get('/api/admin/me', requireAuth, async (req, res) => {
-  const lockState = await getLockState();
   res.json({
     id: req.adminUser.id,
     username: req.adminUser.username,
     role: req.adminUser.role,
-    lock: { is_locked: lockState.is_locked },
   });
-});
-
-app.get('/api/admin/lock-state', requireAuth, async (_req, res) => {
-  const lockState = await getLockState();
-  res.json(lockState);
-});
-
-app.post('/api/admin/lock-state', requireAuth, requireOwner, async (req, res) => {
-  const isLocked = !!req.body.is_locked;
-  const before = await getLockState();
-  await pool.query(
-    `UPDATE admin_lock_state
-     SET is_locked=$1, changed_by_user_id=$2, changed_at=NOW()
-     WHERE id=1`,
-    [isLocked, req.adminUser.id]
-  );
-  await writeAudit(req, {
-    entityType: 'lock_state',
-    entityId: 'global',
-    action: 'POST',
-    beforeJson: before,
-    afterJson: { is_locked: isLocked },
-  });
-  res.json({ ok: true, is_locked: isLocked });
 });
 
 app.post('/api/admin/permission-requests', requireAuth, async (req, res) => {
@@ -1095,7 +1058,7 @@ app.use('/api/admin', async (req, res, next) => {
   if (req.path === '/login') return next();
   if (!req.adminUser) return next();
   if (req.method === 'GET') return next();
-  if (req.path === '/lock-state' || req.path === '/permission-requests') return next();
+  if (req.path === '/permission-requests') return next();
 
   const { entityType, entityId } = parseAdminEntity(req);
   req._auditEntityType = entityType;
@@ -1221,7 +1184,7 @@ app.get('/api/analytics', requireAuth, async (_req, res) => {
 
 // ── Goods ─────────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/goods', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/goods', requireAuth, async (req, res) => {
   const { name, base_price, type, hop_pct } = req.body;
   if (!name || !base_price || !type || hop_pct == null)
     return res.status(400).json({ error: 'Missing fields' });
@@ -1238,7 +1201,7 @@ app.post('/api/admin/goods', requireAuth, requireUnlockedOrOwner, async (req, re
   }
 });
 
-app.patch('/api/admin/goods/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/goods/:name', requireAuth, async (req, res) => {
   const name = decodeURIComponent(req.params.name);
   const { base_price, type, hop_pct } = req.body;
   try {
@@ -1252,7 +1215,7 @@ app.patch('/api/admin/goods/:name', requireAuth, requireUnlockedOrOwner, async (
   }
 });
 
-app.delete('/api/admin/goods/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/goods/:name', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM goods WHERE name=$1', [decodeURIComponent(req.params.name)]);
     res.json({ ok: true });
@@ -1261,7 +1224,7 @@ app.delete('/api/admin/goods/:name', requireAuth, requireUnlockedOrOwner, async 
   }
 });
 
-app.post('/api/admin/goods/:name/cities', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/goods/:name/cities', requireAuth, async (req, res) => {
   try {
     await pool.query(
       `INSERT INTO city_goods (city_name,good_name) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
@@ -1276,7 +1239,6 @@ app.post('/api/admin/goods/:name/cities', requireAuth, requireUnlockedOrOwner, a
 app.delete(
   '/api/admin/goods/:name/cities/:city',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query('DELETE FROM city_goods WHERE good_name=$1 AND city_name=$2', [
@@ -1292,7 +1254,7 @@ app.delete(
 
 // ── Travel times ──────────────────────────────────────────────────────────────
 
-app.put('/api/admin/travel-times', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.put('/api/admin/travel-times', requireAuth, async (req, res) => {
   const { from_city, to_city, minutes } = req.body;
   if (!from_city || !to_city || typeof minutes !== 'number' || minutes <= 0)
     return res.status(400).json({ error: 'Invalid data' });
@@ -1313,7 +1275,7 @@ app.put('/api/admin/travel-times', requireAuth, requireUnlockedOrOwner, async (r
 
 // ── Cities ────────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/cities', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/cities', requireAuth, async (req, res) => {
   const { name, culture, language, has_fire_temple } = req.body;
   if (!name) return res.status(400).json({ error: 'Missing name' });
   try {
@@ -1327,7 +1289,7 @@ app.post('/api/admin/cities', requireAuth, requireUnlockedOrOwner, async (req, r
   }
 });
 
-app.patch('/api/admin/cities/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/cities/:name', requireAuth, async (req, res) => {
   const name = decodeURIComponent(req.params.name);
   const { culture, language, has_fire_temple } = req.body;
   try {
@@ -1341,7 +1303,7 @@ app.patch('/api/admin/cities/:name', requireAuth, requireUnlockedOrOwner, async 
   }
 });
 
-app.delete('/api/admin/cities/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/cities/:name', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM cities WHERE name=$1', [decodeURIComponent(req.params.name)]);
     res.json({ ok: true });
@@ -1353,7 +1315,6 @@ app.delete('/api/admin/cities/:name', requireAuth, requireUnlockedOrOwner, async
 app.post(
   '/api/admin/cities/:name/traits',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query(
@@ -1370,7 +1331,6 @@ app.post(
 app.delete(
   '/api/admin/cities/:name/traits/:trait',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query('DELETE FROM city_city_traits WHERE city_name=$1 AND trait_name=$2', [
@@ -1384,7 +1344,7 @@ app.delete(
   }
 );
 
-app.post('/api/admin/cities/:name/goods', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/cities/:name/goods', requireAuth, async (req, res) => {
   try {
     await pool.query(
       `INSERT INTO city_goods (city_name,good_name) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
@@ -1399,7 +1359,6 @@ app.post('/api/admin/cities/:name/goods', requireAuth, requireUnlockedOrOwner, a
 app.delete(
   '/api/admin/cities/:name/goods/:good',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query('DELETE FROM city_goods WHERE city_name=$1 AND good_name=$2', [
@@ -1415,7 +1374,7 @@ app.delete(
 
 // ── Traits ────────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/traits', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/traits', requireAuth, async (req, res) => {
   const { name, description } = req.body;
   if (!name) return res.status(400).json({ error: 'Missing name' });
   try {
@@ -1429,7 +1388,7 @@ app.post('/api/admin/traits', requireAuth, requireUnlockedOrOwner, async (req, r
   }
 });
 
-app.patch('/api/admin/traits/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/traits/:name', requireAuth, async (req, res) => {
   try {
     await pool.query(`UPDATE city_traits SET description=COALESCE($1,description) WHERE name=$2`, [
       req.body.description ?? null,
@@ -1441,7 +1400,7 @@ app.patch('/api/admin/traits/:name', requireAuth, requireUnlockedOrOwner, async 
   }
 });
 
-app.delete('/api/admin/traits/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/traits/:name', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM city_traits WHERE name=$1', [
       decodeURIComponent(req.params.name),
@@ -1452,7 +1411,7 @@ app.delete('/api/admin/traits/:name', requireAuth, requireUnlockedOrOwner, async
   }
 });
 
-app.post('/api/admin/trait-effects', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/trait-effects', requireAuth, async (req, res) => {
   const { trait_name, kind, bonus, cond_type, cond_value } = req.body;
   if (!trait_name || bonus == null) return res.status(400).json({ error: 'Missing fields' });
   try {
@@ -1466,7 +1425,7 @@ app.post('/api/admin/trait-effects', requireAuth, requireUnlockedOrOwner, async 
   }
 });
 
-app.patch('/api/admin/trait-effects/:id', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/trait-effects/:id', requireAuth, async (req, res) => {
   const { kind, bonus, cond_type, cond_value } = req.body;
   try {
     await pool.query(
@@ -1482,7 +1441,6 @@ app.patch('/api/admin/trait-effects/:id', requireAuth, requireUnlockedOrOwner, a
 app.delete(
   '/api/admin/trait-effects/:id',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query('DELETE FROM trait_effects WHERE id=$1', [req.params.id]);
@@ -1495,7 +1453,7 @@ app.delete(
 
 // ── Languages ─────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/languages', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/languages', requireAuth, async (req, res) => {
   if (!req.body.name) return res.status(400).json({ error: 'Missing name' });
   try {
     await pool.query(`INSERT INTO languages (name) VALUES ($1) ON CONFLICT DO NOTHING`, [
@@ -1507,7 +1465,7 @@ app.post('/api/admin/languages', requireAuth, requireUnlockedOrOwner, async (req
   }
 });
 
-app.delete('/api/admin/languages/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/languages/:name', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM languages WHERE name=$1', [decodeURIComponent(req.params.name)]);
     res.json({ ok: true });
@@ -1518,7 +1476,7 @@ app.delete('/api/admin/languages/:name', requireAuth, requireUnlockedOrOwner, as
 
 // ── Religions ─────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/religions', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/religions', requireAuth, async (req, res) => {
   if (!req.body.name) return res.status(400).json({ error: 'Missing name' });
   try {
     await pool.query(`INSERT INTO religions (name) VALUES ($1) ON CONFLICT DO NOTHING`, [
@@ -1530,7 +1488,7 @@ app.post('/api/admin/religions', requireAuth, requireUnlockedOrOwner, async (req
   }
 });
 
-app.delete('/api/admin/religions/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/religions/:name', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM religions WHERE name=$1', [decodeURIComponent(req.params.name)]);
     res.json({ ok: true });
@@ -1539,7 +1497,7 @@ app.delete('/api/admin/religions/:name', requireAuth, requireUnlockedOrOwner, as
   }
 });
 
-app.post('/api/admin/religion-perks', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/religion-perks', requireAuth, async (req, res) => {
   const { religion, min_level, perk_type, multiplier, description } = req.body;
   if (!religion || !min_level || !perk_type || multiplier == null)
     return res.status(400).json({ error: 'Missing fields' });
@@ -1557,7 +1515,6 @@ app.post('/api/admin/religion-perks', requireAuth, requireUnlockedOrOwner, async
 app.patch(
   '/api/admin/religion-perks/:id',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     const { min_level, perk_type, multiplier, description } = req.body;
     try {
@@ -1581,7 +1538,6 @@ app.patch(
 app.delete(
   '/api/admin/religion-perks/:id',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query('DELETE FROM religion_perks WHERE id=$1', [req.params.id]);
@@ -1593,7 +1549,7 @@ app.delete(
 );
 
 // ── Maintenance & Changelogs ──────────────────────────────────────────────────
-app.post('/api/admin/maintenance', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/maintenance', requireAuth, async (req, res) => {
   const { active, message } = req.body;
   try {
     await pool.query(
@@ -1627,7 +1583,7 @@ app.get('/api/admin/test-discord', requireAuth, requireOwner, async (req, res) =
     res.status(500).json({ error: e.message });
   }
 });
-app.post('/api/admin/changelogs', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/changelogs', requireAuth, async (req, res) => {
   const { version, date, entries, thanks } = req.body;
   if (!version) return res.status(400).json({ error: 'Missing version' });
 
@@ -1653,7 +1609,7 @@ app.post('/api/admin/changelogs', requireAuth, requireUnlockedOrOwner, async (re
   }
 });
 
-app.patch('/api/admin/changelogs/:id', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/changelogs/:id', requireAuth, async (req, res) => {
   const { version, date, entries, thanks } = req.body;
   try {
     const result = await pool.query(
@@ -1677,7 +1633,7 @@ app.patch('/api/admin/changelogs/:id', requireAuth, requireUnlockedOrOwner, asyn
   }
 });
 
-app.delete('/api/admin/changelogs/:id', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/changelogs/:id', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM changelogs WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
@@ -1686,7 +1642,7 @@ app.delete('/api/admin/changelogs/:id', requireAuth, requireUnlockedOrOwner, asy
   }
 });
 
-app.post('/api/admin/notices', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/notices', requireAuth, async (req, res) => {
   const { active, message, level } = req.body;
   if (!message) return res.status(400).json({ error: 'Missing message' });
   try {
@@ -1716,7 +1672,7 @@ app.post('/api/admin/notices', requireAuth, requireUnlockedOrOwner, async (req, 
   }
 });
 
-app.post('/api/admin/notices/disable', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/notices/disable', requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       'UPDATE notices SET active = false, updated_at = NOW() RETURNING *'
@@ -1735,7 +1691,7 @@ app.post('/api/admin/notices/disable', requireAuth, requireUnlockedOrOwner, asyn
 
 // ── Events ────────────────────────────────────────────────────────────────────
 
-app.post('/api/admin/events', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.post('/api/admin/events', requireAuth, async (req, res) => {
   const { name, glyph, dir, good_types, good_names, description } = req.body;
   if (!name) return res.status(400).json({ error: 'Missing name' });
   try {
@@ -1749,7 +1705,7 @@ app.post('/api/admin/events', requireAuth, requireUnlockedOrOwner, async (req, r
   }
 });
 
-app.patch('/api/admin/events/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/events/:name', requireAuth, async (req, res) => {
   const { glyph, dir, good_types, good_names, description } = req.body;
   try {
     await pool.query(
@@ -1769,7 +1725,7 @@ app.patch('/api/admin/events/:name', requireAuth, requireUnlockedOrOwner, async 
   }
 });
 
-app.delete('/api/admin/events/:name', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.delete('/api/admin/events/:name', requireAuth, async (req, res) => {
   try {
     await pool.query('DELETE FROM event_types WHERE name=$1', [
       decodeURIComponent(req.params.name),
@@ -1783,7 +1739,6 @@ app.delete('/api/admin/events/:name', requireAuth, requireUnlockedOrOwner, async
 app.post(
   '/api/admin/events/:name/levels',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     const { level, pct, base_bonus, label } = req.body;
     if (!level || pct == null) return res.status(400).json({ error: 'Missing fields' });
@@ -1800,7 +1755,7 @@ app.post(
   }
 );
 
-app.patch('/api/admin/events/levels/:id', requireAuth, requireUnlockedOrOwner, async (req, res) => {
+app.patch('/api/admin/events/levels/:id', requireAuth, async (req, res) => {
   const { label, pct, base_bonus } = req.body;
   try {
     await pool.query(
@@ -1816,7 +1771,6 @@ app.patch('/api/admin/events/levels/:id', requireAuth, requireUnlockedOrOwner, a
 app.delete(
   '/api/admin/events/levels/:id',
   requireAuth,
-  requireUnlockedOrOwner,
   async (req, res) => {
     try {
       await pool.query('DELETE FROM event_levels WHERE id=$1', [req.params.id]);
@@ -1868,13 +1822,16 @@ app.get('/api/admin/sections', requireAuth, async (_req, res) => {
 });
 
 app.post('/api/admin/sections', requireAuth, async (req, res) => {
-  const { title, description, todos } = req.body;
+  const { title, description, todos, task_type } = req.body;
   if (!title) return res.status(400).json({ error: 'Missing title' });
   const actor = req.adminUser.username;
+  if (actor !== 'domi') return res.status(403).json({ error: 'Only domi can create tasks' });
+  const validTypes = ['frontend', 'backend', 'frontend+backend'];
+  const type = validTypes.includes(task_type) ? task_type : 'frontend';
   try {
     const { rows } = await pool.query(
-      'INSERT INTO project_sections (title, description, created_by) VALUES ($1,$2,$3) RETURNING *',
-      [title, description || '', actor]
+      'INSERT INTO project_sections (title, description, created_by, task_type) VALUES ($1,$2,$3,$4) RETURNING *',
+      [title, description || '', actor, type]
     );
     const sectionId = rows[0].id;
     const validTodos = Array.isArray(todos) ? todos.map(t => String(t).trim()).filter(Boolean) : [];

@@ -1,9 +1,35 @@
 # silkroadcalc.eu - Codebase Reference
 
+## After a Game Update: What to Change
+
+This is the only section you need after a patch. All game data lives in `backend/seed.js`. Edit values there, then run:
+
+```
+cd backend
+node seed.js
+```
+
+No deploy needed. Writes directly to Railway PostgreSQL and goes live on the next API call.
+
+| What changed | Where in seed.js |
+|---|---|
+| Good base prices or hop% | `GOODS` (~line 5) |
+| City traits or produced goods | `CITIES` (~line 38) |
+| Trait modifier rules | `TRAIT_EFFECTS` (~line 117) |
+| Language modifiers | `LANGUAGES` (~line 190) |
+| Religion bonus rules | `RELIGION_PERKS` (~line 197) |
+| Event types or levels | `EVENT_TYPES` / `EVENT_LEVELS` (~line 228) |
+| Travel times between cities | `TRAVEL_TIMES_RAW` (~line 326) |
+
+If you also changed **language modifier percentages, reputation discount threshold/amount, or luxury goods access rules**, those are hardcoded constants in `frontend/shared/engine-constants.js` and must be updated there too (they are not seeded from the database).
+
+---
+
 ## Architecture
 
-Two-domain setup:
+Three layers:
 
+- **Cloudflare** - DNS proxy in front of GitHub Pages. Provides clean URLs (/routes, /planner, /setup, /settings, /updates) via URL Rewrite Rules.
 - **Frontend:** `https://silkroadcalc.eu` - GitHub Pages, fully static HTML/CSS/JS
 - **Backend:** `https://admin.silkroadcalc.eu` - Railway, Express + PostgreSQL
 
@@ -21,8 +47,11 @@ silkroadcalc.eu/
 │
 ├── frontend/
 │   ├── shared/                       Loaded by every page
+│   │   ├── engine-constants.js       Hardcoded constants (lang mod%, rep discount, luxury access)
+│   │   ├── api-config.js             API base URL config
+│   │   ├── sync.js                   Shared API sync helpers
 │   │   ├── setup-sync.js             Fetches API data + overwrites engine globals
-│   │   ├── overlays.js               Maintenance banner + notice bar
+│   │   ├── overlays.js               Maintenance banner + session ping
 │   │   ├── nav.js                    Navigation, mobile menu, auth button
 │   │   └── base.css                  Base styles shared across pages
 │   │
@@ -33,46 +62,46 @@ silkroadcalc.eu/
 │   │   ├── icons/                    Good + city icons
 │   │   └── images/                   Favicon, OG image, etc.
 │   │
-│   ├── routes/                       Route calculator (primary page)
+│   ├── routes/                       Route calculator (primary page, /routes)
 │   │   ├── routes.html
-│   │   ├── script.js                 Routes UI + all route logic (~1950 lines)
+│   │   ├── script.js                 Routes UI + all route logic
 │   │   ├── main-overlays.js          Page-local overlay wiring
 │   │   ├── routes.css
 │   │   └── styles.css
 │   │
-│   ├── planner/                      Courier route planner
+│   ├── planner/                      Courier route planner (/planner)
 │   │   ├── planner.html
 │   │   ├── planner.js
 │   │   └── planner.css
 │   │
-│   ├── setup/                        Character setup wizard
+│   ├── setup/                        Character setup wizard (/setup)
 │   │   ├── setup.html
 │   │   ├── setup.js
 │   │   └── setup.css
 │   │
-│   ├── settings/                     User settings page
+│   ├── settings/                     User settings page (/settings)
 │   │   ├── settings.html
 │   │   ├── settings.js
 │   │   └── settings.css
 │   │
-│   └── updates/                      Changelog / updates page
+│   └── updates/                      Changelog / updates page (/updates)
 │       ├── updates.html
 │       └── updates.css
 │
 └── backend/
-    ├── index.js                      Express API server (~1600 lines)
+    ├── index.js                      Express API server
     ├── db.js                         PostgreSQL schema + pool
     ├── seed.js                       Seeds/updates the database
     ├── services/
     │   └── discord.js                Discord webhook notifications
     └── admin/
-        ├── index.html                Admin panel (3 tabs: Analytics, Site, Data)
+        ├── index.html                Admin panel (5 tabs: Analytics, Site, Changelog, Data, Projects)
         └── assets/
             ├── css/styles.css
             └── js/
-                ├── script.js         Tab switching + login
-                ├── admin-utils.js    Shared helpers (api(), ss(), el(), etc.)
-                └── admin-site-analytics.js  All panel logic (analytics, site, data)
+                ├── script.js               Tab switching + login
+                ├── admin-utils.js          Shared helpers (api(), ss(), el(), etc.)
+                └── admin-site-analytics.js All panel logic
 ```
 
 ---
@@ -81,8 +110,8 @@ silkroadcalc.eu/
 
 All price calculations live here. Dynamic data (GOODS, CITIES, TRAVEL_TIMES, TRAIT_EFFECTS, RELIGION_PERKS, EVENTS) starts as empty defaults and is overwritten at runtime by `syncFromApi()` in `routes/script.js` or `syncData()` in `planner/planner.js`.
 
-| What | Line |
-|------|------|
+| What | Approx. line |
+|---|---|
 | `CITY_NEIGHBORS` - adjacency map for hop routing | 5 |
 | `CITIES` - traits, culture, language, produced goods | 14 |
 | `GOODS` - base prices and hop% per good | 70 |
@@ -107,25 +136,41 @@ All price calculations live here. Dynamic data (GOODS, CITIES, TRAVEL_TIMES, TRA
 **Buy:** `round(base + base*(pow(1+hopPct, hops)-1) + floor(base*|mod|)*sign + eventDelta)`
 **Sell:** `round(base + base*(pow(1+hopPct, hops)-1) + floor(base*|mod|)*sign + eventDelta)`
 
-For buy: positive city modifier means negative adjustment (cheaper). For sell: positive modifier means positive adjustment (more profit). Modifiers below `$1` floor to zero.
+For buy: positive city modifier means negative adjustment (cheaper). For sell: positive modifier means positive adjustment (more profit). Modifiers below $1 floor to zero.
+
+---
+
+## Hardcoded Constants - `frontend/shared/engine-constants.js`
+
+Constants not stored in the database. Used by both the browser (via `window.ENGINE_CONSTANTS`) and the backend `/api/constants` endpoint (via `require()`).
+
+| Constant | What it controls |
+|---|---|
+| `langMod.nativePct` | Native language sell bonus (+3%) |
+| `langMod.foreignL1Pct` | Broken language penalty (-3%) |
+| `langMod.foreignL3Pct` | Fluent language bonus (+3%) |
+| `langMod.zoroL1ByzMultiplier` | Zoroastrianism L1 language multiplier |
+| `langMod.judaismL2Multiplier` | Judaism L2 language multiplier |
+| `repDiscount.minRank` | Minimum rank for reputation discount |
+| `repDiscount.discount` | Discount amount (10%) |
+| `luxury` | Which goods are luxury, what city sells them, and min rank to buy |
 
 ---
 
 ## Routes Page - `frontend/routes/script.js`
 
-| What | Line |
-|------|------|
+| What | Approx. line |
+|---|---|
 | `getPlayerState()` - reads character setup from UI/localStorage | 4 |
 | `updateAll()` - triggers full recalculation + render | 42 |
 | `renderTable()` - main routes table rendering | 58 |
 | `renderMobileCards()` - mobile card layout | 195 |
-| `renderEventsTab()` - events panel UI | 428 |
-| `renderPricesTab()` - prices matrix tab | 564 |
-| `buildPriceBreakdown()` - tooltip showing buy/sell modifiers | 1600 |
-| `renderBestLoop()` - optimal round-trip route card | 1048 |
-| `exportCSV()` - export routes to CSV | 843 |
-| `saveNamedState()` / `loadNamedState()` - named setup presets | 1000 / 1014 |
-| `syncFromApi()` - fetches all game data from API, overwrites engine globals | 1892 |
+| `renderPricesTab()` - prices matrix tab | ~470 |
+| `renderBestLoop()` - optimal round-trip route card | ~900 |
+| `exportCSV()` - export routes to CSV | ~770 |
+| `saveNamedState()` / `loadNamedState()` - named setup presets | ~860 |
+| `buildPriceBreakdown()` - tooltip showing buy/sell modifiers | ~1350 |
+| `syncFromApi()` - fetches all game data from API, overwrites engine globals | ~1650 |
 
 ---
 
@@ -133,75 +178,55 @@ For buy: positive city modifier means negative adjustment (cheaper). For sell: p
 
 ### Public
 
-| Route | Line |
-|-------|------|
-| `GET /api/goods` | 251 |
-| `GET /api/cities` | 290 |
-| `GET /api/travel-times` | 276 |
-| `GET /api/events` | 321 |
-| `GET /api/religions` | 355 |
-| `GET /api/religion-perks` | 364 |
-| `GET /api/trait-effects` | 373 |
-| `GET /api/languages` | 382 |
-| `GET /api/maintenance` | 391 |
-| `GET /api/notices` | 410 |
-| `GET /api/changelogs` | 401 |
+| Route | What |
+|---|---|
+| `GET /api/goods` | All goods with base price + hop% |
+| `GET /api/cities` | All cities with traits + produced goods |
+| `GET /api/travel-times` | Travel time matrix |
+| `GET /api/events` | Event type definitions |
+| `GET /api/religions` | Religion list |
+| `GET /api/religion-perks` | Religion bonus rules |
+| `GET /api/trait-effects` | City trait modifier rules |
+| `GET /api/languages` | Language list |
+| `GET /api/maintenance` | Maintenance mode status |
+| `GET /api/notices` | Active notice bar content |
+| `GET /api/changelogs` | Changelog entries |
+| `GET /api/constants` | Hardcoded engine constants from engine-constants.js |
 
 ### Auth (Discord OAuth)
 
-| Route | Line |
-|-------|------|
-| `GET /api/auth/discord` - initiates OAuth | 482 |
-| `GET /api/auth/discord/callback` - OAuth callback | 492 |
-| `GET /api/auth/me` - current user | 539 |
-| `POST /api/session/ping` - session tracking for analytics | 460 |
+| Route | What |
+|---|---|
+| `GET /api/auth/discord` | Initiates OAuth |
+| `GET /api/auth/discord/callback` | OAuth callback |
+| `GET /api/auth/me` | Current user |
+| `POST /api/session/ping` | Session tracking for analytics |
 
 ### Admin (JWT auth required)
 
-| Route | Line |
-|-------|------|
-| `POST /api/admin/login` | 750 |
-| `GET /api/analytics` | 957 |
-| `POST /api/admin/maintenance` | - |
-| `POST /api/admin/notices` | - |
-| `POST /api/admin/changelogs` | - |
+| Route | What |
+|---|---|
+| `POST /api/admin/login` | Admin login |
+| `GET /api/analytics` | Analytics data |
+| `POST /api/admin/maintenance` | Set maintenance mode |
+| `POST /api/admin/notices` | Manage notices |
+| `POST /api/admin/changelogs` | Manage changelog |
+| `GET/POST /api/admin/sections` | Project task management |
 
 ---
 
 ## Database - `backend/db.js`
 
-`initSchema()` starts at **line 9** and creates all tables:
+`initSchema()` starts at line 9 and creates all tables:
 
-`goods`, `travel_times`, `sessions`, `daily_sessions`, `languages`, `cultures`, `city_traits`, `trait_effects`, `cities`, `city_city_traits`, `city_goods`, `religions`, `religion_perks`, `event_types`, `event_levels`, `settings`, `changelogs`, `notices`, `admin_users`, `admin_lock_state`, `admin_audit_log`, `discord_users`, `user_webhooks`, `forum_posts`, `forum_comments`, `forum_votes`
-
----
-
-## Seed Script - `backend/seed.js`
-
-Run `node seed.js` from `backend/` to populate or update the database. Uses `ON CONFLICT ... DO UPDATE SET` so re-running always overwrites existing values without duplicating.
-
-| What | Line |
-|------|------|
-| `GOODS` - 20 goods with base prices + hop% | 5 |
-| `CITIES` - 6 cities with traits + produced goods | 38 |
-| `TRAITS` - city trait definitions | 100 |
-| `TRAIT_EFFECTS` - trait modifier rules | 117 |
-| `LANGUAGES` | 190 |
-| `CULTURES` | 191 |
-| `RELIGIONS` | 196 |
-| `RELIGION_PERKS` | 197 |
-| `EVENT_TYPES` | 228 |
-| `EVENT_LEVELS` | 263 |
-| `TRAVEL_TIMES_RAW` - travel time matrix in hours | 326 |
-| `ins()` - upsert helper | 448 |
-| `seed()` - main seed function | 461 |
+`goods`, `travel_times`, `sessions`, `daily_sessions`, `languages`, `cultures`, `city_traits`, `trait_effects`, `cities`, `city_city_traits`, `city_goods`, `religions`, `religion_perks`, `event_types`, `event_levels`, `settings`, `changelogs`, `notices`, `admin_users`, `admin_audit_log`, `discord_users`, `user_webhooks`, `project_sections`, `project_todos`
 
 ---
 
 ## Environment Variables (Railway)
 
 | Variable | Purpose |
-|----------|---------|
+|---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `JWT_SECRET` | Signed tokens for admin login |
 | `DISCORD_CLIENT_ID` | OAuth app ID |
@@ -211,27 +236,15 @@ Run `node seed.js` from `backend/` to populate or update the database. Uses `ON 
 | `DISPLAY_NAMES` | Override display names: `userId:Name,userId2:Name2` |
 | `OWNER_USERNAME` | Admin panel owner username |
 | `OWNER_PASSWORD` | Admin panel owner password |
+| `GITHUB_TOKEN` | GitHub API token for commit feed in admin projects tab |
 
 ---
 
 ## Data Flow
 
-1. Page loads - `syncFromApi()` (routes) or `syncData()` (planner) fetches `/api/goods`, `/api/cities`, `/api/trait-effects`, etc.
+1. Page loads: `syncFromApi()` (routes) or `syncData()` (planner) fetches `/api/goods`, `/api/cities`, `/api/trait-effects`, etc.
 2. Fetched values overwrite the empty defaults in `main-engine.js` globals
 3. `generateRoutes()` computes all buy/sell combinations using current engine state
 4. UI renders routes table / planner / prices
 
 If the API is unreachable, pages fall back to empty data (no routes shown). All game data lives in `seed.js` and the database.
-
----
-
-## Changing Game Data
-
-Edit values in `backend/seed.js`, then run:
-
-```
-cd backend
-node seed.js
-```
-
-No GitHub push needed - writes directly to Railway PostgreSQL. Changes are live immediately after the next API call.

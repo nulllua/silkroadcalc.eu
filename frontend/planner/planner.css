@@ -228,9 +228,8 @@
   background: rgba(180,204,98,0.04), var(--bg-card);
   border: 1px solid rgba(180,204,98,0.2);
   border-radius: var(--r-md);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  display: flex;
+  justify-content: center;
   text-align: center;
 }
 .prs-item {}
@@ -377,9 +376,9 @@ body .pr-section-label::after {
 @media (max-width: 860px) {
   .planner-layout { grid-template-columns: 1fr; }
   .planner-sidebar { position: static; }
-  .pr-summary { grid-template-columns: repeat(3, 1fr); }
+  .pr-summary { justify-content: center; }
 }
 @media (max-width: 480px) {
   .planner-layout { padding: 16px; }
-  .pr-summary { grid-template-columns: 1fr 1fr; }
+  .pr-summary { justify-content: center; }
 }

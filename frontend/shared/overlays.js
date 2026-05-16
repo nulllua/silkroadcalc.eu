@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var API = 'https://admin.silkroadcalc.eu';
+  var API = (typeof API_BASE !== 'undefined' ? API_BASE : 'https://admin.silkroadcalc.eu');
   var isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
 
   async function initFingerprint() {

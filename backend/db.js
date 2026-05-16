@@ -315,6 +315,7 @@ async function initSchema() {
     ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMPTZ;
     ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS done BOOL NOT NULL DEFAULT false;
     ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS done_at TIMESTAMPTZ;
+    ALTER TABLE project_sections ADD COLUMN IF NOT EXISTS task_type VARCHAR(20) NOT NULL DEFAULT 'frontend';
   `);
 }
 

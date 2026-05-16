@@ -267,8 +267,6 @@
 
     /* Summary */
     html += '<div class="pr-summary">' +
-      '<div class="prs-item"><span class="prs-val ' + cls(d.outTradeProfit) + '">' + sign(d.outTradeProfit) + '</span><span class="prs-label">Trade Profit</span></div>' +
-      (d.mustReturn && d.retLegs.length > 0 ? '<div class="prs-item"><span class="prs-val ' + cls(d.retTradeProfit) + '">' + sign(d.retTradeProfit) + '</span><span class="prs-label">Return Profit</span></div>' : '') +
       '<div class="prs-item"><span class="prs-val ' + cls(d.totalProfit) + '">' + sign(d.totalProfit) + '</span><span class="prs-label">Total Profit</span></div>' +
     '</div>';
 
@@ -302,32 +300,6 @@
   }
 
   /* ── Init ─────────────────────────────────────────────────────────────── */
-  var API_BASE = 'https://admin.silkroadcalc.eu';
-
-  function syncData(cb) {
-    var reqs = [
-      fetch(API_BASE + '/api/goods'),
-      fetch(API_BASE + '/api/cities'),
-      fetch(API_BASE + '/api/travel-times'),
-      fetch(API_BASE + '/api/trait-effects'),
-      fetch(API_BASE + '/api/religion-perks'),
-      fetch(API_BASE + '/api/events'),
-    ];
-    Promise.all(reqs).then(function (rs) {
-      return Promise.all(rs.map(function (r) { return r.ok ? r.json() : null; }));
-    }).then(function (ds) {
-      var goods = ds[0], cities = ds[1], travel = ds[2], traits = ds[3], perks = ds[4], events = ds[5];
-      if (goods && goods.length) GOODS = goods.map(function (g) { return { name: g.name, base: g.base_price, type: g.type, hopPct: g.hop_pct, produced_in: g.produced_in }; });
-      if (cities && cities.length) { var c = {}; cities.forEach(function (r) { c[r.name] = { culture: r.culture, language: r.language, hasFireTemple: r.has_fire_temple, traits: r.traits, produced: r.produced }; }); CITIES = c; }
-      if (travel && Object.keys(travel).length) TRAVEL_TIMES = travel;
-      if (traits && traits.length) TRAIT_EFFECTS = traits.map(function (r) { return { trait_name: r.trait_name, kind: r.kind, bonus: parseFloat(r.bonus), cond_type: r.cond_type, cond_value: r.cond_value }; });
-      if (perks && perks.length) RELIGION_PERKS = perks.map(function (r) { return { religion: r.religion, min_level: r.min_level, perk_type: r.perk_type, multiplier: parseFloat(r.multiplier) }; });
-      if (events && events.length) { var em = {}, lm = {}; events.forEach(function (e) { em[e.name] = { dir: e.dir, label: e.name, glyph: e.glyph, goodTypes: e.good_types, goodNames: e.good_names }; (e.levels || []).forEach(function (l) { if (!lm[l.level]) lm[l.level] = { pct: l.pct, base: l.base_bonus, label: {} }; lm[l.level].label[e.name] = l.label; }); }); EVENTS = em; EVENT_LEVELS = lm; }
-      rebuildRouteCaches();
-      cb();
-    }).catch(function () { cb(); });
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
     if (typeof loadEventState === 'function') loadEventState();
     initQuestToggles();
@@ -335,7 +307,7 @@
     if (btn) btn.addEventListener('click', run);
     var clrBtn = $id('plannerClear');
     if (clrBtn) clrBtn.addEventListener('click', clearPlanner);
-    syncData(function () {
+    syncFromApi(function () {
       var hasInputs = restoreInputs();
       if (hasInputs) run();
     });

@@ -132,7 +132,7 @@
                 <div class="proj-subtab" data-subtab="claimed" onclick="switchProjSubtab('claimed')">Claimed</div>
                 <div class="proj-subtab" data-subtab="all" onclick="switchProjSubtab('all')">All Tasks</div>
               </div>
-              <button class="btn btn-add mini-btn" style="margin-left:auto" onclick="openNewSection()">+ Create Task</button>
+              <button class="btn btn-add mini-btn" id="proj-create-btn" style="margin-left:auto;display:none" onclick="openNewSection()">+ Create Task</button>
             </div>
 
             <div id="proj-new-section" style="display:none;margin-bottom:16px" class="card-box">
@@ -143,6 +143,14 @@
               <div style="margin-bottom:10px">
                 <label class="field-label">Description / Steps</label>
                 <textarea id="ns-desc" class="tfield" rows="3" placeholder="What needs to be done..."></textarea>
+              </div>
+              <div style="margin-bottom:10px">
+                <label class="field-label">Type</label>
+                <select id="ns-type" class="ifield" style="width:100%">
+                  <option value="frontend">Frontend</option>
+                  <option value="backend">Backend</option>
+                  <option value="frontend+backend">Frontend + Backend</option>
+                </select>
               </div>
               <div style="margin-bottom:10px">
                 <label class="field-label">Todos</label>
@@ -199,14 +207,9 @@
         <h2>Language Modifier</h2>
         <table class="data" style="max-width:560px;margin-bottom:8px">
           <thead><tr><th>Situation</th><th>Modifier</th></tr></thead>
-          <tbody>
-            <tr><td>Native language matches city language</td><td class="hl">+3%</td></tr>
-            <tr><td>Foreign language — Level 1</td><td style="color:var(--red)">−3%</td></tr>
-            <tr><td>Foreign language — Level 3</td><td class="hl">+3%</td></tr>
-            <tr><td>Foreign language — Level 2 (or native, already counted)</td><td>0%</td></tr>
-          </tbody>
+          <tbody id="data-lang-body"><tr><td colspan="2" class="dim">Loading…</td></tr></tbody>
         </table>
-        <p class="hint" style="margin-bottom:20px">Zoroastrianism L1 + Byzantine city + negative lang mod: ×1.5. Judaism L2: lang mod ×1.2.</p>
+        <p id="data-lang-note" class="hint" style="margin-bottom:20px"></p>
 
         <h2>Religion Modifier (Sell / Buy Bonus)</h2>
         <table class="data" style="max-width:700px;margin-bottom:8px">
@@ -223,10 +226,7 @@
         <h2>Reputation Discount — Buy Only</h2>
         <table class="data" style="max-width:520px;margin-bottom:8px">
           <thead><tr><th>Culture</th><th>Required Rank</th><th>Discount</th></tr></thead>
-          <tbody>
-            <tr><td>Byzantine cities</td><td>Byzantine Rank ≥ 6</td><td style="color:var(--green)">−10%</td></tr>
-            <tr><td>Persian cities</td><td>Sassanid Rank ≥ 6</td><td style="color:var(--green)">−10%</td></tr>
-          </tbody>
+          <tbody id="data-rep-body"><tr><td colspan="3" class="dim">Loading…</td></tr></tbody>
         </table>
         <p class="hint" style="margin-bottom:20px">Reduces buy price only. No effect on sell price.</p>
 
@@ -250,10 +250,7 @@
         <h2>Luxury Goods Access</h2>
         <table class="data" style="max-width:580px">
           <thead><tr><th>Good</th><th>Exclusive City</th><th>Culture</th><th>Min Rank to Buy</th></tr></thead>
-          <tbody>
-            <tr><td class="hl">Byzantine Silk</td><td>Antioch</td><td>Byzantine</td><td>Byzantine Rank ≥ 4</td></tr>
-            <tr><td class="hl">Persian Carpets</td><td>Ctesiphon</td><td>Persian</td><td>Sassanid Rank ≥ 4</td></tr>
-          </tbody>
+          <tbody id="data-luxury-body"><tr><td colspan="4" class="dim">Loading…</td></tr></tbody>
         </table>
 
       </div>
