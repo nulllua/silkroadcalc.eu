@@ -6,11 +6,11 @@
     const path = window.location.pathname.replace(/\/$/, '') || '/';
     const links = document.querySelectorAll('.nav-link[data-page]');
     const map = {
-      updates: ['/frontend/updates/updates.html'],
-      routes:  ['/frontend/routes/routes.html', '/index.html', '/'],
-      planner: ['/frontend/planner/planner.html'],
-      setup:   ['/frontend/setup/setup.html'],
-      settings:['/frontend/settings/settings.html'],
+      updates: ['/frontend/updates/updates.html', '/updates'],
+      routes:  ['/frontend/routes/routes.html', '/index.html', '/', '/routes'],
+      planner: ['/frontend/planner/planner.html', '/planner'],
+      setup:   ['/frontend/setup/setup.html', '/setup'],
+      settings:['/frontend/settings/settings.html', '/settings'],
     };
     links.forEach(function (a) {
       const page = a.getAttribute('data-page');

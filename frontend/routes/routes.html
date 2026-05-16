@@ -9,12 +9,12 @@
     <meta name="keywords" content="silk road routes, silk road trading routes, best routes silk road, silk road profit calculator, srt routes, silk road trading simulator routes" />
     <meta name="author" content="domi (@nulllua)" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://silkroadcalc.eu/frontend/routes/routes.html" />
+    <link rel="canonical" href="https://silkroadcalc.eu/routes" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Trade Routes | Silk Road Trading Calculator" />
     <meta property="og:description" content="Find the most profitable trade routes in Silk Road Trading Simulator. Factor in culture, religion, animals and storage." />
-    <meta property="og:url" content="https://silkroadcalc.eu/frontend/routes/routes.html" />
+    <meta property="og:url" content="https://silkroadcalc.eu/routes" />
     <meta property="og:image" content="https://silkroadcalc.eu/frontend/assets/images/icon.png" />
 
     <meta name="theme-color" content="#0f1115" />
@@ -24,38 +24,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/frontend/assets/images/icon.png" />
 
-    <link rel="stylesheet" href="../shared/base.css" />
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./routes.css" />
+    <link rel="stylesheet" href="/frontend/shared/base.css" />
+    <link rel="stylesheet" href="/frontend/routes/styles.css" />
+    <link rel="stylesheet" href="/frontend/routes/routes.css" />
   </head>
   <body data-theme="slate">
-    <script src="../shared/theme-sync.js"></script>
+    <script src="/frontend/shared/theme-sync.js"></script>
     <div class="fx-shimmer" id="fxShimmer" aria-hidden="true"></div>
 
     <!-- ── TOP NAV ──────────────────────────────────────────────────────── -->
     <nav id="topnav">
       <div class="nav-inner">
-        <a class="nav-logo" href="/frontend/routes/routes.html">
+        <a class="nav-logo" href="/routes">
           <img src="/frontend/assets/images/icon.png" alt="SilkRoadCalc" width="28" height="28" />
           <span>SilkRoadCalc</span>
         </a>
         <div class="nav-links" id="navLinks">
-          <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
-          <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
-          <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
-          <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
-          <a href="/frontend/updates/updates.html" class="nav-link" data-page="updates">Updates</a>
+          <a href="/routes"   class="nav-link" data-page="routes">Routes</a>
+          <a href="/planner"  class="nav-link" data-page="planner">Courier Planner</a>
+          <a href="/setup"    class="nav-link" data-page="setup">Setup</a>
+          <a href="/settings" class="nav-link" data-page="settings">Settings</a>
+          <a href="/updates" class="nav-link" data-page="updates">Updates</a>
         </div>
         <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
       <div class="nav-mobile-panel" id="navMobilePanel">
-        <a href="/frontend/routes/routes.html"   class="nav-link" data-page="routes">Routes</a>
-        <a href="/frontend/planner/planner.html"  class="nav-link" data-page="planner">Courier Planner</a>
-        <a href="/frontend/setup/setup.html"    class="nav-link" data-page="setup">Setup</a>
-        <a href="/frontend/settings/settings.html" class="nav-link" data-page="settings">Settings</a>
-        <a href="/frontend/updates/updates.html" class="nav-link" data-page="updates">Updates</a>
+        <a href="/routes"   class="nav-link" data-page="routes">Routes</a>
+        <a href="/planner"  class="nav-link" data-page="planner">Courier Planner</a>
+        <a href="/setup"    class="nav-link" data-page="setup">Setup</a>
+        <a href="/settings" class="nav-link" data-page="settings">Settings</a>
+        <a href="/updates" class="nav-link" data-page="updates">Updates</a>
       </div>
     </nav>
 
@@ -353,13 +353,15 @@
         clearCityEvent(city);
       }
     </script>
-    <script defer src="../shared/setup-sync.js"></script>
-    <script defer src="../assets/js/main-utils.js"></script>
-    <script defer src="../assets/js/main-engine.js"></script>
-    <script defer src="./script.js"></script>
-    <script defer src="./main-overlays.js"></script>
-    <script defer src="../shared/overlays.js"></script>
-    <script defer src="../shared/nav.js"></script>
+    <script defer src="/frontend/shared/api-config.js"></script>
+    <script defer src="/frontend/shared/setup-sync.js"></script>
+    <script defer src="/frontend/assets/js/main-utils.js"></script>
+    <script defer src="/frontend/assets/js/main-engine.js"></script>
+    <script defer src="/frontend/shared/sync.js"></script>
+    <script defer src="/frontend/routes/script.js"></script>
+    <script defer src="/frontend/routes/main-overlays.js"></script>
+    <script defer src="/frontend/shared/overlays.js"></script>
+    <script defer src="/frontend/shared/nav.js"></script>
 
     <div id="maintenanceOverlay">
       <img src="/frontend/assets/images/icon.png" alt="" width="48" height="48" style="opacity:0.5;margin-bottom:8px" />
