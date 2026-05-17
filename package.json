@@ -1,5 +1,29 @@
 {
   "dependencies": {
     "dotenv": "^17.4.2"
-  }
+  },
+  "name": "silkroadcalc.eu",
+  "version": "1.0.0",
+  "description": "This is the only section you need after a patch. All game data lives in `backend/seed.js`. Edit values there, then run:",
+  "main": "index.js",
+  "devDependencies": {
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nulllua/silkroadcalc.eu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nulllua/silkroadcalc.eu/issues"
+  },
+  "homepage": "https://github.com/nulllua/silkroadcalc.eu#readme"
 }

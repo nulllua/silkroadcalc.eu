@@ -386,83 +386,6 @@ const TRAVEL_TIMES_RAW = {
   },
 };
 
-const HISTORICAL_CHANGELOGS = [
-  {
-    version: 'v1.0',
-    date: '2026-04-28',
-    entries: ['Initial release with cities, goods and religion modifiers'],
-  },
-  {
-    version: 'v1.1',
-    date: '2026-04-29',
-    entries: [
-      'Tools tab with trip planner and optimal setup finder',
-      'Best round-trip card and price breakdown tooltips',
-    ],
-  },
-  {
-    version: 'v1.2',
-    date: '2026-04-30',
-    entries: [
-      'Events tab introduced with city countdown timers',
-      'Price calculations now include event modifiers',
-    ],
-  },
-  {
-    version: 'v1.3',
-    date: '2026-05-01',
-    entries: [
-      'Inline return-leg route expansion',
-      'Named setup save slots',
-      'Custom event durations',
-    ],
-  },
-  {
-    version: 'v1.4',
-    date: '2026-05-02',
-    entries: [
-      'Mobile support improvements for calculator layout and onboarding',
-      'Routes shown as tappable cards on phones',
-    ],
-  },
-  {
-    version: 'v1.5',
-    date: '2026-05-03',
-    entries: [
-      'Antioch added with goods, traits and travel times',
-      'Spice goods added: Coriander, Sesame, Saffron',
-      'Luxury goods added: Byzantine Silk and Persian Carpets',
-      'Rank 6 faction buy discount reflected in prices',
-      'Prices tab introduced',
-    ],
-    thanks: 'MinisterOfYapping & Bird',
-  },
-  {
-    version: 'v1.6',
-    date: '2026-05-04',
-    entries: [
-      'Prices recalculated from scratch to match in-game values',
-      'Routes include all goods in all cities with import cost factored in',
-      'Fixed missing/incorrect city trait bonuses',
-    ],
-    thanks: 'KuglerKnight',
-  },
-  {
-    version: 'v1.7',
-    date: '2026-05-05',
-    entries: [
-      'Travel times have been remeasured in-game and recalibrated for route ranking accuracy',
-      'Prices tab rebuilt as a compact matrix grouped by type',
-      'Trip Planner replaced with Courier Route Planner',
-      'Events tab visual refresh with city cards and countdown',
-      "What's New window appears after updates",
-      'Routes table performance and search responsiveness improved',
-      'General UI decluttering',
-      'Display setting added to turn off walking animation',
-    ],
-  },
-];
-
 async function ins(table, fields, vals, upsertOn) {
   const cols = fields.join(',');
   const pls = fields.map((_, i) => `$${i + 1}`).join(',');
@@ -547,20 +470,6 @@ async function seed() {
       `INSERT INTO event_levels (event_name,level,pct,base_bonus,label) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (event_name,level) DO UPDATE SET pct=EXCLUDED.pct,base_bonus=EXCLUDED.base_bonus,label=EXCLUDED.label`,
       [l.event_name, l.level, l.pct, l.base_bonus, l.label]
     );
-
-  console.log('Historical changelogs...');
-  for (const c of HISTORICAL_CHANGELOGS) {
-    const existing = await pool.query('SELECT 1 FROM changelogs WHERE version=$1 LIMIT 1', [
-      c.version,
-    ]);
-    if (!existing.rows.length) {
-      await pool.query(
-        `INSERT INTO changelogs (version,date,entries,thanks)
-         VALUES ($1,$2,$3,$4)`,
-        [c.version, c.date, c.entries, c.thanks || '']
-      );
-    }
-  }
 
   console.log('Game constants...');
   await pool.query(
