@@ -8,6 +8,7 @@ Never describe what you are "about to do".
 Never summarize completed work unless requested.
 Prefer silent execution over commentary.
 Output only the result, diff, or direct answer.
+Do not commit nor push to github unless asked to.
 
 # Coding Rules
 

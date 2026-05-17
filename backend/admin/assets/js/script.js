@@ -18,7 +18,7 @@ function logout() {
   location.reload();
 }
 
-const TAB_LOADERS = { analytics: loadAnalytics, site: loadSite, changelog: loadChangelog, data: loadData, projects: loadProjects };
+const TAB_LOADERS = { analytics: loadAnalytics, site: loadSite, changelog: loadChangelog, projects: loadProjects };
 const loadedTabs = new Set();
 
 function loadTabOnce(name) {
